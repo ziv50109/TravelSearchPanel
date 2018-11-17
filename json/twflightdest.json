@@ -1,0 +1,98 @@
+{
+    "1": {
+      "<BOARD_POINT_NAME>": "松山",
+      "<BOARD_POINT_CODE>": "TSA",
+      "<OFF_POINT_NAME>": "金門",
+      "<OFF_POINT_CODE>": "KNH"
+    },
+    "2": {
+      "<BOARD_POINT_NAME>": "松山",
+      "<BOARD_POINT_CODE>": "TSA",
+      "<OFF_POINT_NAME>": "台東",
+      "<OFF_POINT_CODE>": "TTT"
+    },
+    "3": {
+      "<BOARD_POINT_NAME>": "松山",
+      "<BOARD_POINT_CODE>": "TSA",
+      "<OFF_POINT_NAME>": "馬公",
+      "<OFF_POINT_CODE>": "MZG"
+    },
+    "4": {
+      "<BOARD_POINT_NAME>": "金門",
+      "<BOARD_POINT_CODE>": "KNH",
+      "<OFF_POINT_NAME>": "松山",
+      "<OFF_POINT_CODE>": "TSA"
+    },
+    "5": {
+      "<BOARD_POINT_NAME>": "金門",
+      "<BOARD_POINT_CODE>": "KNH",
+      "<OFF_POINT_NAME>": "台中",
+      "<OFF_POINT_CODE>": "RMQ"
+    },
+    "6": {
+      "<BOARD_POINT_NAME>": "台中",
+      "<BOARD_POINT_CODE>": "RMQ",
+      "<OFF_POINT_NAME>": "金門",
+      "<OFF_POINT_CODE>": "KNH"
+    },
+    "7": {
+      "<BOARD_POINT_NAME>": "台中",
+      "<BOARD_POINT_CODE>": "RMQ",
+      "<OFF_POINT_NAME>": "花蓮",
+      "<OFF_POINT_CODE>": "HUN"
+    },
+    "8": {
+      "<BOARD_POINT_NAME>": "台中",
+      "<BOARD_POINT_CODE>": "RMQ",
+      "<OFF_POINT_NAME>": "馬公",
+      "<OFF_POINT_CODE>": "MZG"
+    },
+    "9": {
+      "<BOARD_POINT_NAME>": "馬公",
+      "<BOARD_POINT_CODE>": "MZG",
+      "<OFF_POINT_NAME>": "台中",
+      "<OFF_POINT_CODE>": "RMQ"
+    },
+    "10": {
+      "<BOARD_POINT_NAME>": "馬公",
+      "<BOARD_POINT_CODE>": "MZG",
+      "<OFF_POINT_NAME>": "高雄",
+      "<OFF_POINT_CODE>": "KHH"
+    },
+    "11": {
+      "<BOARD_POINT_NAME>": "馬公",
+      "<BOARD_POINT_CODE>": "MZG",
+      "<OFF_POINT_NAME>": "松山",
+      "<OFF_POINT_CODE>": "TSA"
+    },
+    "12": {
+      "<BOARD_POINT_NAME>": "花蓮",
+      "<BOARD_POINT_CODE>": "HUN",
+      "<OFF_POINT_NAME>": "台中",
+      "<OFF_POINT_CODE>": "RMQ"
+    },
+    "13": {
+      "<BOARD_POINT_NAME>": "花蓮",
+      "<BOARD_POINT_CODE>": "HUN",
+      "<OFF_POINT_NAME>": "高雄",
+      "<OFF_POINT_CODE>": "KHH"
+    },
+    "14": {
+      "<BOARD_POINT_NAME>": "高雄",
+      "<BOARD_POINT_CODE>": "KHH",
+      "<OFF_POINT_NAME>": "馬公",
+      "<OFF_POINT_CODE>": "MZG"
+    },
+    "15": {
+      "<BOARD_POINT_NAME>": "高雄",
+      "<BOARD_POINT_CODE>": "KHH",
+      "<OFF_POINT_NAME>": "花蓮",
+      "<OFF_POINT_CODE>": "HUN"
+    },
+    "16": {
+      "<BOARD_POINT_NAME>": "台東",
+      "<BOARD_POINT_CODE>": "TTT",
+      "<OFF_POINT_NAME>": "松山",
+      "<OFF_POINT_CODE>": "TSA"
+    }
+  }

@@ -1,0 +1,124 @@
+{  
+    "Destinations":[  
+       {  
+          "Code":"JP_TYO",
+          "Name":"東京(TOKYO) TYO-日本",
+          "Kind":"10",
+          "KindName":"城市"
+       },
+       {  
+          "Code":"JP_TYO_24",
+          "Name":"上野御徒町-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_04",
+          "Name":"新宿-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_10",
+          "Name":"淺草-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_20",
+          "Name":"東京-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_05",
+          "Name":"池袋-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_12",
+          "Name":"品川-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_08",
+          "Name":"秋葉原-東京(TOKYO) TYO-日本",
+          "Kind":"18",
+          "KindName":"區域"
+       },
+       {  
+          "Code":"JP_TYO_JPTYO265",
+          "Name":"東京迪士尼樂園大飯店(TOKYO DISNEYLAND HOTEL)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_JPTYO110",
+          "Name":"東京灣希爾頓大飯店(HILTON TOKYO BAY HOTEL)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_00024850",
+          "Name":"格拉斯麗新宿酒店(HOTEL GRACERY SHINJUKU)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_JPTYO411",
+          "Name":"上野三井花園酒店(MITSUI GARDEN HOTEL UENO)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_JPTYO326",
+          "Name":"寶石飯店上野(HOTEL SARDONYX UENO)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_00044885",
+          "Name":"APA 飯店 \u003c京成上野站前\u003e(APA HOTEL KEISEI UENO-EKIMAE)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_JPNTYO36",
+          "Name":"京王廣場(KEIO PLAZA HOTEL TOKYO)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_00044886",
+          "Name":"APA 飯店 \u003c上野站前\u003e(APA HOTEL UENO-EKIMAE)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_JPTYO416",
+          "Name":"樂天都市酒店 錦系町(LOTTE CITY HOTEL KINSHICHO)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_JPTYO320",
+          "Name":"淺草AGORA PLACE 飯店(AGORA PLACE ASAKUSA)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_URA_00066610",
+          "Name":"東京灣大倉飯店(HOTEL OKURA TOKYO BAY)-浦安市(迪士尼)-千葉縣(URAYASU SHI) URA-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       },
+       {  
+          "Code":"JP_TYO_00035018",
+          "Name":"DORMY INN 上野御徒町(DORMY INN UENO OKACHIMACHI)-東京(TOKYO) TYO-日本",
+          "Kind":"90",
+          "KindName":"飯店"
+       }
+    ]
+ }

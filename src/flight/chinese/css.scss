@@ -1,0 +1,118 @@
+@import '../../../magaele/core/core/variables';
+@import '../../../magaele/core/core/mixins';
+
+$className: 'flight_chinese';
+
+@mixin position($value) {
+    display: flex;
+    justify-content: $value;
+    align-items: center;
+}
+
+$selected: #0077b3;
+
+.#{$className} {
+    // 出發機場
+    .st_rcln {
+        .ic_rcln {
+            color: #999;
+        }
+        .dropdown-place-holder {
+            font-weight: bold;
+            font-size: 16px;
+            color: $selected;
+            .dropdown-label {
+                font-weight: normal;
+                font-size: 14px;
+                color: #999;
+            }
+            input {
+                width: 100%;
+                color: $selected;
+            }
+            .cy_rcln {
+                color: black;
+            }
+            &.selected {
+                color: $selected;
+            }
+        }
+    }
+
+    .icon .ic_rcln {
+        font-size: 20px;
+        padding-left: 5px;
+        color: #999;
+    }
+    .int_rcln_input {
+        color: $selected;
+        font-weight: bold;
+        &::-webkit-input-placeholder {
+            color: $selected;
+        }
+    }
+    .dpt {
+        &:after {
+            content: '';
+            display: none;
+        }
+    }
+    .bor-right {
+        .int_rcln_input {
+            border-right: 1px solid #e3e3e3;
+        }
+    }
+    .peopleAndCabin {
+        .int_rcln_label {
+            font-size: 14px;
+        }
+        .int_rcln_input {
+            padding-top: 22px;
+        }
+    }
+    .footer {
+        button {
+            width: 100%;
+        }
+        .footerInfo {
+            color: #1c9c9d;
+            margin: 10px 0;
+            a {
+                text-decoration: none;
+                cursor: pointer;
+            }
+        }
+        @media (min-width: $screen-desktop) {
+            button {
+                width: 90px;
+                float: right;
+                margin-top: 48px;
+            }
+        }
+    }
+    .st_rnls_descendant_content {
+        padding-right: 30px;
+        .st_rcln {
+            width: auto;
+            .dropdown-place-holder {
+                color: $selected;
+            }
+        }
+        .peopleContent {
+            padding-top: 10px;
+            @include position(space-between);
+        }
+        .st_rnls_descendant_content_close {
+            font-size: 16px;
+        }
+    }
+    .cy_rcln {
+        .prev,
+        .next {
+            z-index: 100;
+        }
+        .calendar_box {
+            z-index: 99;
+        }
+    }
+}

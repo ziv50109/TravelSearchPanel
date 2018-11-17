@@ -1,0 +1,229 @@
+/**
+ * Import core mixins, variables, or others
+ */
+ @import '../../../magaele/core/core/mixins';
+ @import '../../../magaele/core/core/variables';
+ /**
+  * Define your classname
+  */
+
+$classname: 'hotelsRectPC';
+$blue: #0077b3;
+.#{$classname} {
+    min-height: 390px;
+    position: relative;
+    // style on phone device
+    & > .#{$classname}_hotelCont {
+        .int_rcln{
+            .int_rcln_input{
+                border:none;
+            }
+        }
+        .int_rctg{
+            font-size: 16px;
+            position: relative;
+            .int-col {
+                flex: 1;
+            }
+            .cyrcmnInput{
+                >div{
+                    display: inline-block;
+                    vertical-align: bottom;
+                }
+                input{
+                    border:none;
+                }
+            }
+            .dtm_rcfr-row{
+                .int_rcln{
+                    .int_rcln_input{
+                        padding:1px 6px;
+                    }
+                }
+            }
+        }
+        .close_btn{
+            display: block;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            z-index: 15;
+            color: transparent;
+            cursor: pointer;
+            &:before,&:after{
+                content: '';
+                display: block;
+                width: 20px;
+                height: 2px;
+                background-color: #444444;
+                position: absolute;
+                top: 14px;
+                left: 5px;
+            }
+            &:before{
+                transform: rotate(45deg);
+            }
+            &:after{
+                transform: rotate(-45deg);
+            }
+        }
+        .destination{
+            position: relative;
+            margin-bottom:10px;
+            .wrap_container{
+                position: absolute;
+                top:50px;
+                left:0;
+                z-index: 10;
+                background-color: #fff;
+                border: 1px solid #ddd;
+            }
+            .act_wrap_container{
+                position: absolute;
+                top:50px;
+                left:0;
+                z-index: 10;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                .act_rajx{
+                    .section{
+                        .title{
+                            border-top:none;
+                            font-size: 16px;
+                            font-weight: bold;
+                            color: #222;
+                            i{
+                                display: none;
+                            }
+                        }
+                    }
+                    .item{
+                        line-height: 30px;
+                        padding:10px;
+                    }
+                }  
+            }
+        }
+        .booking{
+            .cal_icon{
+                padding-top: 18px;
+            }
+            .nights{
+                display: inline-flex;
+                align-items: center;
+                padding-top: 24px;
+                color: #0077b3;
+                font-weight: bold;
+                font-size: 16px;
+            }
+            .clearBtn{
+                display: none !important;
+            }
+        }
+        .searchBtn{
+            position: absolute;
+            bottom:0;
+            left:0;
+            width: 100%;
+            text-align: right;
+            .bookingToday{
+                margin-right: 12px;
+            }
+        }
+        .roomSetting{
+            .clearBtn{
+                display: none !important;
+            }
+            .input_group{
+                position: relative;
+                .stCont{
+                    position: absolute;
+                    top:50px;
+                    left:0;
+                    display: none;
+                    width: 657px;
+                    min-height: 100px;
+                    background-color: #fff;
+                    z-index: 10;
+                    box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+                    border: solid 1px #ddd;
+                    padding:20px 15px 15px;
+                    .st_rcln{
+                        width: 50%;
+                    }
+                    &.show{
+                        display: block;
+                    }
+                    .int_rcln{
+                        &:last-of-type{
+                            height: auto;
+                            .int_rcln_input{
+                                padding-top:0;
+                            }
+                        }
+                    }
+                    .room_list_section{
+                        margin-bottom:10px;
+                        .room_count_title{
+                            display: inline-block;
+                            vertical-align: middle;
+                        }
+                        .room_list_row{
+                            display: inline-block;
+                            vertical-align: middle;
+                            .row_title{
+                                min-width: auto;
+                                margin:0 10px;
+                                text-align: right;
+                            }
+                            .st_child{
+                                display: inline-block;
+                                vertical-align: top;
+                            }
+                            .st_childAge{
+                                display: inline-block;
+                                vertical-align: top;
+                            }
+                            .children_age_select{
+                                width: 70px;
+                            }
+                        }
+                    }
+                }
+            }            
+        }
+    
+    }
+
+    @media screen and (min-width: $screen-tablet) {
+        // style on tablet device
+
+    }
+    @media screen and (min-width: $screen-desktop) {
+        // style on desktop device
+
+        .room_list_section{
+            .room_count_title {
+                line-height: 30px;
+                margin-right: 0px;
+                margin-bottom: 10px;
+            }
+        } 
+        .ntb_rcln{
+            &.search_panel_two{
+                > .tabs{
+                    margin-bottom:10px;
+                }
+            }
+        } 
+    }
+    @media screen and (min-width: $screen-lg-desktop) {
+        // style on desktop device
+    }
+
+    & .#{$classname}_descendant {
+
+    }
+}

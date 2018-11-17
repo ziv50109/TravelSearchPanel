@@ -1,0 +1,99 @@
+@import "../core/core/mixins";
+@import "../core/core/variables";
+
+$classname: 'nvb_rslb';
+// 編譯後的CSS所在位置，如果你的CSS有需要讀圖檔或字型，請在URL字串前加上'#{$resource-path}'
+$resource-path: resource-path($classname);
+// -------------------------------------
+// 您的CSS Code
+// -------------------------------------
+//以下範例可以刪除，改為您自已的CSS Code
+.#{$classname} {
+	height: 100%;
+	width: 100%;
+    display: block;
+    transition-duration: 300ms;
+	position: fixed;
+	overflow: hidden;
+	overflow-y: auto;
+	background: #fff;
+	-webkit-overflow-scrolling: touch;
+	top: 0;
+    z-index: 10;
+    // box-shadow: inset -1px 0px 1px #c2c1b9;
+	& + button[type="button"]{
+		width: 100%;
+    	margin: auto;
+	}
+	&[direction=left] {
+		transform: translate(-100%, 0px);
+		left: 0;
+	}
+	&[direction=right] {
+		transform: translate(100%, 0px);
+		right: 0;
+	}
+	&.active{
+        display: block;
+        transition-duration: 300ms;
+        transform: translate(0%, 0px);
+    }
+    &_goBack {
+        cursor: pointer;
+        position: absolute;
+        top: 5px;
+        left: 10px;
+        z-index: 10;
+        color: #ff615d;
+        font-size: 30px;
+    }
+    > .nvb_content {
+        height: 100%;
+        padding-top: 115px;
+        background-color: #f1f1f1;
+        > header {
+            padding: 15px 15px 10px;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+        }
+        .page_title {
+            margin-bottom: 15px;
+        }
+        .search_input {
+            display: flex;
+            > .int_rcln {
+                flex: 1;
+            }
+            .int_rcln_input {
+                border: 2px solid #ff8b88;
+            }
+            > .bt_rcnb {
+                margin-left: 10px;
+                min-width: auto;
+                min-height: auto;
+                padding: 0;
+                flex: 0 0 50px;
+                height: 40px;
+                line-height: 40px;
+            } 
+        }
+        .page_content {
+            height: 100%;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+    }
+    > .dtmPage.nvb_content {
+        padding-top: 125px;
+        > header {
+            height: 125px;
+            p {
+                margin: 5px 0 0;
+            }
+        }
+    }
+}

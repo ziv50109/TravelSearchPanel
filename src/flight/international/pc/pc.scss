@@ -1,0 +1,309 @@
+@import '../../../../magaele/core/core/variables';
+@import '../../../../magaele/core/core/mixins';
+
+$className: 'flight_international';
+
+$input-color: #0077b3;
+
+.#{$className} {
+    .Rtow {
+        flex: 0 0 30%;
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        border-bottom: 1px solid #b0b0b0;
+        background-color: transparent;
+        border-right: none;
+        font-size: 16px;
+
+        li {
+            cursor: pointer;
+            width: auto;
+            color: #888;
+            font-weight: 700;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            margin: 0 10px -1px 0;
+            text-align: center;
+            padding: 7px 8px;
+            font-size: 14px;
+
+            &.active {
+                color: #e10500;
+                border-color: #e10500;
+                background-color: transparent;
+                width: auto;
+            }
+        }
+    }
+
+    .panel {
+        .cr_rcln {
+            z-index: 1;
+            margin-bottom: 10px;
+
+            &:nth-of-type(2) {
+                margin-left: 20px;
+            }
+        }
+
+        .toolif {
+            color: #24a07d;
+            margin-right: 3px;
+        }
+
+        .txt-toolif {
+            color: #24a07d;
+            margin-bottom: 5px;
+        }
+    }
+
+    .openMoreOptions {
+        overflow: inherit;
+    }
+
+    .ZeroOneRtowStyle {
+        > * {
+            margin-top: 10px;
+        }
+        margin-bottom: 10px;
+    }
+    .ThreeRtowStyle {
+        display: flex;
+        height: 50px;
+        margin-top: 10px;
+    }
+
+    
+
+    .int-col {
+        input {
+            border: none;
+            border-radius: 0;
+            outline: none;
+            background: transparent;
+            padding: 0;
+            height: 100%;
+            font-size: 16px;
+            width: 100%;
+            color: $input-color;
+        }
+    }
+    .AppendContainer {
+        margin-top: 10px;
+        &:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        &.show {
+            display: block;
+        }
+        &.hide {
+            display: none;
+        }
+        .AppendItemStyle {
+            margin-bottom: 10px;
+            float: left;
+            display: flex;
+            align-items: center;
+            flex: 1;
+            .minus-items {
+                margin: 0;
+                min-width: 32px;
+                height: 32px;
+                border-radius: 3px;
+                padding: 0;
+                background-color:#ff615d;
+                margin-right: 10px;
+            }
+        }
+        // 增加按鈕
+        .mulitAdd {
+            min-width: 32px;
+            min-height: 32px;
+            border-radius: 3px;
+            float: left;
+            padding: 0;
+            background-color:#ff615d;
+            margin-top: 9px;
+        }
+
+    }
+
+    .ItemStyle {
+        display: flex;
+        width: 100%;
+        height: 50px;
+        > * {
+            margin-right: 10px;
+        }
+    }
+
+    .single-change {
+        border: none;
+        > * {
+            &:first-child {
+                border: 1px solid #ddd;
+                border-right: none;
+            }
+            &:last-child {
+                border: 1px solid #ddd;
+                border-left: none;
+            }
+        }
+        .changeBtn {
+            margin: 0;
+            width: 23px;
+            height: 50px;
+            background-size: 13px;
+            border-top:  1px solid #ddd;
+            border-bottom:  1px solid #ddd;
+        }
+     }
+
+    .calendarStyle {
+        display: flex;
+        position: relative;
+        z-index: 1;
+        .close_btn {
+            cursor: pointer;
+        }
+    }
+    .st_rnls {
+        .int_rcln_input {
+            padding-top: 21px;
+            color: $input-color;
+        }
+    }
+    .int_rctg {
+        .int-col{
+            padding: 0 10px;
+            .int-label {
+                margin: 0;
+            }
+        }
+    }
+
+    .checkBoxMagin {
+        margin-left: 22px;
+    }
+
+    .openMoreOptions {
+        .clp_rcdp_title_text {
+            font-size: 14px;
+        }
+        margin-top: 10px;
+    }
+
+    
+
+    // 人數艙等
+    &.peopleCabinStyle {
+        .dropdown-place-holder {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: rgb(68, 68, 68);
+        }
+        .num-people {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+    
+    // 更多搜尋選項
+    .clp_rcdp_content {
+        background-color: #f1f1f1;
+        padding: 10px;
+        .searchMoreTop {
+            display: flex;
+            .dropdown-place-holder {
+                &.breakline {
+                    padding: 8px;
+                }
+            }
+            > * {
+                flex: 1;
+                margin-right: 11px;
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+        .checkBoxMagin {
+            margin-top: 10px;
+            margin-left: 0;
+        }
+    }
+
+    // 雙月曆樣式
+    .doubleCanlendarStyle {
+        display: flex;
+        // border: 1px solid #ddd; 
+        .int_rctg {
+            // border: none;
+            &:first-child {
+                border-right: none;
+            }
+            &:last-child {
+                border-left: none; 
+                .int-col {
+                    border-left: 1px solid #e3e3e3;
+                }
+            }
+        }
+        
+    }
+
+    // 送出按鈕
+    .submitBtn {
+        width: 90px;
+        height: 50px;
+        border-radius: 5px;
+        float: right;
+    }
+
+    .inputStyle {
+        position: relative;
+        .clearBtn {
+            width: 14px;
+            height: 14px;
+            background-color: #999999;
+            border-radius: 50%;
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            &:before {
+                content: '';
+                width: 60%;
+                height: 1px;
+                background: #fff;
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                margin: auto;
+                transform: rotate(45deg);
+            }
+            &:after {
+                content: '';
+                width: 60%;
+                height: 1px;
+                background: #fff;
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                margin: auto;
+                transform: rotate(-45deg);
+            }
+        }
+    }
+   
+}

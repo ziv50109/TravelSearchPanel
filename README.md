@@ -1,1 +1,1 @@
-TravelSearchPanel
+searchPanel.react.future

@@ -1,0 +1,216 @@
+/**
+ * Import core mixins, variables, or others
+ */
+
+@import '../../../magaele/core/core/mixins';
+@import '../../../magaele/core/core/variables';
+$color_gray: #999;
+$white_two: #f1f1f1;
+/**
+  * Define your classname
+  */
+
+$classname: 'hotelsRectM';
+@mixin fontBase($fontSize) {
+    height: $fontSize;
+    border: 0;
+    font-size: $fontSize;
+    line-height: $fontSize;
+}
+
+.#{$classname} {
+    // style on phone device
+    &>.#{$classname}_hotelCont {
+        .destination {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .int_rcln {
+            line-height: 16px;
+            height: auto;
+            &.icon {
+                >.int_rcln_input {
+                    color: #0077b3;
+                    font-weight: bold;
+                }
+            }
+        }
+        .nights {
+            display: inline-flex;
+            align-items: center;
+            color: #0077b3;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 16px;
+        } 
+        .booking {
+            position: relative;
+            margin: 0 0 10px 0;
+            .input_group{
+                .cal_icon{
+                    width: 16px;
+                    @include fontBase(16px);
+                }
+                .int_rcln  {
+                    max-width: 112px;
+                }
+                .int_rcln_input {
+                    padding: 0;
+                    border: none;
+                    &:not(:empty){
+                        max-width: 95px;
+                        .int_rcln {
+                            width: 90px;
+                        }
+                    }
+                    &:not(input):empty:before {
+                        color: $color_gray;
+                    }
+                }
+                .int_rcln > .int_rcln_input:not(:empty){
+                    width: 95px;
+                }
+            }
+        }
+        .searchBtn {
+            margin-top: 80px;
+            width: calc(100% - 20px);
+            text-align: center;
+            .bookingToday {
+                display: inline-block;
+                margin-bottom: 20px;
+                color: #0077b3;
+                text-decoration: none;
+                font-size: 14px;
+            }
+            .search_button {
+                width: 100%;
+            }
+        }
+        .chkbox-group {
+            padding-top: 10px;
+        }
+    }
+    @media screen and (min-width: $screen-tablet) {
+        // style on tablet device
+    }
+    @media screen and (min-width: $screen-desktop) {
+        // style on desktop device
+        &_pcBtnShow {}
+    }
+    @media screen and (min-width: $screen-lg-desktop) {
+        // style on desktop device
+    }
+    & .#{$classname}_descendant {}
+}
+
+.hotelsRectM-calendar {
+    .cy_rcln {
+        >.confirm_btn {
+            span {
+                display: none;
+            }
+        }
+    }
+}
+
+.hotelsRectM-header {
+    .int_rcln {
+        >.int_rcln_input {
+            color: #0077b3;
+            font-weight: bold;
+        }
+    }
+}
+
+.hotelsRectM-roomPage {
+    .room_list_section {
+        margin-bottom: 10px;
+        .row_title {
+            text-align: right;
+        }
+        .room_count_title {
+            margin-bottom: 5px;
+        }
+        .room_list_row {
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+            .int_rcln {
+                .clearBtn {
+                    display: none;
+                }
+            }
+        }
+        .childStCont {
+            .children_age_select {
+                select {
+                    width: 87px;
+                }
+            }
+        }
+    }
+    .hotelsRectM-roomList {
+        padding: 10px;
+        height: 100%;
+        background-color: #fff;
+        .psTxt {
+            padding: 10px;
+            color: #24a07d;
+        }
+    }
+}
+
+.hotelsRectM-destination {
+    .destinationOpation {
+        height: 100%;
+        background-color: #fff;
+        .wrap_container {
+            width: 100%;
+            .dtm_rcfr-label {
+                padding-left: 25px;
+                @include fontBase(14px);
+            }
+        }
+        .act_wrap_container {
+            width: 100%;
+            .act_rajx {
+                .section {
+                    .title {
+                        border-top: none;
+                        color: #222;
+                        font-weight: bold;
+                        font-size: 16px;
+                        i {
+                            display: none;
+                        }
+                    }
+                }
+                .item {
+                    padding: 10px;
+                    line-height: 30px;
+                }
+            }
+        }
+    }
+    .ntb_rcln {
+        &.search_panel_two {
+            >.tabs {
+                padding: 15px 10px;
+                margin-bottom: 0;
+                background-color: $white_two;
+                li {
+                    &:last-child{
+                        margin-right: 0;
+                    }
+
+                }
+            }
+        }
+    }
+    .int_rcln {
+        input {
+            padding: 10px;
+        }
+    }
+}

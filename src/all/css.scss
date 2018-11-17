@@ -1,0 +1,124 @@
+// 所有panel組裝的css
+body {
+    font-family: "微軟正黑體", "Microsoft JhengHei", "微軟雅黑體", "Microsoft YaHei";
+}
+
+.search_panel {
+    // 單一面板樣式
+    &-singlePanel {
+        position: relative;
+        display: block;
+        min-height: 410px;
+        padding: 10px 10px 10px 15px;
+        box-shadow: 0 0 8px 0 rgba(68, 68, 68, 0.3), 0 0 8px 0 rgba(0, 0, 0, 0.25);
+        &:before, &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+        }
+        &:before {
+            height: 60px;
+            background-color: #e10500;
+            z-index: 1;
+        }
+        &:after {
+            height: 100%;
+            background-color: #444;
+        }
+        // 單一面板 M 樣式
+        &.search_panel-m {
+            width: 100%;
+            box-shadow: none;
+            &:before, &:after {
+                display: none;
+            }
+        }
+        // 單一面板 PC 樣式
+        &.search_panel-pc {
+            display: inline-flex;
+        }
+    }
+    // all M 板樣式
+    &_all_mobile.search_panel_one {
+        // padding-top: 55px;
+        > .tabs {
+            // position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            z-index: 3;
+            border: 0;
+        }
+        
+        // .ctns {
+        //     width: 100%;
+        //     .panel {
+        //         padding: 15px;
+        //     }
+        // }
+    }
+    // M 版 Head
+    &-mobileHead {
+        padding: 10px 15px;
+        background-color: #e10500;
+        &_cnt {
+            position: relative;
+            text-align: center;
+            font-size: 16px;
+            color: #fff;
+        }
+        p {
+            margin: 0;
+        }
+        &_close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 16px;
+            height: 16px;
+            fill: #fff;
+            cursor: pointer;
+        }
+    }
+    // all PC 板樣式
+    &_all_pc {
+        display: inline-flex;
+        min-width: 470px;
+        min-height: 410px;
+        box-shadow: 0 5px 10px #666;
+        > .tabs {
+           flex-direction: column;
+           flex: 0;
+           background-color: #41454c;
+           border-bottom: 0;
+           li {
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               width: 80px;
+               margin: 0;
+               padding: 0;
+               border-bottom: 0;
+               border-left: 5px solid transparent;
+           }
+           li.active {
+                background-color: #fff;
+                border-left: 5px solid #e10500;
+            }
+        }
+        .ctns {
+            display: flex;
+            width: 100%;
+            > .panel {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    }
+    &-block {
+        display: block;
+    }
+}
+

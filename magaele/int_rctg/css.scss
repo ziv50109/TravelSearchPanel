@@ -1,0 +1,263 @@
+// -------------------------------------
+// Core Mixins
+// -------------------------------------
+@import '../core/core/mixins';
+// -------------------------------------
+// Variables Import
+// -------------------------------------
+@import '../core/core/variables';
+// -------------------------------------
+// Susy 設定載入
+// -------------------------------------
+@import '../core/core/susy-config';
+// -------------------------------------
+// Components / Modules Setting
+// -------------------------------------
+$classname: 'int_rctg';
+// -------------------------------------
+$theme_lakegreen: #69c1a8;
+$color_gray: #eaeaea;
+$color_warm-gray: #999999;
+$color_oceanBlue: #0077b3;
+@mixin size($w, $h) {
+    width: $w;
+    height: $h;
+}
+
+.#{$classname} {
+    position: relative;
+    border: solid 1px #ddd;
+    background: white;
+    // padding: 0px 6px 0px 0px;
+    outline: none;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    @include size(100%, 50px);
+    &.focus {
+        border: solid 1px $theme_lakegreen;
+    }
+    .icon {
+        @include size(25px, 100%);
+        > i {
+            display: block;
+            font-size: 20px;
+            margin: 14px 0px 14px 5px;
+            color: $color_warm-gray;
+        }
+    }
+    .int-col {
+        flex: 1;
+        padding: 8px 10px 8px 5px;
+        .int-label {
+            line-height: 14px;
+            height: 14px;
+            margin-bottom: 4px;
+            color: #aaa;
+        }
+        .input_group {
+            display: flex;
+            border: none;
+            margin: 0;
+            line-height: 16px;
+        }
+    }
+    .act_racp {
+        top: 103%;
+        left: 0;
+    }
+    .dtm_rcln {
+        left: 0;
+        top: 103%;
+    }
+    .dtm_rcfr {
+        // position: absolute;
+        @include size(657px, 478px);
+        // background-color: #fff;
+        // top: 103%;
+        // left: 0;
+        // z-index: 9;
+    }
+    &.isMax {
+        .int-tags,
+        .int-tags-single {
+            > input {
+                display: none;
+            }
+        }
+    }
+}
+.require {
+    .int-label {
+        > label:after {
+            content: '*';
+            color: #e10500;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+        }
+    }
+}
+.xs {
+    height: 25px;
+    .int-tag {
+        line-height: 1.3;
+    }
+}
+.sm {
+    height: 30px;
+    .int-tag {
+        line-height: 20px;
+    }
+}
+.md {
+    height: 40px;
+    .int-col {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        .int-tags {
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+    }
+}
+.lg {
+    height: 50px;
+    .int-tag {
+        // line-height: 35px;
+    }
+}
+input.isMax {
+    display: none;
+}
+// Multiple
+.int-tags {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    margin: 4px 0 0 0;
+    height: 16px;
+    font-size: 16px;
+    > input {
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        border: none;
+        border-radius: 0;
+        outline: none;
+        background: transparent;
+        padding: 0;
+        min-width: 1px;
+        height: 100%;
+        font-size: 16px;
+    }
+    > .int-tag {
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        max-width: 30%;
+        position: relative;
+        background: $color_gray;
+        margin-right: 5px;
+        padding: 2px 20px 2px 4px;
+        line-height: 16px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: $color_oceanBlue;
+        font-weight: bold;
+        > span {
+            color: $color_warm-gray;
+            cursor: pointer;
+            position: absolute;
+            right: 2px;
+            top: 0;
+            font-weight: normal;
+            line-height: 8.5px;
+            font-size: 10px;
+            @include size(10px, 100%); // display: inline-block;
+            // vertical-align: top;
+            display: block; // margin: 0px 0 0px 10px;
+            padding: 5px 0;
+            text-align: center;
+        }
+    }
+}
+
+// Single
+.int-tags-single {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: auto;
+    // padding-top: 4px;
+    > input {
+        // -webkit-box-flex: 1;
+        // -ms-flex: 1;
+        // flex: 1;
+        border: none;
+        border-radius: 0;
+        outline: none;
+        background: transparent;
+        padding: 0;
+        min-width: 1px;
+        height: 100%;
+        font-size: 16px;
+        color: #0077b3;
+    }
+    .int-tag {
+        color: $color_oceanBlue;
+        font-size: 16px;
+        line-height: initial;
+        flex: 1;
+        > span {
+            display: none;
+        }
+    }
+    .clearBtn {
+        top: 0;
+        bottom: 0;
+        right: 0;
+        margin: auto;
+    }
+}
+
+// SingleChange
+.single-change {
+    display: flex;
+    align-items: center;
+    border: solid 1px #ddd;
+    // .int-col {
+    //     outline: 1px solid red;
+    // }
+    .int_rctg {
+        border: none;
+        flex: 1;
+    }
+    .int-tags-single {
+        input {
+            width: 100%;
+        }
+    }
+    .changeBtn {
+        width: 13px;
+        height: 13px;
+        cursor: pointer;
+        background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDE0IDEwIj4KICAgIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0ibm9uemVybyI+CiAgICAgICAgPHBhdGggZD0iTS0xLTNoMTZ2MTZILTF6Ii8+CiAgICAgICAgPHBhdGggZmlsbD0iIzAwMCIgZD0iTS4xNiAzLjIxM0wyLjQ5Mi44NzlhLjU0NC41NDQgMCAxIDEgLjc3Ljc3TDEuODU5IDMuMDUzaDExLjU5N2EuNTQ0LjU0NCAwIDEgMSAwIDEuMDlILjU0NGEuNTQ0LjU0NCAwIDAgMS0uMzg1LS45M3ptMTMuNjggMy41N2wtMi4zMzMgMi4zMzNhLjU0NC41NDQgMCAxIDEtLjc3LS43N2wxLjQwNC0xLjQwNEguNTQ0YS41NDQuNTQ0IDAgMSAxIDAtMS4wODloMTIuOTEyYS41NDQuNTQ0IDAgMCAxIC4zODUuOTN6Ii8+CiAgICA8L2c+Cjwvc3ZnPgo=)
+            no-repeat center;
+        background-size: 100%;
+        margin: 0 10px;
+    }
+}

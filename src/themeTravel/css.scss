@@ -1,0 +1,303 @@
+@import "Magaele/core/core/mixins";
+@import "Magaele/core/core/variables";
+
+$classname: 'themeTravel';
+
+//面板可能共用的css
+$SelectedFontColor: #0077b3;
+$LightgrayTxt: #999;
+
+.#{$classname} {
+    // min-width: 330px;
+    // max-width: 370px;
+    > *:not(:last-child) {  margin-bottom: 10px; }
+    input {
+        color: $SelectedFontColor;
+        font-size: 16px;
+        &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+            color: $LightgrayTxt;
+        }
+        &::-moz-placeholder { /* Firefox 19+ */
+            color: $LightgrayTxt;
+        }
+        &:-ms-input-placeholder { /* IE 10+ */
+            color: $LightgrayTxt;
+        }
+        &:-moz-placeholder { /* Firefox 18- */
+            color: $LightgrayTxt;
+        }   
+    }
+    .floatL {
+        float: left;
+        vertical-align: top;
+        width: calc(50% - 5px);
+    }
+    .pp-w {
+        max-width: 360px;
+    }
+
+    .m-t-80 {
+        margin-top: 80px;
+    }
+    
+    .lightgray {
+        color: $LightgrayTxt;
+    }
+
+    //[目的地 關鍵字]單選項input
+    .int_rcln {
+        height: auto;
+        &_input {
+            padding: 0;
+            font-weight: bold;
+            color: $SelectedFontColor;
+            &:focus {
+                border-color: #ddd;
+            }
+        }
+    
+        .int_rcln_label {
+            font-size: 14px;
+        }
+        // [出發日曆] label
+        // &.breakline {
+        //     .int_rcln_label {
+        //         left: 36px;
+        //     }
+        // }
+    }
+    .int-tag {
+        font-size: 16px;
+    }
+
+    //label, icon 對齊
+    // .int_rctg {
+    //     .int-col {
+    //         padding-left: 15px;
+    //     }
+    // }
+    .st_rcln .ic_rcln {
+        padding-left: 6px;
+    }
+
+    //icon
+    .ic_rcln, .int_rctg .icon > i, .int_rcln.icon > i {
+        color: $LightgrayTxt;
+        font-size: 18px;
+    }
+
+    //[旅遊主題、出發地] 下拉選單
+    .st_rcln {
+        &.action {
+            .dropdown-place-holder {
+                border-color: #ddd;
+            }
+        }
+        .dropdown-place-holder {
+            &.selected {
+                color: $SelectedFontColor;
+            }
+        }
+        .dropdown-label {
+            font-size: 14px;
+        }
+    }
+
+    // [只找保證出團、只找可報名團體] checkbox 樣式調整
+    .cr_rcln {
+        input:focus + .indicator {
+            border-color: #ddd;
+        }
+    }
+
+    // [出發日曆] label
+    .calendar_compose {
+        .int_rcln {                
+            &.breakline {
+                .int_rcln_label {
+                    left: 30px;
+                }
+            }
+            .int_rcln_input:not(input):empty::before{
+                color: $LightgrayTxt;
+                left: 1px;
+            }
+        }            
+    }
+}
+
+//popup
+.popup {
+    ul {
+        padding: 0;
+        li {
+            list-style: none;
+            display: flex;
+        }
+    }
+}
+
+
+// [目的地] 快速選單
+.#{$classname} .dtm_rcfr,
+.#{$classname}-nvb .dtm_rcfr {
+    position: relative;
+    width: auto;
+    height: auto;
+    &-row {
+        display: flex;
+        // margin: 0 4px;
+        // @media screen and (min-width: 375px) {
+        //     margin: 0 10px;
+        // }
+        @media screen and (min-width: $screen-desktop) {
+            margin: 0;
+        }
+        .int_rcln_input {
+            border: none;
+        }
+        .bt_rcnb {
+            margin-left: 10px;
+        }
+    }
+    &-input-wrap {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 0 0 0 10px;
+        border: 2px solid #ff8b88;
+    }
+    &-wrap {
+        display: none;
+        position: static;
+        width: 100%;
+        height: calc(100vh - 130px);
+        overflow: auto;
+        background-color: #fff;
+        @media screen and (min-width: $screen-desktop) {
+            position: absolute;
+            top: 100%;
+            left: -1px;
+            width: 690px;
+            height: auto;
+            overflow: visible;
+            padding: 16px 14px 0;
+            border: 1px solid rgba(153, 153, 153, 0.7);
+            z-index: 11;
+        }
+        &.open {
+            display: block;
+        }
+    }
+    &-label {
+        margin: 0 0 12px;
+        font-size: 14px;
+        color: #24a07d;
+    }
+    &-close_btn {
+        display: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 10px;
+        cursor: pointer;
+        @media screen and (min-width: $screen-desktop) {
+            display: block;
+        }
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+    // 選取的 select 區塊
+    &-selected-wrap {
+        white-space: nowrap;
+    }
+    // 選取的 select item
+    &-selected {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 72/360*100vw;
+        line-height: 1.3;
+        margin: 0 4px 0 0;
+        padding-left: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        color: $SelectedFontColor;
+        background-color: #eaeaea;
+        cursor: pointer;
+        &:last-of-type {
+            margin: 0;
+        }
+        @media screen and (min-width: 375px) {
+            width: 78px;
+        }
+        @media screen and (min-width: $screen-desktop) {
+            width: 108px;
+        }
+        span {
+            width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+        svg {
+            width: 6px;
+            height: 6px;
+            fill: #999;
+        }
+    }
+
+}
+// [目的地] 補字選單
+.#{$classname} .act_racp,
+.#{$classname}-nvb .act_racp {
+    box-shadow: none;
+    outline: none;
+    left: 0;
+    min-width: 100%;
+    height: calc(100vh - 130px);
+    max-height: 100%;
+    margin-top: 40px;
+    &-future {
+        & .m-place .close,
+        & .noMatchText .close {
+            display: none;
+            @media screen and (min-width: $screen-desktop) {
+                display: block;
+            }
+        }
+        .noMatchText {
+            color: #999;
+            padding: 0;
+            @media screen and (min-width: $screen-desktop) {
+                color: #24a07d;
+                padding: 12px 46px 7px 10px;
+            }
+        }
+    }
+    @media screen and (min-width: $screen-desktop) {
+        height: auto;
+        max-height: 360px;
+        margin-top: auto;
+        box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+    }
+    .section {
+        max-width: 100%;
+    }
+}
+
+// 手機板日曆確認按鈕
+.confirm_btn {
+    >span {
+        display: none;
+    }
+}

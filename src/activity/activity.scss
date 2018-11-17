@@ -1,0 +1,278 @@
+* {
+  // outline: 1px solid red;
+}
+//color
+$color_01: #ff8b88;
+$color_02: red;
+$color_03: grey;
+$color_04: #0077b3;
+$color_05: #dddddd;
+$color_06: #e10500;
+$color_07: #999999;
+$color_08: #ff615d;
+$color_09: #24a07d;
+$color_10: #e3e3e3;
+$color_11: #222222;
+$color_white:#fff;
+$color_brown: #444;
+.color_09 {
+  color: $color_09;
+}
+.color_ocean {
+  color: $color_04 !important;
+}
+.borderRed {
+  border: 2px solid $color_01;
+}
+
+.activity {
+  .bt_rcnb {
+    border: 1px solid $color_05;
+    background: #fff;
+    color: $color_brown;
+    width: 55px;
+    height: 32px;
+    border-radius: 3px;
+    padding: 0;
+    margin: 0 10px 0 0;
+    line-height: 14px;
+    font-size: 14px;
+    &.mbBtn {
+      width: 96px;
+    }
+    &.search {
+      border-radius: 5px;
+      background-color: red;
+      color: white;
+      font-size: 16px;
+      left: 0;
+      bottom: 0;
+      height: 45px;
+      width: 95%;
+      margin: 15px 11px;
+    }
+    &:hover,
+    &.active {
+      border: 1px solid #ff615d;
+      background-color: #ff615d;
+      color: $color_white;
+    }
+    &.sureBtn {
+      background-color: #e10500;
+      color: white;
+      height: 40px;
+      min-width: 0;
+      flex-grow: 0;
+    }
+  } //button
+
+  .outSideSearchInput {
+    cursor: pointer;
+    border: 1px solid #dddddd;
+    height: 50px;
+    border-radius: 2px;
+    line-height: 16px;
+    font-weight: bold;
+    width: 100%;
+    padding: 15px 10px;
+    &:focus {
+      outline: none;
+    }
+    color: $color_07;
+    &.insideSearchInput {
+      border: solid 2px $color_01;
+      border-radius: 1px;
+      color: $color_04;
+      input {
+        color: red !important;
+        text-shadow: 0px 0px 0px #495057;
+      }
+    }
+  }
+  .search_input_container_wraper {
+    display: flex;
+    .search_input_container {
+      display: flex;
+      position: relative;
+      clear: both;
+      flex: 1;
+      margin-right: 10px;
+      margin-left: 10px;
+      .inputContainer {
+        width: 100%;
+        .crossIcon {
+          position: absolute;
+          right: 8px;
+          top: 30%;
+        }
+      }
+    }
+    ._crossIcon {
+      position: absolute;
+      right: 8px;
+      top: 30%;
+      cursor: pointer;
+    }
+  }
+
+  .searchContainer {
+    .act_rajx {
+      max-height: initial;
+      border-top: 2px solid $color_10 !important;
+      width: 100%;
+      box-shadow: 0 0px 0px rgba(0, 0, 0, 0.25);
+      border: none;
+      padding: 0;
+      .noMatchText {
+        font-size: 14px;
+        color: $color_09;
+        height: 100vh;
+        margin-left: 5px;
+        .close {
+          display: none;
+        }
+      }
+      .section {
+        .title {
+          color: $color_11;
+          font-weight: bold;
+          font-size: 16px;
+          border-top: none;
+        }
+        .item {
+          display: block;
+          padding: 5px 8px;
+          // color: #444;
+          line-height: 2;
+          font-size: 14px;
+          cursor: pointer;
+          border-bottom: 1px solid #ddd;
+        }
+      }
+      .m-place {
+        margin-bottom: 10px;
+        color: #24a07d;
+        display: inline-block;
+        font-size: 14px;
+        margin-left: 15px;
+        padding: 0;
+        margin-top: 5px;
+        .close {
+          display: none;
+        }
+      }
+    }
+  }
+  .searchNotFoundTxt {
+    margin-bottom: 10px;
+    color: #24a07d;
+    margin-top: 10px;
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 15px;
+  }
+
+  ////////////////////////////////////////PC/////////////////////////////////////////////////////////////////
+  &.activePc {
+    width: 100%;
+    .pcBtn {
+      margin-top: 10px;
+    }
+    .bt_rcnb {
+      &.search {
+        width: initial;
+        background-color: $color_06;
+        margin: 10px 5px;
+      }
+      &:hover,
+      &.active {
+      }
+      &.sureBtn {
+      }
+    } //button
+
+    .outSideSearchInput {
+      color: $color_04;
+    }
+
+    .search_input_container_wraper {
+      position: relative;
+
+      .search_input_container {
+        .inputContainer {
+          .crossIcon {
+            position: absolute;
+            right: 37px;
+            top: 56%;
+          }
+        }
+      }
+      ._crossIcon {
+        position: absolute;
+        right: 44px;
+        top: 59%;
+        cursor: pointer;
+      }
+    }
+    .searchContainer {
+      .actrajaxWraper {
+        position: absolute;
+      }
+      .cross {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .act_rajx {
+        position: initial;
+        border-top: none !important;
+        width: auto;
+        margin-top: 0;
+        border: solid 1px $color_05;
+        display: block;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        padding: 5px 20px;
+        .noMatchText {
+          width: auto;
+          padding: 0 10px 5px;
+          height: auto;
+          .close {
+            display: block;
+            right: 8px;
+            top: 9px;
+            border: none;
+
+            color: black;
+          }
+        }
+        .section {
+          width: 600px;
+          .title {
+            border-top: none;
+          }
+          .item {
+            border-bottom: 1px solid #ddd;
+          }
+        }
+        .m-place {
+          margin-bottom: 0;
+          margin-left: 0;
+          .close {
+            right: 3px;
+            top: 10px;
+            color: black;
+            display: block;
+            border:none;
+          }
+        }
+      }
+    }
+    .emptyHeight {
+      min-height: 200px;
+    }
+  }
+}

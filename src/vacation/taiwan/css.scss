@@ -1,0 +1,280 @@
+@import '../../../magaele/core/core/mixins';
+@import '../../../magaele/core/core/variables';
+@mixin fontBase($fontSize){
+    height: $fontSize;
+    line-height: $fontSize;
+    font-size: $fontSize;
+    border: 0;
+}
+@mixin size($w,$h) {
+    width: $w;
+    height: $h;
+}
+$classname: 'travel_panel';
+$blue: #0077b3;
+input::placeholder {
+    color: #999 !important;
+}
+
+.d-f {
+    display: flex;
+}
+
+.act_rajx_pos-t {
+    top: 80px !important;
+}
+
+.fwb-b {
+    .dropdown-place-holder {
+        font-weight: 700;
+        &.selected {
+            color: #0077b3 !important;
+        }
+        span {
+            color: #999 !important;
+            font-weight: 100;
+        }
+    }
+}
+
+.nvb_rslb_title {
+    div {
+        font-size: 20px;
+        color: #222;
+        font-weight: bold;
+        padding: 5px 0;
+    }
+}
+
+.dtm_rcfr {
+    width: 100%; // border-top: 2px solid #e3e3e3;
+    .tabs {
+        // padding-top: 10px;
+        background-color: #f1f1f1;
+        li {
+            width: 50% !important;
+        }
+    }
+}
+
+.vacation_taiwan_pc {
+    .st_rcln {
+        .ic_rcln {
+            display: block;
+            color: #999;
+            margin: 15px 8px;
+            font-size: 18px;
+            padding: unset;
+            line-height: unset;
+        }
+        .dropdown-place-holder {
+            padding-left: 30px;
+        }
+    }
+    .SingleInputMenu {
+        .icon {
+            width: unset;
+        }
+        .int-col {
+            padding: unset;
+        }
+    }
+    .calendar_compose {
+        .ic_rcln {
+            font-size: 18px;
+            color: #999;
+        }
+        .int_rcln_label {
+            font-size: 14px;
+            left: 30px !important;
+        }
+        .int_rcln_input {
+            padding-left: 30px !important;
+        }
+    }
+    .pc_keyWord {
+        .int_rcln {
+            height: unset;
+            &.blue {
+                input {
+                    color: #0077b3;
+                    font-weight: 700;
+                }
+            }
+            input {
+                width: 100%;
+                border: 0px solid #ddd;
+            }
+        }
+        .act_rajx {
+            left: 15px;
+        }
+    }
+}
+
+.nvbRslb_destination {
+    .SingleInputMenu {
+        margin-left: 16px;
+        .int-label{
+            display: none;
+        }
+    }
+    .bt_rcnb {
+        margin-right: 16px;
+    }
+    .int_rctg {
+        border: solid 2px #ff8b88;
+        height: 40px;
+        .int-col{
+            padding: 4px 4px 4px 10px;
+        }
+    }
+    .dtm_rcfr-wrap {
+        padding: 0px;
+        border: none;
+        top: 40px;
+        .dtm_rcfr-label {
+            margin: 11px 0px;
+        }
+        .dtm_rcfr {
+            width: 100vw;
+            position: fixed;
+            overflow: scroll;
+            height: calc( 100vh - 100px);
+            margin: 0 -16px;
+        }
+    }
+    .act_racp {
+        position: fixed;
+        top: 80px;
+        border: none;
+        padding: 0 23px;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        min-width: 99%;
+        .close {
+            display: none;
+        }
+    }
+}
+
+.vacation_taiwan_m {
+    // .st_rcln {
+    //     .ic_rcln {
+    //         display: block;
+    //         color: #999;
+    //         padding: 15px 5px;
+    //         font-size: 18px;
+    //     }
+    //     .dropdown-place-holder {
+    //         padding-left: 30px;
+    //     }
+    // }
+    .st_rcln {
+        position: static;
+        .real-select {
+            left: 0;
+            top: 0;
+        }
+        
+        .dropdown-place-holder {
+            @include fontBase(16px);
+            padding: 0;
+            font-weight: bold;
+        }
+    }
+    .int_rctg {
+        margin-bottom: 10px;
+    }
+    .Destination {
+        .ic_rcln {
+            font-size: 18px;
+            margin: 0px 8px;
+            color: #999;
+            left: unset;
+        }
+        .int_rcln_label {
+            font-size: 14px;
+            left: 30px !important;
+        }
+        .int_rcln_input {
+            padding-left: 30px !important;
+            color: #0077b3 !important;
+            font-weight: 700;
+        }
+    }
+    .calendar_compose {
+        .ic_rcln {
+            font-size: 18px;
+            color: #999;
+        }
+        .int_rcln_label {
+            font-size: 14px;
+            left: 30px !important;
+        }
+        .int_rcln_input {
+            padding-left: 30px !important;
+        }
+
+    }
+    .keywordComponent {
+        .int_rcln_label {
+            font-size: 14px;
+        }
+        .int_rcln_input {
+            font-weight: 700;
+            color: #0077b3;
+        }
+    }
+    .bt_rcnb {
+        width: calc(100% - 20px);
+        position: fixed;
+        left: 10px;
+        bottom: 10px;
+    }
+}
+
+.m_keyWord {
+    margin: 0 16px;
+    display: flex;
+    label {
+        display: none;
+    }
+    input {
+        border: 1px solid #ddd;
+        padding: 12px 10px;
+    }
+    .int_rcln {
+        input {
+            width: 100%;
+        }
+    }
+    &+.act_rajx {
+        position: static;
+        border: none;
+        color: #24a07d;
+        font-size: 14px;
+        background: transparent;
+        box-shadow: none;
+        .m-place {
+            color: #24a07d;
+            button {
+                display: none;
+            }
+        }
+    }
+}
+
+.pc_keyWord {
+    .int_rcln {
+        height: unset;
+        input {
+            width: 100%;
+            border: 0px solid #ddd;
+        }
+    }
+    .act_rajx {
+        left: 15px;
+    }
+}

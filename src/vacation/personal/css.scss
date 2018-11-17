@@ -1,0 +1,333 @@
+%act_new_item {
+    font-size: 14px;
+    line-height: 45px;
+    border-bottom: 1px solid #e3e3e3;
+    padding: 0 10px;
+}
+%act_rajx_inside {
+    position: static;
+    border:none;
+    font-size: 14px;
+    background: transparent;
+    box-shadow:none;
+}
+%reset_origin_select {
+    background-color: #fff;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    padding: 0 5px;
+    border-radius: 0;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+%triangle_after {
+    content: '';
+    position: absolute;
+    top: 43%;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 5px 0 5px;
+    border-color: #000544 transparent transparent transparent;
+    pointer-events: none;
+}
+
+.txt_green {
+    color: #24a07d;
+}
+
+// 搜尋中
+.searching {
+    margin: 0;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+// for IE 取消原生select的下拉箭頭
+select::-ms-expand {
+    display: none;
+}
+
+
+.vacation_personal_mobile,
+.vacation_personal_pc {
+    position: relative;
+    input,
+    select,
+    .int_rcln_input {
+        color: #0077b3;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .st_rcln .dropdown-place-holder.selected {
+        color: #0077b3;
+    }
+
+    >.bt_rcnb {
+        z-index: 4;
+    }
+}
+
+.vacation_personal_pc {
+    >.bt_rcnb {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        &.moreSearchIsActive {
+            position: relative;
+            float: right;
+            margin-top: 10px;
+        }
+    }
+}
+
+.vacation_personal_mobile {
+    padding-bottom: 50px;
+    >.bt_rcnb {
+        width: calc(100% - 20px);
+        position: fixed;
+        right: 10px;
+        bottom: 10px;
+    }
+}
+
+.room_list_section {
+    .room_count_title,
+    .room_list_row {
+        margin-bottom: 10px;
+    }
+    .row_title {
+        min-width: 5em;
+        display: inline-block;
+        margin-right: 15px;
+        vertical-align: middle;
+    }
+}
+
+.children_ages_section,
+.age_select_section {
+    display: flex;
+    align-items: center;
+}
+
+.age_select_section {
+    flex: 1;
+    height: 30px;
+    align-items: stretch;
+    margin-top: 10px;
+}
+
+.children_age_select {
+    position: relative;
+    flex: 1;
+    margin-right: 5px;
+    > select {
+        @extend %reset_origin_select;
+    }
+    &:after {
+        @extend %triangle_after;
+    }
+    &:last-child {
+        margin-right: 0;
+    }
+}
+
+// 間數下拉
+.room_count_select {
+    display: block;
+    position: relative;
+    line-height: 38px;
+    height: 40px;
+    width: 370px;
+    margin-bottom: 10px;
+    > select {
+        @extend %reset_origin_select;
+        padding-left: 5em;
+    }
+    &:before {
+        content: '間數:';
+        color: #999;
+        position: absolute;
+        left: 10px;
+        top: 0;
+        line-height: 38px;
+        z-index: 1;
+    }
+    &:after {
+        @extend %triangle_after;
+    }
+}
+
+// M版分頁
+.page_content{
+    touch-action: manipulation;
+    .act_rajx{
+        @extend %act_rajx_inside;
+        .item {
+            @extend %act_new_item;
+        }
+    }
+    select,
+    input {
+        font-size: 16px;
+    }
+}
+
+// 各欄位組合component
+.input_compose {
+    position: relative;
+    .room_list_wrap_container,
+    .act_wrap_container,
+    .wrap_container {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        border: solid 1px #ddd;
+        background-color: #fff;
+        z-index: 15;
+        .close_btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            z-index: 1;
+            background-color: transparent;
+            border: none;
+            font-weight: bold;
+            outline: none;
+        }
+    }
+}
+
+// 目的地補字的外框
+.act_wrap_container {
+    width: 450px;
+    overflow-y: auto;
+    max-height: 535px;
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    /* Track */
+    &::-webkit-scrollbar-track {
+        background: #fff; 
+    }
+    /* Handle */
+    &::-webkit-scrollbar-thumb {
+        background: #d8d8d8; 
+    }
+    /* Handle on hover */
+    &::-webkit-scrollbar-thumb:hover {
+        background: #555; 
+    }
+    .act_rajx {
+        @extend %act_rajx_inside;
+        .item {
+            @extend %act_new_item;
+        }
+        // 把act舊的X按鈕隱藏起來
+        .close {
+            display: none;
+        }
+    }
+}
+
+.wrap_container {
+    padding: 0px;
+    width: 660px;
+}
+
+.room_list_wrap_container {
+    width: 700px;
+    padding: 15px;
+    > .st_rcln {
+        width: 370px;
+    }
+}
+
+// pc版更多搜尋選項樣式
+.moreSearch {
+    margin-top: 10px;
+    >.show_text {
+        cursor: pointer;
+        margin: 0;
+    }
+    // 箭頭
+    .control_arrow {
+        color: #a3abb0;
+        display: inline-block;
+        line-height: 1;
+        font-size: 12px;
+        margin-left: 5px;
+        transition: transform 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+        transform: rotate(0);
+    }
+    &.active {
+        .moreSeach_content {
+            margin-top: 10px;
+            display: block;
+        }
+        .control_arrow {
+            transform: rotate(180deg) translateY(2px);
+        }
+    }
+}
+.moreSeach_content {
+    display: none;
+    background-color: #f1f1f1;
+    padding-top: 10px;
+    > .st_rcln {
+        margin: 0 10px;
+        width: calc(50% - 20px);
+        float: left;
+    }
+    &:after {
+        display: block;
+        content: '';
+        clear: both;
+    }
+}
+
+@media (min-width: 980px) {
+    .room_list_section{
+        > .room_list_row {
+            display: inline-block;
+            vertical-align: top;
+        }
+        .room_count_title,
+        .child_row {
+            display: inline-block;
+            vertical-align: top;
+            margin-bottom: 0;
+        }
+        .room_count_title {
+            line-height: 30px;
+            margin-right: 15px;
+        }
+        .age_select_section {
+            flex: 1;
+            margin-top: 0;
+        }
+        .child_count_control,
+        .children_ages_section {
+            display: inline-flex;
+            align-items: center;
+        }
+        .row_title {
+            min-width: 0;
+            margin-right: 5px;
+        }
+        .child_count_control {
+            margin: 0 10px;
+            .row_title {
+                min-width: 5em;
+            }
+        }
+        .children_age_select{
+            flex: 0 0 70px;
+        }
+    }
+}

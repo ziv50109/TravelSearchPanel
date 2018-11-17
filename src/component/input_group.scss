@@ -1,0 +1,61 @@
+.input_group {
+    display: flex;
+    margin-bottom: 10px;
+    border:1px solid #ddd;
+    .int_rcln{
+        .int_rcln_input{
+            color:#0077b3;
+            font-weight: bold;
+            border:none;
+            &:focus{
+                border-color:#ddd;
+            }
+        }
+        &:last-of-type{
+            height: 50px;
+            .int_rcln_input{
+                padding-top: 26px;
+            }
+        }
+    }
+    .cal_icon{
+        color:#999;
+        display: inline-flex;
+        align-items: center;
+    }
+    > div {
+        flex: 1;
+    }
+    .vacation_select_group {
+        padding: 6px 0;
+        > label,
+        > select {
+            padding: 0 6px;
+            line-height: 1;
+        }
+        > label {
+            display: block;
+            color: #aaa;
+            font-size: 16px;
+            &.request:after {
+                content: '*';
+                display: inline-block;
+                color: #e10500;
+                vertical-align: middle;
+                line-height: 1;
+                margin-top: 4px;
+            }
+        }
+        > select {
+            border: none;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            font-size: 16px;
+            color: #0077b3;
+            font-weight: bold;
+        }
+    }
+}

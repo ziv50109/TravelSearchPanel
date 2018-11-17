@@ -1,0 +1,292 @@
+/**
+ * Import core mixins, variables, or others
+ */
+@import "../core/core/mixins";
+@import "../core/core/variables";
+/**
+ * Define your classname
+ */
+$classname: "cy_rcln";
+$betweenbackground-color:rgba(255, 139, 136, .2);
+$border-color: #e3e3e3;
+$red: #e10500;
+$top_gap: 120px; 
+$date_box_width_mobile: 45px;
+$date_box_width_pc: 40px;
+$date_box_height_pc: 40px;
+ 
+.#{$classname} {
+     height: 100%;
+     background-color: #fff;
+     text-align: center;
+     padding-top: $top_gap;
+     padding-bottom: 60px;
+ 
+    .calendar_content {
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .calendar_box {
+        border-top: 1px solid $border-color;
+        border-bottom: 1px solid $border-color;
+        background-color: #fff;
+        
+        &:first-child{
+            border-top: 10px solid $border-color;
+        }
+    }
+
+    .year_month {
+        border-bottom: solid 1px $border-color;
+        padding: 10px 0;
+        .title {
+            font-size: 20px;
+            margin: 0;
+            color: $red;
+        }
+    }
+
+    .week {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        >span {
+            flex: 1;
+        }
+        .holiday {
+            color: #ff615d;
+        }
+    }
+
+    .month_box {
+        background-color: #f1f1f1;
+    }
+
+    .week_row {
+        display: flex;
+        // Clean the empty row
+        &:last-child {
+            > div:first-child:empty{
+                display: none;
+                ~ div{
+                    display: none;
+            }}
+        }
+    }
+
+    .date {
+        flex: 1;
+        height: $date_box_width_mobile;
+        display: flex;
+        line-height: 26px;
+        justify-content: center;
+        &:not(.empty) {
+            cursor: pointer;
+        }
+        &:not(:empty) {
+            background-color: #fff;
+        }
+        &:hover {
+            .date_box {
+                background-color: #f1f1f1;
+            }
+        }
+        &.isBetween {
+            background-color: $betweenbackground-color;
+        }
+        &.startDay {
+            background-color: $betweenbackground-color;
+            background-image: linear-gradient(to right, #fff 50%, transparent 50%);
+        }
+        &.endDay {
+            background-color: $betweenbackground-color;
+            background-image: linear-gradient(to left, #fff 50%, transparent 50%);
+        }
+        &.active {
+            .date_box {
+                background-color: #ff615d;
+                color: #fff;
+            }
+            .txt {
+                font-weight: bold;
+            }
+        }
+        &.disabled:hover {
+            .date_box {
+                background-color: transparent;
+            }
+        }
+    } 
+
+    .date_box {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: $date_box_width_mobile;
+        height: 100%;
+        border-radius: 50%;
+        .date_num,
+        .txt {
+            line-height: 1;
+        }
+        .txt {
+            font-size: 12px;
+            margin-top: 5px;
+            &:empty {
+                display: none;
+            }
+        }
+    }
+
+    .label_box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+    }
+
+    .selected_info {
+        display: flex;
+        justify-content: center;
+        border-bottom: 1px solid $border-color;
+        padding-top: 10px;
+        .title {
+            margin: 0;
+            font-size: 16px;
+        }
+        .date,
+        .date {
+            height: 33px;
+            font-size: 24px;
+            color: #0077b3;
+        }
+    }
+
+    .start_section,
+    .end_section {
+        min-height: 60px;
+        flex: 0 0 120px;
+        margin: 0 10px;
+        border-bottom: 3px solid transparent;
+        &.active {
+            border-bottom-color: $red;
+        }
+        &:only-child {
+            border-bottom: none;
+        }
+    }
+
+    .prev,
+    .next {
+        position: absolute;
+        background-color: transparent;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        outline: none;
+        top: 10px;
+        left: 45px;
+        cursor: pointer;
+        &:hover {
+            background-color: #f7f7f7;
+        }
+        &:before {
+            content: '';
+            border: 3px solid $red;
+            width: 10px;
+            height: 10px;
+            border-left-width: 0;
+            border-top-width: 0;
+            transform: rotate(135deg);
+            margin-right: -5px;
+        }
+        &.disabled {
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
+
+    .next {
+        left: auto;
+        right: 45px;
+        &:before {
+            transform: rotate(-45deg);
+            margin-right: 0;
+            margin-left: -5px;
+        }
+    }
+
+    .disabled {
+        color: #bebebe;
+        cursor: not-allowed;
+        &:before {
+            border-color: #bebebe;
+        }
+    }
+
+    > .confirm_btn {
+        cursor: pointer;
+        position: fixed;
+        width: 90%;
+        left: 5%;
+        bottom: 10px;
+        z-index: 1;
+        background-color: $red;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        color: #fff;
+        font-weight: bold;
+        line-height: 40px;
+    }
+}
+ 
+@media (min-width: 980px) {
+    .#{$classname} {
+        display: inline-flex;
+        position: relative;
+        height: auto;
+        background-color: transparent;
+        padding: 0;
+
+        .calendar_box {
+            border: solid 1px $border-color;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+
+        .date {
+            min-width: $date_box_width_pc;
+            height: $date_box_height_pc;
+        }
+
+        .year_month {
+            .title {
+                margin-bottom: 10px;
+                color: #222;
+            }
+        }
+
+        .date_box {
+            width: 100%;
+            .txt {
+                margin-top: 0px;
+            }
+        }
+
+        .week {
+            height: auto;
+            > span {
+                font-size: 12px;
+            }
+        }
+    }
+}

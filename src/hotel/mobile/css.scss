@@ -163,10 +163,13 @@ $classname: 'hotelsRectM';
 
 .hotelsRectM-destination {
     .destinationOpation {
-        height: 100%;
         background-color: #fff;
         .wrap_container {
             width: 100%;
+            .dtm_rcfr{
+                height: calc(100vh - 130px);
+                overflow-y: auto;
+            }
             .dtm_rcfr-label {
                 padding-left: 25px;
                 @include fontBase(14px);

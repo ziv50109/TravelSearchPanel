@@ -10,7 +10,6 @@ import { ClickOutSide } from '../../../../utils';
 import '../../../../magaele/core/core';
 import '../css.scss';
 
-
 const Country = [
     { text: '台北松山', value: 'TSA' },
     { text: '台東', value: 'TTT' },
@@ -54,7 +53,7 @@ function checkData (data) {
     console.log('optino', option);
     for (let key in option) {
         if (!option[key]) {
-            console.log('請輸入完整資料');
+            alert('請輸入完整資料');
             checkingOK = false;
             break;
         } else {
@@ -97,7 +96,7 @@ function toQueryString (data) {
 }
 
 
-
+const DateValueErrorMessage = '請輸入正確的日期格式(YYYYMMDD) EX: 20180101';
 class ComposeCalendar extends PureComponent {
     static defaultProps = {
         onChange: () => {},
@@ -105,10 +104,10 @@ class ComposeCalendar extends PureComponent {
     constructor (props) {
         super(props);
         this.state = {
-            selectedStartDate: '',
-            selectedEndDate: '',
-            startInputValue: '',
-            endInputValue: '',
+            selectedStartDate: dayjs().format('YYYY-MM-DD'),
+            selectedEndDate: dayjs().format('YYYY-MM-DD'),
+            startInputValue: dayjs().format('YYYY-MM-DD'),
+            endInputValue: dayjs().format('YYYY-MM-DD'),
             activeInput: null
         };
     }
@@ -205,6 +204,7 @@ class ComposeCalendar extends PureComponent {
         const {
             activeInput,
             selectedStartDate,
+            endInputValue
         } = this.state;
         let isStart = (activeInput === 'start');
         let TRIP = this.props.TRIP === 1 ? true : false;
@@ -213,11 +213,23 @@ class ComposeCalendar extends PureComponent {
         let nowInput;
         if (TRIP) {
             startDateValue = date;
-            endDateValue = '';
+            if (dayjs(date).isAfter(dayjs(endInputValue))) {
+                endDateValue = date;
+            } else {
+                endDateValue = endInputValue;
+            }
             nowInput = null;
         } else {
             startDateValue = isStart ? date : selectedStartDate;
-            endDateValue = isStart ? '' : date;
+            if (isStart) {
+                if (dayjs(date).isAfter(dayjs(endInputValue))) {
+                    endDateValue = date;
+                } else {
+                    endDateValue = endInputValue;
+                }
+            } else {
+                endDateValue = date;
+            }
             nowInput = isStart ? 'end' : null;
         }
         this.setState(prevState => ({
@@ -308,16 +320,16 @@ class ComposeCalendar extends PureComponent {
 
 
 
-class Panel extends Component {
+class TaiwanBody extends Component {
     constructor (props) {
         super(props);
         this.state = {
             BOARD_POINT: '', // 出發地
             OFF_POINT: '', // 目的地
             TRIP: 1, // 行程
-            DEPARTURE_DATE: '', // 出發日期
-            RETURN_DATE: '', // 回程日期
-            PASSENGER_NUMBER: '', // 旅客人數
+            DEPARTURE_DATE: dayjs().format('YYYY-MM-DD'), // 出發日期
+            RETURN_DATE: dayjs().format('YYYY-MM-DD'), // 回程日期
+            PASSENGER_NUMBER: 1, // default旅客人數1位
             isLoaded: false,
             itemList: [],
             depList: Country,
@@ -483,6 +495,7 @@ class Panel extends Component {
             depPlaceholder,
             arrList,
             arrPlaceholder,
+            PASSENGER_NUMBER
         } = this.state;
         console.log('render');
         return (
@@ -520,9 +533,9 @@ class Panel extends Component {
                         onChange={(e) => { this.roundDate(e) }}
                         TRIP={TRIP}
                     ></ComposeCalendar>
-                    <StRcln ClassName="m-b-sm" option={level} placeholder="請選擇" label="人數" icon={<IcRcln name="toolstaff" />} req breakline whenMouseDown={() => console.log('父層whenMouseDown')} onChangeCallBack={(e) => { this.passengerChange(e) }}></StRcln>
+                    <StRcln ClassName="m-b-sm" option={level} placeholder={`${PASSENGER_NUMBER}位`} label="人數" icon={<IcRcln name="toolstaff" />} req breakline whenMouseDown={() => console.log('父層whenMouseDown')} onChangeCallBack={(e) => { this.passengerChange(e) }}></StRcln>
                     <div className="footer">
-                        <div className="footerInfo"><IcRcln name="toolif" className="p-r-xs" />注意事項：目前僅華信航空提供線上即時訂購。<a>參考其他航空</a></div>
+                        <div className="footerInfo"><IcRcln name="toolif" className="p-r-xs" />注意事項：目前僅華信航空提供線上即時訂購。<a href="https://www.liontravel.com/info/twairline/uni.asp">參考其他航空</a></div>
                         <BtRcnb radius prop="string" className="h-sm m-l-md" lg whenClick={() => { this.handleSubmit() }}>搜尋</BtRcnb>
                     </div>
                 </div>
@@ -531,4 +544,4 @@ class Panel extends Component {
     }
 }
 
-export default Panel;
+export default TaiwanBody;

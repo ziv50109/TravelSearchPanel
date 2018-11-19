@@ -22,6 +22,7 @@ const SearchPanel = function (opts = {}) {
     const {
         panel,
         type,
+        target,
         mTitle,
         mCloseBtn,
         renderNode
@@ -29,6 +30,7 @@ const SearchPanel = function (opts = {}) {
 
     this.panel = panel || 'all';
     this.type = type;
+    this.target = target || '_blank';
     this.mTitle = mTitle || '搜尋引擎';
     this.mCloseBtn = mCloseBtn;
     this.renderNode = document.getElementById(renderNode);
@@ -63,7 +65,7 @@ SearchPanel.prototype.init = function () {
         <div>
             {this.type === 'm' && <MobileHead title={this.mTitle} onClick={this.mCloseBtn} />}
             <div className={this.panelClass}>
-                <Templete />
+                <Templete hrefTarget={this.target} />
             </div>
         </div>,
         this.renderNode

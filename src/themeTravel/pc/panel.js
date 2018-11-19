@@ -1,21 +1,21 @@
 import React, { Component } from 'react';
 import { fetchJsToObj } from '../../../utils';
 
-import StRcln from '../../../magaele/st_rcln';      //select
-import IcRcln from '../../../magaele/ic_rcln';      //icon
-import BtRcnb from '../../../magaele/bt_rcnb';      //button
-import IntRcln from '../../../magaele/int_rcln';    //input
-import CrRcln from '../../../magaele/cr_rcln';      //checkbox
-import PpRcln from '../../../magaele/pp_rcln';      //popup
+import StRcln from '../../../magaele/st_rcln';      // select
+import IcRcln from '../../../magaele/ic_rcln';      // icon
+import BtRcnb from '../../../magaele/bt_rcnb';      // button
+import IntRcln from '../../../magaele/int_rcln';    // input
+import CrRcln from '../../../magaele/cr_rcln';      // checkbox
+import PpRcln from '../../../magaele/pp_rcln';      // popup
 
 import Label from '../../../magaele/int_rctg/components/Label/Label';
 
-import WrapperDtmRcln from '../component/WrapperDtmRcln.js'; //目的地
-import ComposeCalendar from '../../component/ComposeCalendar';//日曆
+import WrapperDtmRcln from '../component/WrapperDtmRcln.js'; // 目的地
+import ComposeCalendar from '../../component/ComposeCalendar';// 日曆
 
 import '../css.scss';
 
-//[ popup ]
+// [ popup ]
 const ContentComponent = (props) => {
     return (
         <div className="popup">
@@ -32,7 +32,7 @@ class Panel extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            ThemeID: '',         
+            ThemeID: '',
             DepartureID: '',
             wrapperDtmRcln: [],
             GoDateStart: '',
@@ -40,7 +40,7 @@ class Panel extends Component {
             Days: '',
             Keywords: '',
             IsEnsureGroup: false,
-            IsSold: false,       
+            IsSold: false,
         };
         this.WrapperDtmRclnMax = 3;
         this.fetchPath = './json/TRS1PSUBJECT.js';
@@ -90,14 +90,14 @@ class Panel extends Component {
     handleSubmit = () => {
         this.validate((boolean, warnings) => {
             if (boolean) {
-                // window.open('https://travel.liontravel.com/search?' + this.filterAllState());
-                console.log('網址列參數===', this.filterAllState());
+                window.open('https://travel.liontravel.com/search?' + this.filterAllState(), this.props.hrefTarget);
+                // console.log('網址列參數===', this.filterAllState());
             } else {
                 alert(warnings.join('、'));
             }
         });
     }
-    
+
     // cbfn = callback function. return 驗證結果[boolean] & 警告文字[array]
     validate = (cbfn) => {
         const {
@@ -119,7 +119,7 @@ class Panel extends Component {
     // 組合參數
     filterAllState = () => {
         const {
-            ThemeID,            
+            ThemeID,
             DepartureID,
             // ArriveID,
             wrapperDtmRcln,
@@ -128,7 +128,7 @@ class Panel extends Component {
             Days,
             Keywords,
             IsEnsureGroup,
-            IsSold, 
+            IsSold,
         } = this.state;
         // 目的地
         const ArriveID = wrapperDtmRcln.map(item => {
@@ -145,9 +145,9 @@ class Panel extends Component {
         });
 
         const ArriveTEXT = wrapperDtmRcln.map(item => {
-            return `${item.text}-${item.vLinetravelText}`   
+            return `${item.text}-${item.vLinetravelText}`;
         });
-        
+
         return `Country=TW&WebCode=B2C&TravelType=0&Page=1&PageSize=20&ThemeID=${ThemeID}&DepartureID=${DepartureID}&GoDateStart=${GoDateStart}&GoDateEnd=${GoDateEnd}&Days=${Days}&IsEnsureGroup=${IsEnsureGroup}&IsSold=${IsSold}&Keywords=${Keywords}&ArriveID=${ArriveID.join('')}&ArriveTEXT=${ArriveTEXT}`;
     }
 
@@ -204,126 +204,126 @@ class Panel extends Component {
     render () {
         const { wrapperDtmRcln } = this.state;
         return (
-            
-                <div className="themeTravel">          
 
-                    <StRcln 
-                        option={this.themeOptions} 
-                        placeholder="請選擇" 
-                        label="旅遊主題" 
-                        icon={<IcRcln name="productrefer" />}
-                        defaultValue={'_'} 
-                        ClassName="strcln_custom" 
-                        req 
-                        breakline 
-                        onChangeCallBack={ (e) => this.setState({ ThemeID: e.split('_').join('') }) }
-                    />
+            <div className="themeTravel">
 
-                    <StRcln 
-                        option={this.option1} 
-                        placeholder="請選擇" 
-                        label="出發地" 
-                        icon={<IcRcln name="toolmap" />} 
-                        defaultValue={'_'} 
-                        ClassName="strcln_custom" 
-                        req 
-                        breakline 
-                        onChangeCallBack={ (e) => this.setState({ DepartureID: e.split('_').join('') }) }
-                    />
+                <StRcln
+                    option={this.themeOptions}
+                    placeholder="請選擇"
+                    label="旅遊主題"
+                    icon={<IcRcln name="productrefer" />}
+                    defaultValue={'_'}
+                    ClassName="strcln_custom"
+                    req
+                    breakline
+                    onChangeCallBack={(e) => this.setState({ ThemeID: e.split('_').join('') })}
+                />
 
-                    <Label
-                        isRequired
-                        label="目的地"
-                        iconName="toolmap"
-                        subComponent={
-                            <WrapperDtmRcln
-                                fetchPath= {this.fetchPath}
-                                selectedData={wrapperDtmRcln}
-                                max={this.WrapperDtmRclnMax}
-                                // int rcln
-                                placeholder="請選擇/可輸入目的地、景點關鍵字"
-                                // act racp
-                                minimumStringQueryLength={2}            // 最少輸入幾個字
-                                minimumStringQuery="請輸入至少兩個文字"  // 尚未輸入文字字數到達要求會顯示此字串
-                                noMatchText="很抱歉，找不到符合的項目"   // 當沒有配對資料時顯示那些文字
-                                // dtm rcln
-                                sublabel="找不到選項？請輸入關鍵字查詢"
-                                onChange={(data) => {
-                                    if (wrapperDtmRcln.some(item => data.value === item.value)) {
-                                        this.setState({
-                                            wrapperDtmRcln: this.changeDestination.remove(data)
-                                        });
-                                    } else if (wrapperDtmRcln.length < this.WrapperDtmRclnMax) {
-                                        this.setState({
-                                            wrapperDtmRcln: this.changeDestination.add(data)
-                                        });
-                                    } else {
-                                        return;
-                                    }
-                                }}
-                            />
-                        }
-                    />
+                <StRcln
+                    option={this.option1}
+                    placeholder="請選擇"
+                    label="出發地"
+                    icon={<IcRcln name="toolmap" />}
+                    defaultValue={'_'}
+                    ClassName="strcln_custom"
+                    req
+                    breakline
+                    onChangeCallBack={(e) => this.setState({ DepartureID: e.split('_').join('') })}
+                />
 
-                    <ComposeCalendar 
-                        titleTxt = '出發日期'                 
-                        onChange = { (e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue }) }
-                        setEndDate={36}
-                        setActiveEnd={36}
-                    />
+                <Label
+                    isRequired
+                    label="目的地"
+                    iconName="toolmap"
+                    subComponent={
+                        <WrapperDtmRcln
+                            fetchPath={this.fetchPath}
+                            selectedData={wrapperDtmRcln}
+                            max={this.WrapperDtmRclnMax}
+                            // int rcln
+                            placeholder="請選擇/可輸入目的地、景點關鍵字"
+                            // act racp
+                            minimumStringQueryLength={2}            // 最少輸入幾個字
+                            minimumStringQuery="請輸入至少兩個文字"  // 尚未輸入文字字數到達要求會顯示此字串
+                            noMatchText="很抱歉，找不到符合的項目"   // 當沒有配對資料時顯示那些文字
+                            // dtm rcln
+                            sublabel="找不到選項？請輸入關鍵字查詢"
+                            onChange={(data) => {
+                                if (wrapperDtmRcln.some(item => data.value === item.value)) {
+                                    this.setState({
+                                        wrapperDtmRcln: this.changeDestination.remove(data)
+                                    });
+                                } else if (wrapperDtmRcln.length < this.WrapperDtmRclnMax) {
+                                    this.setState({
+                                        wrapperDtmRcln: this.changeDestination.add(data)
+                                    });
+                                } else {
+                                    return;
+                                }
+                            }}
+                        />
+                    }
+                />
 
-                    <StRcln 
-                        option={this.option2} 
-                        placeholder="請選擇" 
-                        label="旅遊天數" 
-                        icon={<IcRcln name="tooldate" />} 
-                        defaultValue={''} 
-                        ClassName="strcln_custom floatL m-r-sm" 
-                        breakline 
-                        onChangeCallBack={ (e) => this.setState({ Days: e }) }
-                    />      
-                    
-                    <IntRcln
-                        placeholder="可輸入團號"
-                        label="產品名稱/關鍵字"
-                        className="floatL"
-                        breakline
-                        onChange={(e, data) => {                         
-                            this.setState({ Keywords: data })
-                        }}
-                        onClearValue={(inputDOM) => {
-                            inputDOM.value='';
-                            this.setState({ Keywords: '' }); // 用 setState 去清除
-                        }}                       
-                    /> 
+                <ComposeCalendar
+                    titleTxt ="出發日期"
+                    onChange ={(e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue })}
+                    setEndDate={36}
+                    setActiveEnd={36}
+                />
 
-                    <CrRcln 
-                        type="checkbox" 
-                        textContent="只找保證出團" 
-                        className="d-ib"
-                        whenChange={ (e) => this.setState({ IsEnsureGroup: e }) }
-                    />
-                    <PpRcln
-                        CustomComponent={<IcRcln name="toolif" className="md-fz-smd" />}
-                        ContentComponent={<ContentComponent />}
-                        moduleClassName="PpRcln1 m-l-xs lightgray"
-                        events={['click']}
-                        width="360px"
-                        position={['bottom', 'horizon_center']}
-                    />
+                <StRcln
+                    option={this.option2}
+                    placeholder="請選擇"
+                    label="旅遊天數"
+                    icon={<IcRcln name="tooldate" />}
+                    defaultValue={''}
+                    ClassName="strcln_custom floatL m-r-sm"
+                    breakline
+                    onChangeCallBack={(e) => this.setState({ Days: e })}
+                />
 
-                    <CrRcln 
-                        type="checkbox" 
-                        textContent="只找可報名團體"
-                        className="d-ib m-l-lg"
-                        whenChange={ (e) => this.setState({ IsSold: e }) }
-                    />
- 
-                    
-                    <div className="txt-right">
-                        <BtRcnb prop="string" className="h-sm" whenClick={this.handleSubmit} lg radius>搜尋</BtRcnb>
-                    </div>
+                <IntRcln
+                    placeholder="可輸入團號"
+                    label="產品名稱/關鍵字"
+                    className="floatL"
+                    breakline
+                    onChange={(e, data) => {
+                        this.setState({ Keywords: data });
+                    }}
+                    onClearValue={(inputDOM) => {
+                        inputDOM.value = '';
+                        this.setState({ Keywords: '' }); // 用 setState 去清除
+                    }}
+                />
+
+                <CrRcln
+                    type="checkbox"
+                    textContent="只找保證出團"
+                    className="d-ib"
+                    whenChange={(e) => this.setState({ IsEnsureGroup: e })}
+                />
+                <PpRcln
+                    CustomComponent={<IcRcln name="toolif" className="md-fz-smd" />}
+                    ContentComponent={<ContentComponent />}
+                    moduleClassName="PpRcln1 m-l-xs lightgray"
+                    events={['click']}
+                    width="360px"
+                    position={['bottom', 'horizon_center']}
+                />
+
+                <CrRcln
+                    type="checkbox"
+                    textContent="只找可報名團體"
+                    className="d-ib m-l-lg"
+                    whenChange={(e) => this.setState({ IsSold: e })}
+                />
+
+
+                <div className="txt-right">
+                    <BtRcnb prop="string" className="h-sm" whenClick={this.handleSubmit} lg radius>搜尋</BtRcnb>
                 </div>
+            </div>
 
         );
     }

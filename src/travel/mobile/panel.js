@@ -145,7 +145,7 @@ class Panel extends Component {
     handleSubmit = () => {
         this.validate((boolean, warnings) => {
             if (boolean) {
-                window.open('https://travel.liontravel.com/search?' + this.filterAllState());
+                window.open('https://travel.liontravel.com/search?' + this.filterAllState(), this.props.hrefTarget);
             } else {
                 alert(warnings.join('、'));
             }
@@ -192,6 +192,7 @@ class Panel extends Component {
                     subComponent={
                         <StRcln
                             option={this.option1}
+                            defaultValue=""
                             onChangeCallBack={(value) => this.setState({ StRcln1: value })}
                         />
                     }

@@ -1,0 +1,199 @@
+$flight_theme_pink: #ff615d;
+$flight_theme_red: #e10500;
+$flight_theme_blue: #0077b3;
+$flight_tooltip: #1c9c9d;
+
+@mixin inputStyle {
+    .int_rcln_input {
+        border: none;
+        color: $flight_theme_blue;
+        font-weight: bold;
+        padding-top: 23px;
+    }
+    .int_rcln {
+        position: relative;
+    }
+    .int_rcln .int_rcln_input:not(input):empty::before {
+        height: auto;
+        line-height: normal;
+    }
+}
+
+@import '../../../../magaele/core/core/variables';
+@import '../../../../magaele/core/core/mixins';
+
+$className: 'flight_international_mobile';
+
+.#{$className} {
+    // 單程、來回、多個目的地 menu
+    .Rtow {
+        flex: 0 0 30%;
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        border-bottom: 1px solid #b0b0b0;
+        background-color: transparent;
+        border-right: none;
+        font-size: 16px;
+
+        li {
+            cursor: pointer;
+            width: auto;
+            color: #888;
+            font-weight: 700;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            margin: 0 10px -1px 0;
+            text-align: center;
+            padding: 7px 8px;
+            font-size: 14px;
+
+            &.active {
+                color: #e10500;
+                border-color: #e10500;
+                background-color: transparent;
+                width: auto;
+            }
+        }
+    }
+
+    .show {
+        display: block;
+    }
+    .hide {
+        display: none;
+    }
+
+    .threeStyle {
+        margin-top: 10px;
+        .doubleChangeStyle {
+            margin: 0;
+        }
+        .singleCalendar {
+            border-top: none;
+        }
+        .mulitMinus {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 3px;      
+            background-color: #fff;
+            color: #ff615d;
+            border: 1px solid #ff615d;
+            padding: 0;
+            margin: 10px 10px 0 10px;
+        }
+        .haveMinus {
+            display: flex;
+            > * {
+                &:first-child {
+                    flex: 1;
+                }
+            }
+        }
+    }     
+    .doubleChangeStyle {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        .changeBtn {
+            width: 12px;
+            height: 50px;
+            background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDE0IDEwIj4KICAgIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0ibm9uemVybyI+CiAgICAgICAgPHBhdGggZD0iTS0xLTNoMTZ2MTZILTF6Ii8+CiAgICAgICAgPHBhdGggZmlsbD0iIzAwMCIgZD0iTS4xNiAzLjIxM0wyLjQ5Mi44NzlhLjU0NC41NDQgMCAxIDEgLjc3Ljc3TDEuODU5IDMuMDUzaDExLjU5N2EuNTQ0LjU0NCAwIDEgMSAwIDEuMDlILjU0NGEuNTQ0LjU0NCAwIDAgMS0uMzg1LS45M3ptMTMuNjggMy41N2wtMi4zMzMgMi4zMzNhLjU0NC41NDQgMCAxIDEtLjc3LS43N2wxLjQwNC0xLjQwNEguNTQ0YS41NDQuNTQ0IDAgMSAxIDAtMS4wODloMTIuOTEyYS41NDQuNTQ0IDAgMCAxIC4zODUuOTN6Ii8+CiAgICA8L2c+Cjwvc3ZnPgo=) no-repeat center;
+            background-size: 100%;
+        }
+        
+        @include inputStyle;
+    }
+    
+
+    .singleCalendar {
+        border: 1px solid #ddd;
+        @include inputStyle;
+    }
+
+    .doubleCalendar {
+        display: flex;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        * {
+            border: none;
+        }
+        .int_rcln_label {
+            left: 11px;
+        } 
+        @include inputStyle
+        .int_rcln + .int_rcln{
+            &::before {
+                content: '';
+                border-left: 1px solid #ddd;
+                position: absolute;
+                height: 80%;
+                left: 0;
+                top: 10%;
+            }
+            span {
+                outline: 1px solid red;
+                padding-left: 11px;
+            }
+        }
+    }
+
+    .peopleCabin {
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        .int_rcln_input {
+            border: none;
+            color: $flight_theme_blue;
+            font-weight: bold;
+            padding-top: 23px;
+        }
+    }
+
+    .checkBoxContainer {
+        margin: 10px 0;
+        >* {
+            &:last-child {
+                margin-left: 22px;
+            }
+        }
+    }
+    .openMoreOptions  {
+        .clp_rcdp_title_text{
+            font-size: 14px;
+        }
+        .clp_rcdp_content {
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+        .searchMoreTop {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            > * {
+                width: calc(50% - 5px);
+            }
+        }
+    }
+
+    .mulitAdd {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #ff615d;
+        border-radius: 3px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        i {
+            margin-right: 10px;
+        }
+    }
+
+    .submitBtn {
+        border-radius: 5px;
+        margin-top: 10px;
+        width: 100%;
+    }
+}

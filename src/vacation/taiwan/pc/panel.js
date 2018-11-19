@@ -361,7 +361,7 @@ class Panel extends Component {
         const newsDatef = sDatef.replace(/-/g, '');
         const newssDatet = sDatet.replace(/-/g, '');
 
-        window.open('https://www.liontravel.com/webft/webftse01.aspx?' + `sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${newsDatef}&sDatef=${newssDatet}&sTools=${Tools}&sHotelName=${selectText}`);
+        window.open('https://www.liontravel.com/webft/webftse01.aspx?' + `sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${newsDatef}&sDatef=${newssDatet}&sTools=${Tools}&sHotelName=${selectText}`, this.props.hrefTarget);
     }
     render () {
         const selectedData = this.state.selectedData;

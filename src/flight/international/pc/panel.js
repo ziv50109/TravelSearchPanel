@@ -1,18 +1,17 @@
 import React, { Component } from 'react';
 import './pc.scss';
-import NtbRcln, {
-    Tab
-} from '../../../../magaele/ntb_rcln/components/Module.js';
-
 import Header from './components/header';
 import InternationalBody from './container/InternationalBody';
 import today from 'dayjs';
+// import TaiwanPC from './container/TaiwanBody';
+// import ChinaPC from './container/chinaBody';
+
 
 class Panel extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            rtow: 3, // 頁數
+            rtow: 0, // 頁數
             depdate1: '', // 去程日期
             depdate2: '', // 回程日期
             clstype: 1, // 艙等
@@ -456,6 +455,7 @@ class Panel extends Component {
 
     render () {
         const {
+            rtow,
             depdate1,
             depdate2,
             focus1,
@@ -469,9 +469,12 @@ class Panel extends Component {
             dtnSelectedData
         } = this.state;
 
-        const body = v => {
-            const { rtow } = this.state;
-            return (
+        return (
+            <div className="flight_international_pc">
+                <Header
+                    rtow={rtow}
+                    tripChange={v => this.tripChange(v)}
+                />
                 <InternationalBody
                     // 目前哪一頁
                     rtow={rtow}
@@ -515,7 +518,6 @@ class Panel extends Component {
                     setSourceSystem={this.setStateVal}
                     // 排除過夜轉機航班
                     setnonprefertransnight={this.setStateVal}
-
                     // 機票 fetch
                     fetchPath={this.fetchPath}
                     // 檢查日期
@@ -539,28 +541,7 @@ class Panel extends Component {
                     multiClearValue={this.multiClearValue}
                     multiBlur={this.multiBlur}
                 />
-            );
-        };
-
-        return (
-            <NtbRcln
-                activeTabIndex={0}
-                customClass="search_panel_two flight_international"
-            >
-                <Tab label="國際機票預訂">
-                    <Header
-                        rtow={this.state.rtow}
-                        tripChange={v => this.tripChange(v)}
-                    />
-                    {body()}
-                </Tab>
-                <Tab label="大陸境內機票">
-                    <h1>大陸境內機票</h1>
-                </Tab>
-                <Tab label="台灣境內機票">
-                    <h1>台灣境內機票</h1>
-                </Tab>
-            </NtbRcln>
+            </div>
         );
     }
 }

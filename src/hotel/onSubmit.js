@@ -28,7 +28,8 @@ function onSubmit (panelState) {
         Rooms,
         Filter,
         CheckIn,
-        CheckOut
+        CheckOut,
+        hrefTarget
     } = panelState;
 
     Destination.Code = Code;
@@ -62,7 +63,7 @@ function onSubmit (panelState) {
     const queryStrDestn = '"Destination":{' + toQueryString(Destination) + '}';
     const queryString = encodeURIComponent('{' + queryStrDate + queryStrRoom + queryStrFilter + queryStrDestn + '}');
 
-    window.location.href = `${targetUrl}search?searchParam=${queryString}`;
+    window.open(`${targetUrl}search?searchParam=${queryString}`, hrefTarget);
 }
 
 

@@ -8,10 +8,10 @@ import IntGpct from '../../../../magaele/int_gpct';
 import CyRcln from '../../../../magaele/cy_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
 import { ClickOutSide } from '../../../../utils';
-import { Tab } from '../../../../magaele/ntb_rcln';
 import StRnls from '../../../../magaele/st_rnls';
 import PpRcln from '../../../../magaele/pp_rcln';
-import utils from '../../../../utils/utils';
+import utils from '../../../../utils/';
+import dayjs from 'dayjs';
 
 // 人數艙等
 const PeopleAndCabin = props => {
@@ -61,7 +61,7 @@ class PcCalendar extends Component {
 
     state = {
         selectedStartDate: '',
-        startInputValue: '2018-10-22',
+        startInputValue: dayjs().add(3, 'day').format('YYYY-MM-DD'),
         onFocus: false
     };
 
@@ -92,9 +92,10 @@ class PcCalendar extends Component {
         const style = {
             borderColor: 'red'
         };
-
+        const today = dayjs();
         return (
             <ClickOutSide
+                className="pcCalendarCont"
                 onClickOutside={() => {
                     this.setState(prevState => ({
                         ...prevState,
@@ -119,10 +120,10 @@ class PcCalendar extends Component {
                 {!onFocus ? null : (
                     <CyRcln
                         doubleMonth={doubleMonth}
-                        activeStart="2017-12"
-                        activeEnd="2019-02"
-                        startDate="2018-09-03"
-                        endDate="2019-01-20"
+                        activeStart={today.format('YYYY-MM')}
+                        activeEnd={today.add(1, 'years').format('YYYY-MM')}
+                        startDate={today.add(3, 'days').format('YYYY-MM-DD')}
+                        endDate={today.add(1, 'years').subtract(4, 'days').format('YYYY-MM-DD')}
                         selectedStartDate={selectedStartDate}
                         onDateClick={this.clickDate}
                     />
@@ -133,7 +134,7 @@ class PcCalendar extends Component {
 }
 
 // 主畫面
-class Panel extends Component {
+class ChinaBody extends Component {
     static defaultProps = {
         doubleMonth: false
     };
@@ -295,133 +296,131 @@ class Panel extends Component {
 
         return (
             <React.Fragment>
-                <Tab label="大陸國內機票">
-                    <div className="flight_chinese">
-                        {isLoaded && options.length > 0 ? ( // AJAX load完，陣列裡有東西才開始 render
-                            <React.Fragment>
-                                {/* 出發機場 */}
-                                <StRcln
-                                    ClassName={'m-b-sm'}
-                                    option={options}
-                                    placeholder="請選擇"
-                                    label="出發機場"
-                                    icon={<IcRcln name="planeairplane" />}
-                                    req
-                                    breakline
-                                    // whenMouseDown={() => console.log('父層whenMouseDown')}
-                                    onChangeCallBack={e => {
-                                        this.dptChange(e);
-                                    }}
-                                    defaultValue={'_PEK_PEK'}
-                                />
+                <div className="flight_chinese">
+                    {isLoaded && options.length > 0 ? ( // AJAX load完，陣列裡有東西才開始 render
+                        <React.Fragment>
+                            {/* 出發機場 */}
+                            <StRcln
+                                ClassName={'m-b-sm'}
+                                option={options}
+                                placeholder="請選擇"
+                                label="出發機場"
+                                icon={<IcRcln name="planeairplane" />}
+                                req
+                                breakline
+                                // whenMouseDown={() => console.log('父層whenMouseDown')}
+                                onChangeCallBack={e => {
+                                    this.dptChange(e);
+                                }}
+                                defaultValue={'_PEK_PEK'}
+                            />
 
-                                {/* 目的機場 */}
-                                <StRcln
-                                    ClassName={'m-b-sm'}
-                                    option={options}
-                                    placeholder="請選擇"
-                                    label="目的機場"
-                                    icon={<IcRcln name="toolmap" />}
-                                    req
-                                    breakline
-                                    // whenMouseDown={() => console.log('父層whenMouseDown')}
-                                    onChangeCallBack={e => {
-                                        this.dtnChange(e);
-                                    }}
-                                    defaultValue={'_SHA_SHA'}
-                                />
+                            {/* 目的機場 */}
+                            <StRcln
+                                ClassName={'m-b-sm'}
+                                option={options}
+                                placeholder="請選擇"
+                                label="目的機場"
+                                icon={<IcRcln name="toolmap" />}
+                                req
+                                breakline
+                                // whenMouseDown={() => console.log('父層whenMouseDown')}
+                                onChangeCallBack={e => {
+                                    this.dtnChange(e);
+                                }}
+                                defaultValue={'_SHA_SHA'}
+                            />
 
-                                {/* 出發日期 */}
-                                <div className="st_rcln m-b-sm dpt">
-                                    <i className="ic_rcln tooldate" />
-                                    <div className="dropdown-place-holder selected breakline withIcon">
-                                        <span className="dropdown-label req breakline">
-                                            出發日期
-                                        </span>
-                                        <PcCalendar
-                                            selectDate={this.selectDate}
-                                        />
-                                    </div>
+                            {/* 出發日期 */}
+                            <div className="st_rcln m-b-sm dpt">
+                                <i className="ic_rcln tooldate" />
+                                <div className="dropdown-place-holder selected breakline withIcon">
+                                    <span className="dropdown-label req breakline">
+                                        出發日期
+                                    </span>
+                                    <PcCalendar
+                                        selectDate={this.selectDate}
+                                    />
                                 </div>
+                            </div>
 
-                                {/* 人數 / 艙等 */}
-                                <StRnls
-                                    moduleClassName="peopleAndCabin"
-                                    CustomComponent={
-                                        <PeopleAndCabin
-                                            cabin={this.state.cabinText}
-                                            peopleNumber={this.state.sAdt}
+                            {/* 人數 / 艙等 */}
+                            <StRnls
+                                moduleClassName="peopleAndCabin"
+                                CustomComponent={
+                                    <PeopleAndCabin
+                                        cabin={this.state.cabinText}
+                                        peopleNumber={this.state.sAdt}
+                                    />
+                                }
+                                ContentComponent={
+                                    <React.Fragment>
+                                        <StRcln
+                                            option={Cabin}
+                                            placeholder="經濟艙"
+                                            label="艙等"
+                                            req
+                                            whenCloseCallBack={() =>
+                                                console.log(
+                                                    '父層whenCloseCallBack'
+                                                )
+                                            }
+                                            onChangeCallBack={e =>
+                                                this.selectCabin(e)
+                                            }
                                         />
-                                    }
-                                    ContentComponent={
-                                        <React.Fragment>
-                                            <StRcln
-                                                option={Cabin}
-                                                placeholder="經濟艙"
-                                                label="艙等"
-                                                req
-                                                whenCloseCallBack={() =>
-                                                    console.log(
-                                                        '父層whenCloseCallBack'
-                                                    )
-                                                }
-                                                onChangeCallBack={e =>
-                                                    this.selectCabin(e)
+                                        <div className="peopleContent">
+                                            <p>人數</p>
+                                            <IntGpct
+                                                max={this.state.max}
+                                                min={this.state.min}
+                                                count={this.state.sAdt}
+                                                btnClassMinus="ic_rcln toolcancelb"
+                                                btnClassAdd="ic_rcln tooladdb"
+                                                onClickAdd={this.onClickAdd} // 按下增加
+                                                onClickMinus={
+                                                    this.onClickMinus
                                                 }
                                             />
-                                            <div className="peopleContent">
-                                                <p>人數</p>
-                                                <IntGpct
-                                                    max={this.state.max}
-                                                    min={this.state.min}
-                                                    count={this.state.sAdt}
-                                                    btnClassMinus="ic_rcln toolcancelb"
-                                                    btnClassAdd="ic_rcln tooladdb"
-                                                    onClickAdd={this.onClickAdd} // 按下增加
-                                                    onClickMinus={
-                                                        this.onClickMinus
-                                                    }
-                                                />
-                                            </div>
-                                        </React.Fragment>
-                                    }
-                                    whenOpen={e =>
-                                        console.log('Demo Panel Open')
-                                    }
-                                    whenClose={e =>
-                                        console.log('Demo Panel Close')
-                                    }
+                                        </div>
+                                    </React.Fragment>
+                                }
+                                whenOpen={e =>
+                                    console.log('Demo Panel Open')
+                                }
+                                whenClose={e =>
+                                    console.log('Demo Panel Close')
+                                }
+                            />
+
+                            {/* footer 泡泡框 、 搜尋 */}
+                            <div className="footer">
+                                <PpRcln
+                                    CustomComponent={<CustomComponent />}
+                                    ContentComponent={<ContentComponent />}
+                                    moduleClassName="PpRcln2 m-r-xxl"
+                                    events={['click', 'hover']}
+                                    position={['bottom', 'horizon_center']}
                                 />
 
-                                {/* footer 泡泡框 、 搜尋 */}
-                                <div className="footer">
-                                    <PpRcln
-                                        CustomComponent={<CustomComponent />}
-                                        ContentComponent={<ContentComponent />}
-                                        moduleClassName="PpRcln2 m-r-xxl"
-                                        events={['click', 'hover']}
-                                        position={['bottom', 'horizon_center']}
-                                    />
-
-                                    <BtRcnb
-                                        radius
-                                        prop="string"
-                                        className="h-sm"
-                                        lg
-                                        whenClick={() => {
-                                            this.handleSubmit();
-                                        }}
-                                    >
-                                        搜尋
-                                    </BtRcnb>
-                                </div>
-                            </React.Fragment>
-                        ) : null}
-                    </div>
-                </Tab>
+                                <BtRcnb
+                                    radius
+                                    prop="string"
+                                    className="h-sm"
+                                    lg
+                                    whenClick={() => {
+                                        this.handleSubmit();
+                                    }}
+                                >
+                                    搜尋
+                                </BtRcnb>
+                            </div>
+                        </React.Fragment>
+                    ) : null}
+                </div>
             </React.Fragment>
         );
     }
 }
 
-export default Panel;
+export default ChinaBody;

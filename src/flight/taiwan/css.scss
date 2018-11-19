@@ -23,6 +23,13 @@
         padding-left: 5px;
         color: #999; 
     }
+    .int_rcln{
+        &.icon{
+            >i{
+                left: 0;
+            }
+        }
+    }
     .int_rcln_label{
         color:#999;
     }

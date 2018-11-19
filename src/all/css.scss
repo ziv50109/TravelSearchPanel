@@ -47,17 +47,40 @@ body {
             // position: fixed;
             left: 0;
             top: 0;
+            display: flex;
             width: 100%;
             z-index: 3;
             border: 0;
+            background-color: #666;
+            > li {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                margin: 0;
+                color: #fff;
+                border: 0;
+                &.active {
+                    width: 100%;
+                    color: #e10500;
+                    background-color: #fff;
+                    border: 0;
+                }
+            }
         }
-        
-        // .ctns {
-        //     width: 100%;
-        //     .panel {
-        //         padding: 15px;
-        //     }
-        // }
+        .ctns {
+            width: 100%;
+            .panel {
+                padding: 15px;
+            }
+        }
+        .search_panel_two {
+            > .tabs {
+                > li.active {
+                    min-width: 116px;
+                }
+            }
+        }
     }
     // M 版 Head
     &-mobileHead {
@@ -89,21 +112,22 @@ body {
         min-height: 410px;
         box-shadow: 0 5px 10px #666;
         > .tabs {
-           flex-direction: column;
-           flex: 0;
-           background-color: #41454c;
-           border-bottom: 0;
-           li {
-               display: flex;
-               align-items: center;
-               justify-content: center;
-               width: 80px;
-               margin: 0;
-               padding: 0;
-               border-bottom: 0;
-               border-left: 5px solid transparent;
-           }
-           li.active {
+            flex: 0 0 80px;
+            flex-direction: column;
+            min-height: inherit;
+            background-color: #41454c;
+            border-bottom: 0;
+            li {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 80px;
+                margin: 0;
+                padding: 0;
+                border-bottom: 0;
+                border-left: 5px solid transparent;
+            }
+            li.active {
                 background-color: #fff;
                 border-left: 5px solid #e10500;
             }
@@ -114,6 +138,16 @@ body {
             > .panel {
                 width: 100%;
                 padding: 10px;
+            }
+        }
+        .search_panel_two {
+            > .tabs {
+                > li.active {
+                    min-width: 96px;
+                    @media (min-width: 980px) {
+                        min-width: 116px;
+                    }
+                }
             }
         }
     }

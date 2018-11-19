@@ -438,7 +438,7 @@ class Panel extends Component {
                             radius
                             md
                             whenClick={() => {
-                                onSubmit(this.state);
+                                onSubmit(Object.assign(this.state, { hrefTarget: this.props.hrefTarget }));
                             }}
                         >
                             搜尋

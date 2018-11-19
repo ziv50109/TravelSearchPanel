@@ -130,7 +130,7 @@ class Panel extends Component {
     handleSubmit = () => {
         this.validate((boolean, warnings) => {
             if (boolean) {
-                window.open('https://travel.liontravel.com/search?' + this.filterAllState());
+                window.open('https://travel.liontravel.com/search?' + this.filterAllState(), this.props.hrefTarget);
             } else {
                 alert(warnings.join('、'));
             }

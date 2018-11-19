@@ -17,6 +17,7 @@ function onSubmit (panelState) {
         FromDate,
         ToDate,
         fthotel,
+        hrefTarget
     } = panelState;
 
     if (!FromDate.length) {
@@ -47,7 +48,7 @@ function onSubmit (panelState) {
     };
 
     const queryString = toQueryString(queryData);
-    window.location.href = `${targetUrl}?${queryString}`;
+    window.open(`${targetUrl}?${queryString}`, hrefTarget);
 }
 
 

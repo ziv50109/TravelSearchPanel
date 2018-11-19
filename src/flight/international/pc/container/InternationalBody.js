@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import SingleChange from '../../../../shared/SingleChange';
 import CyRcln from '../../../../../magaele/cy_rcln';
 import { ClickOutSide } from '../../../../../utils'; // ClickOutSide 一定要大括弧
 import StRnls from '../../../../../magaele/st_rnls';

@@ -103,7 +103,7 @@ class Panel extends Component {
     handleSubmit = () => {
         this.validate((boolean, warnings) => {
             if (boolean) {
-                // window.open('https://travel.liontravel.com/search?' + this.filterAllState());
+                window.open('https://travel.liontravel.com/search?' + this.filterAllState(), this.props.hrefTarget);
                 console.log('網址列參數===', this.filterAllState());
             } else {
                 alert(warnings.join('、'));
@@ -156,9 +156,9 @@ class Panel extends Component {
         });
 
         const ArriveTEXT = wrapperDtmRcln.map(item => {
-            return `${item.text}-${item.vLinetravelText}`   
+            return `${item.text}-${item.vLinetravelText}`;
         });
-  
+
         return `Country=TW&WebCode=B2C&TravelType=0&Page=1&PageSize=20&ThemeID=${ThemeID}&DepartureID=${DepartureID}&GoDateStart=${CyRcln1[0]}&GoDateEnd=${CyRcln1[1]}&Days=${Days}&IsEnsureGroup=${IsEnsureGroup}&IsSold=${IsSold}&Keywords=${Keywords}&ArriveID=${ArriveID.join('')}&ArriveTEXT=${ArriveTEXT}`;
     }
 

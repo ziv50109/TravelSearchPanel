@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import '../../../../magaele/core/core';
+// import '../../../../magaele/core/core';
+import { flightChinese } from '../../../../source.config';
 import '../css.scss';
 import StRcln from '../../../../magaele/st_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
@@ -167,7 +168,7 @@ class ChinaBody extends Component {
 
     // get 選單裡面的資料
     getOptionData = () => {
-        utils.fetchJsToObj('../json/GetArrayTkt5.json', this.getData);
+        utils.fetchJsToObj(flightChinese.place, this.getData);
     };
     getData = data => {
         this.handleGetData(data.vCity); // 把傳過來的資料做整理
@@ -266,10 +267,7 @@ class ChinaBody extends Component {
             // 如果都沒有未填的選項，就 true 然後 window open
             if (isVaild) {
                 let searchVal = `sFcity=${sFcity}&sTcity=${sTcity}&sFdate=${sFdate}&sAdt=${sAdt}&sClass=${sClass}&sTktkind=${sTktkind}&sChd=${sChd}&sTairp=${sTairp}&sFairp=${sFairp}`;
-                window.open(
-                    'https://www.liontravel.com/webtk/webtkcn01.aspx?' +
-                        searchVal
-                );
+                window.open('https://www.liontravel.com/webtk/webtkcn01.aspx?' + searchVal, this.props.hrefTarget);
             } else {
                 alert('請選擇' + warnText.join('、'));
             }
@@ -296,7 +294,7 @@ class ChinaBody extends Component {
 
         return (
             <React.Fragment>
-                <div className="flight_chinese">
+                <div className="flight_chinese p-t-xs">
                     {isLoaded && options.length > 0 ? ( // AJAX load完，陣列裡有東西才開始 render
                         <React.Fragment>
                             {/* 出發機場 */}

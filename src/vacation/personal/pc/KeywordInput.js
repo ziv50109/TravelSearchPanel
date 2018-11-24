@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import cx from 'classnames';
 import { throttle } from 'lodash';
+import { vacationPersonal } from '../../../../source.config';
 import IntRcln from '../../../../magaele/int_rcln';
 import ActRajx from '../../../../magaele/act_rajx';
 import { ClickOutSide } from '../../../../utils';
@@ -47,7 +48,7 @@ class KeyWordInput extends PureComponent {
         const DestinationSearch = splitDest.length > 1 ? [splitDest[0], splitDest[1]].join('_') : '';
 
         // call API
-        fetch('https://uvacation.liontravel.com/search/keyword', {
+        fetch(vacationPersonal.keyword, {
             method: 'POST',
             body: `Destination=${DestinationSearch}&sKeyWord=${inputText}`,
             headers: {

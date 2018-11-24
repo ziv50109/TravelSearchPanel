@@ -32,28 +32,31 @@ class Panel extends Component {
   render () {
       const { isClick, home, inputValue } = this.state;
       return (
-          <div className="activity container m-sm">
-              <BtRcnb
-                  className={`m-smn m-l-xs mbBtn ${!home ? 'active' : ''}`}
-                  whenClick={() => {
-                      this.setState({ home: false });
-                      this.aa.current._clearInput();
-                  }}
-              > 國外 </BtRcnb>
-              <BtRcnb
-                  className={`m-smn m-l-xs mbBtn ${home ? 'active' : ''}`}
-                  whenClick={() => {
-                      this.setState({ home: true });
-                      this.aa.current._clearInput();
-                  }}
-              > 國內 </BtRcnb>
+          <div className="activity container">
+              <div>
+                  <BtRcnb
+                      className={`m-smn r mbBtn ${!home ? 'active' : ''}`}
+                      whenClick={() => {
+                          this.setState({ home: false });
+                          this.aa.current._clearInput();
+                      }}
+                  > 國外 </BtRcnb>
+                  <BtRcnb
+                      className={`m-smn r mbBtn ${home ? 'active' : ''}`}
+                      whenClick={() => {
+                          this.setState({ home: true });
+                          this.aa.current._clearInput();
+                      }}
+                  > 國內 </BtRcnb>
+              </div>
               <input
                   type="text"
                   value={inputValue}
                   placeholder="輸入城市、景點、體驗行程或活動名稱"
-                  className="outSideSearchInput wrapper-xs m-l-xs m-t-md m-r-xs"
+                  className="outSideSearchInput wrapper-xs m-t-sm"
                   onClick={this.openPage}
               />
+
               <NvbRslb
                   visible={this.state.visible}
                   direction="right"
@@ -77,8 +80,8 @@ class Panel extends Component {
                       </div>
                   </div>
               </NvbRslb>
-              <div className="w-full">
-                  <BtRcnb className="search b-no pos-fix m-b-md">搜尋</BtRcnb>
+              <div className="w-full btn-wrap">
+                  <BtRcnb className="search b-no" lg radius>搜尋</BtRcnb>
               </div>
           </div>
       );

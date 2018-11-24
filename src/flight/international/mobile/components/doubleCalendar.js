@@ -3,7 +3,6 @@ import IntRcln from '../../../../../magaele/int_rcln';
 import IcRcln from '../../../../../magaele/ic_rcln';
 import NvbRslb from '../../../../../magaele/nvb_rslb';
 import CyRcmn from '../../../../../magaele/cy_rcmn';
-import Label from '../../../../../magaele/int_rctg/components/Label/Label';
 import today from 'dayjs';
 
 const DoubleCalendar = (props) => {

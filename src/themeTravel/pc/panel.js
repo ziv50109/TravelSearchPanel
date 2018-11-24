@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { fetchJsToObj } from '../../../utils';
+import { themeTravel } from '../../../source.config';
 
 import StRcln from '../../../magaele/st_rcln';      // select
 import IcRcln from '../../../magaele/ic_rcln';      // icon
@@ -43,8 +44,7 @@ class Panel extends Component {
             IsSold: false,
         };
         this.WrapperDtmRclnMax = 3;
-        this.fetchPath = './json/TRS1PSUBJECT.js';
-        // this.fetchPath = './json/TRS1NEWTRAVEL.js';
+        this.fetchPath = themeTravel.place;
         this.themeOptions = [];
         this.option1 = [];
         this.option2 = [
@@ -266,8 +266,8 @@ class Panel extends Component {
                 />
 
                 <ComposeCalendar
-                    titleTxt ="出發日期"
-                    onChange ={(e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue })}
+                    titleTxt="出發日期"
+                    onChange={(e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue })}
                     setEndDate={36}
                     setActiveEnd={36}
                 />
@@ -321,7 +321,7 @@ class Panel extends Component {
 
 
                 <div className="txt-right">
-                    <BtRcnb prop="string" className="h-sm" whenClick={this.handleSubmit} lg radius>搜尋</BtRcnb>
+                    <BtRcnb prop="string" className="h-sm m-t-xs" whenClick={this.handleSubmit} lg radius>搜尋</BtRcnb>
                 </div>
             </div>
 

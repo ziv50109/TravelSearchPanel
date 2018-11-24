@@ -117,7 +117,7 @@ $blue: #0077b3;
     }
     // [搜尋] button 樣式調整
     .bt_rcnb {
-        margin-top: auto;
+        margin-top: 80px;
     }
 
     // [目的地] 快速選單
@@ -127,6 +127,7 @@ $blue: #0077b3;
         width: auto;
         &-row {
             display: flex;
+            align-items: center;
             margin: 0 15px;
             .int_rcln_input {
                 border: none;
@@ -255,9 +256,14 @@ $blue: #0077b3;
 
     // pc 版樣式
     &.pc {
+        height: 100%;
         // [搜尋] button 樣式調整
         .bt_rcnb {
             align-self: flex-end;
+        }
+        // [搜尋] button 樣式調整
+        .bt_rcnb {
+            margin-top: auto;
         }
         // [目的地] 快速選單
         .dtm_rcfr,

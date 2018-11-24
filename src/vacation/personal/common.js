@@ -95,7 +95,64 @@ function transformActFetchData (data) {
 
     return dataArray;
 }
-
+// AiportData 資料重組
+function transformArpData (data) {
+    let dataObj = {
+        Line: '',
+        Country: '',
+        City: '',
+        level3: '',
+        level2: '機場',
+        Airport: '',
+        txt: ''
+    };
+    const arr = [];
+    if (typeof data === 'object') {
+        data.Airport.forEach(item => {
+            item.AirportList.forEach(ele => {
+                dataObj = {};
+                const country = item.City;
+                dataObj.Airport = ele.Airport;
+                dataObj.Line = '';
+                dataObj.Country = '';
+                dataObj.City = country;
+                dataObj.level3 = ele.Airport;
+                dataObj.level2 = item.level2 ? item.level2 : '機場';
+                dataObj.txt = `${ele.AirportName} (${ele.AirportEName})`;
+                arr.push(dataObj);
+            });
+        });
+    }
+    return arr;
+}
+function transformRawProductData (data) {
+    let arr = [];
+    let dataObj = {
+        Line: '',
+        Country: '',
+        City: '',
+        level3: '',
+        level2: '',
+        Airport: '',
+        txt: ''
+    };
+    if (typeof data === 'object') {
+        data.Destinations.forEach(ele => {
+            dataObj = {};
+            const level2 = ele.Airport ? '機場' : '城市';
+            dataObj.Airport = ele.Airport ? ele.Airport : '';
+            dataObj.Line = ele.line;
+            dataObj.Country = ele.country;
+            dataObj.City = ele.city;
+            dataObj.level3 = ele.city;
+            dataObj.level2 = ele.level2 ? ele.level2 : level2;
+            dataObj.txt = ele.Name;
+            arr.push(dataObj);
+        });
+    }
+    console.log(arr);
+    return arr;
+}
 // 航空公司下拉options
 const airLineOptions = [
     {
@@ -239,6 +296,8 @@ const roomCount = [
 export {
     transformFetchData,
     transformActFetchData,
+    transformArpData,
+    transformRawProductData,
     airLineOptions,
     clskdOptions,
     daysOptions,

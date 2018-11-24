@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
+import { flightInternational } from '../../../../source.config';
 import './pc.scss';
 import Header from './components/header';
-import InternationalBody from './container/InternationalBody';
+import International from './container/International';
 import today from 'dayjs';
-// import TaiwanPC from './container/TaiwanBody';
-// import ChinaPC from './container/chinaBody';
-
 
 class Panel extends Component {
     constructor (props) {
@@ -18,7 +16,7 @@ class Panel extends Component {
             notrans: 'F', // 是否直飛(不轉機)
             haveseat: 'F', // 只找有機位
             nonprefertrans: '', // 排除轉機國家
-            sourcesystem: '', // 廉價航空
+            sourcesystem: 1, // 廉價航空
             nonprefertransnight: 'F', // 排除過夜轉機航班
             adt: 1, // 大人
             chd: 0, // 小孩
@@ -53,7 +51,7 @@ class Panel extends Component {
                 dcCleanBtn2: false
             }
         };
-        this.fetchPath = './json/TRS1NEWTRAVEL.js';
+        this.fetchPath = flightInternational.place;
     }
 
     // 上面的 tab 切換
@@ -446,7 +444,7 @@ class Panel extends Component {
                 let searchVal = `rtow=${rtow}&clsType=${clstype}&adt=${adt}&chd=${chd}&inf=${inf}&notrans=${notrans}&haveseat=${haveseat}&nonprefertrans=${nonprefertrans}&nonprefertransnight=${nonprefertransnight}&sourcesystem=${sourcesystem}&depart1=${dptSelectedData[0].airport}&depcity1=${dptSelectedData[0].city}&depcountry1=${dptSelectedData[0].country}&arrive1=${dtnSelectedData[0].airport}&arrcity1=${dtnSelectedData[0].city}&arrcountry1=${dtnSelectedData[0].country}&depdate1=${depdate1.replace(/\-/g, '/')}`;
                 searchVal += placeText;
                 searchVal += depdateText;
-                window.open('https://flight.liontravel.com/search?' + searchVal);
+                window.open('https://flight.liontravel.com/search?' + searchVal, this.props.hrefTarget);
             } else {
                 alert('請選擇' + warnText.join('、'));
             }
@@ -475,7 +473,7 @@ class Panel extends Component {
                     rtow={rtow}
                     tripChange={v => this.tripChange(v)}
                 />
-                <InternationalBody
+                <International
                     // 目前哪一頁
                     rtow={rtow}
                     // 去程日期
@@ -516,6 +514,7 @@ class Panel extends Component {
                     clearNonprefertrans={this.setStateVal}
                     // 廉價航空
                     setSourceSystem={this.setStateVal}
+                    sourceSystem={this.state.sourcesystem}
                     // 排除過夜轉機航班
                     setnonprefertransnight={this.setStateVal}
                     // 機票 fetch

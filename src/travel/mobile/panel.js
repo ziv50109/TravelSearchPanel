@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import { fetchJsToObj } from '../../../utils';
+import { travel } from '../../../source.config';
 
 // 單純組件
 import Label from '../../../magaele/int_rctg/components/Label/Label.js';            // 外框
@@ -31,6 +32,15 @@ const ContentComponent = (props) => {
     );
 };
 
+const isJsonString = (str) => {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+};
+
 // 分頁 component 回上一頁箭頭
 const NvbGoBack = ({ onClick }) => (
     <span
@@ -41,50 +51,65 @@ const NvbGoBack = ({ onClick }) => (
     </span>
 );
 
-class Panel extends Component {
+class Panel extends PureComponent {
     constructor (props) {
         super(props);
 
         this.state = {
+            // query string
             StRcln1: '',
-            wrapperDtmRcln: [],
+            destination: [],
             CyRcln1: [],
             StRcln2: '',
             IntRcln: '',
             CrRcln1: false,
             CrRcln2: false,
-            activeInput: 0
+            activeInput: 0,
+            // fetch data
+            data: {},
+            // select options
+            option1: [],
+            option2: [
+                { text: '不限', value: '' },
+                { text: '1日', value: 1 },
+                { text: '2日', value: 2 },
+                { text: '3日', value: 3 },
+                { text: '4日', value: 4 },
+                { text: '5日', value: 5 },
+                { text: '6日', value: 6 },
+                { text: '7日', value: 7 },
+                { text: '8日', value: 8 },
+                { text: '9日', value: 9 },
+                { text: '10日及以上', value: 10 }
+            ]
         };
         this.WrapperDtmRclnMax = 3;
-        this.fetchPath = './json/TRS1NEWTRAVEL.js';
-        this.option1 = [{ text: '資料載入中...', value: '' }];
-        this.option2 = [
-            { text: '不限', value: '' },
-            { text: '1日', value: 1 },
-            { text: '2日', value: 2 },
-            { text: '3日', value: 3 },
-            { text: '4日', value: 4 },
-            { text: '5日', value: 5 },
-            { text: '6日', value: 6 },
-            { text: '7日', value: 7 },
-            { text: '8日', value: 8 },
-            { text: '9日', value: 9 },
-            { text: '10日及以上', value: 10 }
-        ];
+        this.fetchPath = travel.place;
+
         this.date = new Date();
         this.year = this.date.getFullYear();
         this.month = this.date.getMonth() + 1;
         this.day = this.date.getDate();
     }
     componentDidMount () {
-        fetchJsToObj(this.fetchPath, (d) => {
-            this.option1 = this.objToOption(d.vCity);
-            this.forceUpdate();
-        });
-    }
+        const sessionData = sessionStorage.getItem(this.fetchPath);
 
-    shouldComponentUpdate (nextProps, nextState) {
-        return this.state !== nextState;
+        if (!sessionData || !isJsonString(sessionData)) {
+            fetchJsToObj(this.fetchPath, (d) => {
+                let stringifyData = JSON.stringify(d);
+                this.setState({
+                    data: d,
+                    option1: this.objToOption(d.vCity)
+                });
+                sessionStorage.setItem(this.fetchPath, stringifyData);
+            });
+        } else {
+            const jsonData = JSON.parse(sessionData);
+            this.setState({
+                data: jsonData,
+                option1: this.objToOption(jsonData.vCity)
+            });
+        }
     }
 
     objToOption = (obj) => {
@@ -102,12 +127,12 @@ class Panel extends Component {
     // cbfn = callback function. return 驗證結果[boolean] & 警告文字[array]
     validate = (cbfn) => {
         const {
-            wrapperDtmRcln,
+            destination,
             CyRcln1
         } = this.state;
         let warningText = [];
 
-        if (wrapperDtmRcln.length < 1) {
+        if (destination.length < 1) {
             warningText.push('請輸入 / 選擇目的地');
         }
         if (CyRcln1.length < 2) {
@@ -119,7 +144,7 @@ class Panel extends Component {
     filterAllState = () => {
         const {
             StRcln1,
-            wrapperDtmRcln,
+            destination,
             CyRcln1,
             StRcln2,
             IntRcln,
@@ -127,7 +152,7 @@ class Panel extends Component {
             CrRcln2
         } = this.state;
         // 目的地
-        const ArriveID = wrapperDtmRcln.map(item => {
+        const ArriveID = destination.map(item => {
             // 第一層
             if (item.vLinewebarea === '_' && item.vLinetravel === '_') {
                 return `-${item.vLine.split('_').join('-')},`;
@@ -164,15 +189,18 @@ class Panel extends Component {
 
     render () {
         const {
-            wrapperDtmRcln,
+            data,
+            destination,
             activeInput,
-            CyRcln1
+            CyRcln1,
+            option1,
+            option2
         } = this.state;
         const showCalendarPage = activeInput === 2;
         const showDestinationPage = activeInput === 1;
         const pageVisible = showCalendarPage || showDestinationPage;
 
-        const query = wrapperDtmRcln.map(item => {
+        const query = destination.map(item => {
             let text = '';
             if (item.vLinewebarea === '_') {
                 text = item.txt || item.text;
@@ -181,7 +209,6 @@ class Panel extends Component {
             }
             return text;
         });
-        console.log(this.year, this.month, this.day);
 
         return (
             <div className="travel_panel mobile">
@@ -191,7 +218,7 @@ class Panel extends Component {
                     iconName="toolmap"
                     subComponent={
                         <StRcln
-                            option={this.option1}
+                            option={option1}
                             defaultValue=""
                             onChangeCallBack={(value) => this.setState({ StRcln1: value })}
                         />
@@ -241,7 +268,7 @@ class Panel extends Component {
                     iconName="tooldate"
                     subComponent={
                         <StRcln
-                            option={this.option2}
+                            option={option2}
                             defaultValue=""
                             onChangeCallBack={(value) => this.setState({ StRcln2: value })}
                         />
@@ -289,8 +316,9 @@ class Panel extends Component {
                     {
                         showDestinationPage &&
                         <WrapperDtmRcln
+                            dataSource={data}
                             fetchPath={this.fetchPath}
-                            selectedData={wrapperDtmRcln}
+                            selectedData={destination}
                             max={this.WrapperDtmRclnMax}
                             // int rcln
                             placeholder="請選擇/可輸入目的地、景點關鍵字"
@@ -302,7 +330,7 @@ class Panel extends Component {
                             sublabel="找不到選項？請輸入關鍵字查詢"
                             emitPushData={(array) => {
                                 this.setState({
-                                    wrapperDtmRcln: array,
+                                    destination: array,
                                     activeInput: 0
                                 });
                             }}

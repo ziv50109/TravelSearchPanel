@@ -1,377 +1,18 @@
 import React, { Component } from 'react';
+import { flightInternational } from '../../../../../source.config';
 import IcRcln from '../../../../../magaele/ic_rcln';
-import IntGpct from '../../../../../magaele/int_gpct';
 import IntRcln from '../../../../../magaele/int_rcln';
 import StRnls from '../../../../../magaele/st_rnls';
 import StRcln from '../../../../../magaele/st_rcln';
 import CrRcln from '../../../../../magaele/cr_rcln';
 import ClpRcdp from '../../../../../magaele/clp_rcdp';
-import Label from '../../../../../magaele/int_rctg/components/Label/Label';
-import ActRacp from '../../../../../magaele/act_racp';
 import BtRcnb from '../../../../../magaele/bt_rcnb';
 import today from 'dayjs';
 import PlaceChange from '../components/doublePlaceM';
 import SingleCalendar from '../components/singleCalendar';
 import DoubleCalendar from '../components/doubleCalendar';
-
-// 補字選單國家 changeKey
-const actRacpChangeKeyCountry = data => {
-    data.forEach(item => {
-        item.txt = item.fullName;
-        delete item.fullName;
-    });
-    return data;
-};
-
-// 補字選單分區的國家 callBack
-const catalogueCallBackCountry = [
-    {
-        catafilter: data => {
-            return data;
-        }
-    }
-];
-
-// 排除輾轉國家
-class FilterTransfer extends Component {
-    state = {
-        // 排除轉機
-        inputText: '', // 綁 input 裡面的值
-        showAct: false,
-        isFocus: false,
-        obj: null,
-        searchKeyWord: '',
-        onClearValue: false // 清除資料
-    };
-
-    onFocus = () => {
-        this.setState({ isFocus: true, showAct: true });
-    };
-
-    onBlur = () => {
-        this.setState({
-            isFocus: false,
-            showAct: false
-        });
-    };
-
-    receive = i => {
-        if (this.props.setNonprefertrans) {
-            this.props.setNonprefertrans('nonprefertrans', i.txt);
-        }
-        this.setState({
-            obj: i,
-            inputText: i.txt
-        });
-    };
-
-    onChange = e => {
-        const val = e.target.value;
-        if (this.props.setNonprefertrans) {
-            this.props.setNonprefertrans('nonprefertrans', val);
-        }
-        this.setState({
-            inputText: val,
-            showAct: val.length >= 2 ? true : false, // 當 input 字 2 字以上時打開選單
-            searchKeyWord: val
-        });
-        // 清除按鈕顯示
-        if (val !== '') {
-            this.setState({ onClearValue: true });
-        } else {
-            this.setState({ onClearValue: false });
-        }
-    };
-
-    closeBtnClickHandleCallback = e => {
-        if (
-            this._actref &&
-            !this._actref.contains(e.target) &&
-            !this.state.isFocus
-        ) {
-            const { inputText } = this.state;
-
-            this.setState({
-                showAct: false,
-                searchKeyWord: inputText
-            });
-        }
-    };
-
-    // 清除資料
-    handleonClearValue = () => {
-        if (this.props.setNonprefertrans) {
-            this.props.setNonprefertrans('nonprefertrans', '');
-        }
-        this.setState({
-            inputText: '',
-            searchKeyWord: '',
-            onClearValue: false
-        });
-    };
-
-    render () {
-        const {
-            inputText,
-            showAct,
-            isFocus,
-            obj,
-            searchKeyWord,
-            onClearValue
-        } = this.state;
-        return (
-            <div className="filterTransfer">
-                <Label
-                    size="lg"
-                    label={'排除轉機國家'}
-                    subComponent={
-                        <React.Fragment>
-                            <div className="int_rcln int-tags-single noBorder">
-                                <input
-                                    type="text"
-                                    value={inputText}
-                                    placeholder="請選擇"
-                                    onChange={this.onChange}
-                                    onFocus={this.onFocus}
-                                    onBlur={this.onBlur}
-                                />
-                                {onClearValue ? (
-                                    <span
-                                        className="clearBtn"
-                                        onMouseDown={this.handleonClearValue}
-                                    />
-                                ) : null}
-                            </div>
-                            <ActRacp
-                                url="./src/json/country.json"
-                                minimumStringQueryLength={2} // 最少輸入幾個字
-                                minimumStringQuery="最少輸入兩個字" // 尚未輸入文字字數到達要求會顯示此字串
-                                setRef={actRef => {
-                                    this._actref = actRef;
-                                }} // 用來監聽點擊對象
-                                ClassName={!showAct && 'd-no'} // 傳入custom class
-                                searchKeyWord={searchKeyWord} // 傳入篩選的字串
-                                whenItemSelect={this.receive} // 模組回傳被選取的物件資料
-                                InputIsFocus={isFocus} // 告訴act 上面的input是否被focus
-                                noMatchText="找不到資料" // 當沒有配對資料時顯示那些文字
-                                footer={false} // 是否顯示footer
-                                theme={'future'} // 樣式調整: future(站長平台)
-                                closeActcallback={() =>
-                                    this.setState({ showAct: false })
-                                } // 強勢關閉act callbackFn
-                                closeBtnClickHandleCallback={
-                                    this.closeBtnClickHandleCallback
-                                } // 點擊關閉視窗icon callbackFn
-                                // jsonKey={'destinations'}
-                                setSelectValue={obj ? obj.dataIndex : ''}
-                                changeKey={actRacpChangeKeyCountry}
-                                catalogue={catalogueCallBackCountry}
-                            />
-                        </React.Fragment>
-                    }
-                />
-            </div>
-        );
-    }
-}
-
-// 人數增加，減少
-class PeopleNumAdd extends Component {
-    constructor (props) {
-        super(props);
-        this.maxSum = 8;
-        this.state = {
-            title: {
-                adult: '大人(12+)',
-                child: '孩童(2-11)',
-                baby: '嬰兒(<2)'
-            },
-            adultObj: {
-                min: 1,
-                max: 8,
-                count: 1
-            },
-            childObj: {
-                min: 0,
-                max: 8,
-                count: 0
-            },
-            babyObj: {
-                min: 0,
-                max: 1,
-                count: 0
-            }
-        };
-    }
-
-    renderState (adultCount, childCount, babyCount) {
-        const total = adultCount + childCount + babyCount;
-        const {
-            adultObj: { min: adultMin, max: adultMax },
-            childObj: { min: childMin, max: childMax },
-            babyObj: { min: babyMin, max: babyMax }
-        } = this.state;
-
-        if (
-            total > this.maxSum ||
-            adultCount > adultMax ||
-            adultCount < adultMin ||
-            childCount > childMax ||
-            childCount < childMin ||
-            babyCount > babyMax ||
-            babyCount < babyMin
-        ) {
-            return;
-        }
-
-        // 傳回總人數
-        if (this.props.setTotalPeople) {
-            this.props.setTotalPeople({ totalNum: total });
-        }
-
-        // 傳回個各格個值
-        if (this.props.setAdt) {
-            this.props.setAdt('adt', adultCount);
-        }
-        if (this.props.setChd) {
-            this.props.setChd('chd', childCount);
-        }
-        if (this.props.setInf) {
-            this.props.setInf('inf', adultCount < babyMax ? adultCount : babyCount);
-        }
-
-        this.setState({
-            adultObj: {
-                min: 1,
-                max: this.maxSum - childCount - babyCount,
-                count: adultCount
-            },
-            childObj: {
-                min: 0,
-                max: this.maxSum - adultCount - babyCount,
-                count: childCount
-            },
-            babyObj: {
-                min: 0,
-                max:
-                    childCount + adultCount * 2 <= this.maxSum ||
-                    adultCount < babyMax
-                        ? adultCount
-                        : this.maxSum - adultCount - childCount,
-                count: adultCount < babyMax ? adultCount : babyCount
-            }
-        });
-    }
-
-    onClickAdd = target => {
-        let {
-            adultObj: { count: adultCount },
-            childObj: { count: childCount },
-            babyObj: { count: babyCount }
-        } = this.state;
-
-        switch (target) {
-            case 'adultObj':
-                adultCount += 1;
-                break;
-            case 'childObj':
-                childCount += 1;
-                break;
-            case 'babyObj':
-                babyCount += 1;
-                break;
-            default:
-                break;
-        }
-
-        this.renderState(adultCount, childCount, babyCount);
-    };
-
-    onClickMinus = target => {
-        let {
-            adultObj: { count: adultCount },
-            childObj: { count: childCount },
-            babyObj: { count: babyCount }
-        } = this.state;
-
-        switch (target) {
-            case 'adultObj':
-                adultCount -= 1;
-                break;
-            case 'childObj':
-                childCount -= 1;
-                break;
-            case 'babyObj':
-                babyCount -= 1;
-                break;
-            default:
-                break;
-        }
-
-        this.renderState(adultCount, childCount, babyCount);
-    };
-
-    render () {
-        return (
-            <div className="con-people">
-                <div className="num-people">
-                    <span>{this.state.title.adult}</span>
-                    <IntGpct
-                        id="peopleAdult"
-                        xin
-                        max={this.state.adultObj.max}
-                        min={this.state.adultObj.min}
-                        count={this.state.adultObj.count}
-                        btnClassMinus="ic_rcln toolcancelb"
-                        btnClassAdd="ic_rcln tooladdb"
-                        onClickAdd={() => {
-                            this.onClickAdd('adultObj');
-                        }} // 按下增加
-                        onClickMinus={() => {
-                            this.onClickMinus('adultObj');
-                        }} // 按下減少
-                    />
-                </div>
-                <div className="num-people">
-                    <span>{this.state.title.child}</span>
-                    <IntGpct
-                        id="peopleChild"
-                        xin
-                        max={this.state.childObj.max}
-                        min={this.state.childObj.min}
-                        count={this.state.childObj.count}
-                        btnClassMinus="ic_rcln toolcancelb"
-                        btnClassAdd="ic_rcln tooladdb"
-                        onClickAdd={() => {
-                            this.onClickAdd('childObj');
-                        }} // 按下增加
-                        onClickMinus={() => {
-                            this.onClickMinus('childObj');
-                        }} // 按下減少
-                    />
-                </div>
-                <div className="num-people">
-                    <span>{this.state.title.baby}</span>
-                    <IntGpct
-                        id="peopleBaby"
-                        xin
-                        max={this.state.babyObj.max}
-                        min={this.state.babyObj.min}
-                        count={this.state.babyObj.count}
-                        btnClassMinus="ic_rcln toolcancelb"
-                        btnClassAdd="ic_rcln tooladdb"
-                        onClickAdd={() => {
-                            this.onClickAdd('babyObj');
-                        }} // 按下增加
-                        onClickMinus={() => {
-                            this.onClickMinus('babyObj');
-                        }} // 按下減少
-                    />
-                </div>
-            </div>
-        );
-    }
-}
+import FlightTransfer from '../components/flightTransfer';
+import PeopleNumAdd from '../components/peopleNumAdd';
 
 class International extends Component {
     constructor (props) {
@@ -425,7 +66,7 @@ class International extends Component {
             { text: '只要廉價航空', value: 2 },
             { text: '排除廉價航空', value: 3 }
         ];
-        this.fetchPath = './json/TRS1NEWTRAVEL.js';
+        this.fetchPath = flightInternational.place;
     }
 
     componentDidMount () {
@@ -625,6 +266,11 @@ class International extends Component {
             arr.push(data);
         }
         if (typeof nowId === 'undefined') {
+            if (selectKey === 'selectDate1') {
+                this.props.setPlace('departure', arr);
+            } else if (selectKey === 'selectDate2') {
+                this.props.setPlace('destination', arr);
+            }
             this.setState({
                 [datakey]: arr.length ? keyword : '',
                 [selectKey]: arr,
@@ -638,7 +284,47 @@ class International extends Component {
     }
 
     switch = () => {
-        alert();
+        const { selectDate1, selectDate2, dptSelectDate, dtnSelectDate } = this.state;
+
+        const obj1 = JSON.parse(JSON.stringify(selectDate2));
+        const obj2 = JSON.parse(JSON.stringify(selectDate1));
+
+        const text1 = dtnSelectDate;
+        const text2 = dptSelectDate;
+
+        this.props.setPlace('departure', obj1);
+        this.props.setPlace('destination', obj2);
+
+        this.setState({
+            selectDate1: obj1,
+            selectDate2: obj2,
+
+            dptSelectDate: text1,
+            dtnSelectDate: text2
+        });
+    }
+
+    multiSwitch = (nowId) => {
+        const { multiItems } = this.state;
+        for (let i in multiItems) {
+            if (multiItems[i].id === nowId) {
+                const obj1 = JSON.parse(JSON.stringify(multiItems[i].selectDate2));
+                const obj2 = JSON.parse(JSON.stringify(multiItems[i].selectDate1));
+
+                const text1 = multiItems[i].dtnSelectDate;
+                const text2 = multiItems[i].dptSelectDate;
+
+                multiItems[i].selectDate1 = obj1;
+                multiItems[i].selectDate2 = obj2;
+                multiItems[i].dptSelectDate = text1;
+                multiItems[i].dtnSelectDate = text2;
+                break;
+            }
+        }
+        if (this.props.setDepDateItems) {
+            this.props.setDepDateItems('multiItems', multiItems);
+        }
+        this.setState({ multiItems });
     }
 
     render () {
@@ -660,8 +346,7 @@ class International extends Component {
         } = this.state;
 
         const { rtow } = this.props;
-
-        const changeStyle = rtow === 3 && 'threeStyle';
+        const changeStyle = rtow === 3 ? 'threeStyle show' : null;
         const isShow = rtow === 3 ? ' show' : ' hide';
         const doubleisShow = rtow === 1 ? 'show' : 'hide';
         const singleisShow = rtow === 0 || rtow === 3 ? 'show' : 'hide';
@@ -731,7 +416,7 @@ class International extends Component {
                             nvbOpen2={() => this.updateState('nvbOpen2', true, item.id)}
                             nvbClose1={() => this.updateState('nvbOpen1', false, item.id)}
                             nvbClose2={() => this.updateState('nvbOpen2', false, item.id)}
-                            // switch={this.switch}
+                            switch={() => this.multiSwitch(item.id)}
                             visible1={item.nvbOpen1}
                             visible2={item.nvbOpen2}
                             selectDate1={item.selectDate1}
@@ -798,7 +483,7 @@ class International extends Component {
                         />
                     }
                     ContentComponent={
-                        <div className="flight_international peopleCabinStyle">
+                        <div className="flight_international_mobile peopleCabinStyle">
                             <StRcln
                                 option={this.ClsTypeLevel}
                                 placeholder="請選擇"
@@ -852,10 +537,13 @@ class International extends Component {
                         <React.Fragment>
                             <div className="searchMoreTop">
                                 {/* 排除轉機國家 */}
-                                <FilterTransfer
+                                <FlightTransfer
+                                    customClass={'flightTransfer'}
+                                    fetchPath={this.fetchPath}
                                     setNonprefertrans={this.props.setNonprefertrans}
                                 />
                                 <StRcln
+                                    ClassName="aviation"
                                     option={this.cheapFlightOptions}
                                     placeholder="請選擇"
                                     label="廉價航空"
@@ -889,7 +577,7 @@ class International extends Component {
                 <BtRcnb
                     prop="string"
                     className="lg submitBtn"
-                    whenClick={this.props.sendData}
+                    whenClick={this.props.submit}
                 >
                 搜尋
                 </BtRcnb>

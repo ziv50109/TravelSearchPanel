@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { hotel } from '../../../source.config';
 import styles from './css.scss';
 import IntRcln from '../../../magaele/int_rcln';
 import IcRcln from '../../../magaele/ic_rcln';
@@ -42,8 +43,8 @@ class Panel extends Component {
             actAllData: null,
             actShowData: [], // 補字選單show的資料
             rajxDataUrl: '',
-            rajxHead: 'https://hotel.liontravel.com/search/keyword?keyWord=',
-            dtmDataSrc: './json/hotelMenu.json',
+            rajxHead: hotel.destinationAutoComplete,
+            dtmDataSrc: hotel.destination,
             actRules: [
                 {
                     title: '城市',
@@ -242,7 +243,7 @@ class Panel extends Component {
         }));
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-            const rajxDataUrl = rajxHead + encodeURI(inputText);
+            const rajxDataUrl = rajxHead + '?keyWord=' + encodeURI(inputText);
             this.fetchDestnActData(rajxDataUrl, inputText);
         }, 500);
     }

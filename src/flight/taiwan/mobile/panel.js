@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
 import cx from 'classnames';
+import { flightTaiwan } from '../../../../source.config';
 import StRcln from '../../../../magaele/st_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
 import IntRcln from '../../../../magaele/int_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
 import NvbRslb from '../../../../magaele/nvb_rslb';
 import CyRcmn from '../../../../magaele/cy_rcmn';
-import '../../../../magaele/core/core';
+// import '../../../../magaele/core/core';
 import '../css.scss';
 
 
@@ -27,7 +28,12 @@ const level = [
     { text: '3位', value: '3' },
     { text: '4位', value: '4' }
 ];
-
+const childLevel = [
+    { text: '0位', value: '0' },
+    { text: '1位', value: '1' },
+    { text: '2位', value: '2' },
+    { text: '3位', value: '3' }
+];
 
 function arrangeData (data) {
     console.log('arrangeData');
@@ -90,7 +96,7 @@ function toQueryString (data) {
             }
         }
     }
-    window.open('https://twflight.liontravel.com/search?' + string);
+    window.open('https://twflight.liontravel.com/search?' + string, this.props.hrefTarget);
     console.log(string);
 }
 
@@ -189,7 +195,8 @@ class Panel extends Component {
             TRIP: 1, // 行程
             DEPARTURE_DATE: '', // 出發日期
             RETURN_DATE: '', // 回程日期
-            PASSENGER_NUMBER: '', // 旅客人數
+            PASSENGER_ADULTNUM: 1, // default大人人數1位
+            PASSENGER_CHILDNUM: 0, // default孩童人數0位
             activeInput: null,
             isLoaded: false,
             itemList: [],
@@ -200,7 +207,7 @@ class Panel extends Component {
         };
     }
     UNSAFE_componentWillMount () {
-        fetch('../json/twflightdest.json')
+        fetch(flightTaiwan.place)
             .then((response) => {
                 // ok 代表狀態碼在範圍 200-299
                 if (!response.ok) throw new Error(response.statusText);
@@ -274,7 +281,6 @@ class Panel extends Component {
     changeOption (selectValue) {
         let itemList = this.state.itemList;
         if (itemList.length !== 0) {
-            console.log('changeOption');
             let nowValue = selectValue;
             let secondList = itemList.filter(function (item, index, arr) { // 篩選出發地可到達的目的地選單
                 return arr[index]['<BOARD_POINT_CODE>'] === nowValue;
@@ -287,8 +293,6 @@ class Panel extends Component {
             }
 
             // 如果目的地選擇的項目 與 下次出發地選擇的項目相同 則設定成該項目
-            console.log('下一次目的地選單', newList);
-            console.log('目的地', this.state.OFF_POINT);
             let lastArr = this.state.OFF_POINT;
             let index;
             if (lastArr !== '') {
@@ -302,7 +306,6 @@ class Panel extends Component {
             } else {
                 index = 0;
             }
-            console.log('index', index);
             this.setState({
                 arrList: newList, // 目的地選單
                 arrPlaceholder: newList[index].text, // 目的地選擇
@@ -311,10 +314,18 @@ class Panel extends Component {
         }
     }
 
-    passengerChange (selectValue) {
-        this.setState({
-            PASSENGER_NUMBER: selectValue
-        });
+    passengerChange (selectValue, from) {
+        if (from === 'p') {
+            this.setState({
+                PASSENGER_ADULTNUM: selectValue
+            });
+        } else if (from === 'c') {
+            this.setState({
+                PASSENGER_CHILDNUM: selectValue
+            });
+        } else {
+            return;
+        }
     }
 
     tripChange (target) {
@@ -355,7 +366,8 @@ class Panel extends Component {
             'OFF_POINT': this.state.OFF_POINT,
             'DEPARTURE_DATE': this.state.DEPARTURE_DATE,
             'RETURN_DATE': this.state.RETURN_DATE,
-            'PASSENGER_NUMBER': this.state.PASSENGER_NUMBER
+            'PASSENGER_ADULTNUM': this.state.PASSENGER_ADULTNUM,
+            'PASSENGER_CHILDNUM': this.state.PASSENGER_CHILDNUM
         };
         console.log('submit');
         arrangeData(info);
@@ -370,6 +382,8 @@ class Panel extends Component {
             depPlaceholder,
             arrList,
             arrPlaceholder,
+            PASSENGER_ADULTNUM,
+            PASSENGER_CHILDNUM
         } = this.state;
 
 
@@ -381,7 +395,7 @@ class Panel extends Component {
                         <li className={cx({ 'active': TRIP === 2 })} onClick={() => { this.tripChange(2) }}>來回</li>
                     </ul>
                 </div>
-                <div className="padder-v-sm">
+                <div className="m-t-sm">
                     <StRcln
                         ClassName="m-b-sm"
                         option={depList}
@@ -412,11 +426,34 @@ class Panel extends Component {
                         DEPARTURE_DATE={DEPARTURE_DATE}
                         RETURN_DATE={RETURN_DATE}
                     ></MobileCalendar>
-                    <StRcln ClassName="m-b-sm" option={level} placeholder="請選擇" label="人數" icon={<IcRcln name="toolstaff" />} req breakline whenMouseDown={() => console.log('父層whenMouseDown')} onChangeCallBack={(e) => { this.passengerChange(e) }}></StRcln>
-                    <div className="footer p-b-xl">
-                        <div className="footerInfo"><IcRcln name="toolif" className="p-r-xs" />注意事項：目前僅華信航空提供線上即時訂購。<a>參考其他航空</a></div>
+                    <div className="m-b-sm m-t-sm">
+                        <StRcln
+                            ClassName="m-b-sm"
+                            option={level}
+                            placeholder={`${PASSENGER_ADULTNUM}位`}
+                            label="大人"
+                            icon={<IcRcln name="toolstaff" />}
+                            req
+                            breakline
+                            whenMouseDown={() => console.log('父層whenMouseDown')}
+                            onChangeCallBack={(e) => { this.passengerChange(e, 'p') }}>
+                        </StRcln>
+                        <StRcln
+                            ClassName="m-b-sm"
+                            option={childLevel}
+                            placeholder={`${PASSENGER_CHILDNUM}位`}
+                            label="孩童"
+                            icon={<IcRcln name="toolchild" />}
+                            req
+                            breakline
+                            whenMouseDown={() => console.log('父層whenMouseDown')}
+                            onChangeCallBack={(e) => { this.passengerChange(e, 'c') }}>
+                        </StRcln>
                     </div>
-                    <BtRcnb radius prop="string" className="pos-fix pos-bottom h-sm w-full" lg whenClick={() => { this.handleSubmit() }}>搜尋</BtRcnb>
+                    <div className="footer">
+                        <div className="footerInfo"><IcRcln name="toolif" />注意事項：目前僅華信航空提供線上即時訂購。<a>參考其他航空</a></div>
+                    </div>
+                    <BtRcnb radius prop="string" className="h-sm w-full" lg whenClick={() => { this.handleSubmit() }}>搜尋</BtRcnb>
                 </div>
             </div>
         );

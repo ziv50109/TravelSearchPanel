@@ -1,0 +1,19 @@
+{
+  "Airport": [
+    {
+      "City": "DXB",
+      "AirportList": [
+        {
+          "Airport": "DWC",
+          "AirportName": "杜拜 (DWC)",
+          "AirportEName": "DUBAI"
+        },
+        {
+          "Airport": "DXB",
+          "AirportName": "杜拜 (DXB)",
+          "AirportEName": "DUBAI"
+        }
+      ]
+    }
+  ]
+}

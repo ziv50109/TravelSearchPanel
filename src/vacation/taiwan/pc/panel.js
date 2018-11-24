@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import cx from 'classnames';
+import { vacationTaiwan } from '../../../../source.config';
 
 // 單純組件
 // import StRcln from '../../../../magaele/st_rcln';
@@ -54,7 +55,7 @@ class DestinationContentComponent extends Component {
             dptSelectedData: [],
             dtnSelectedData: []
         };
-        this.fetchPath = '../../../../json/freeTaiwan.js';
+        this.fetchPath = vacationTaiwan.destination;
     }
 
     // 交換
@@ -168,7 +169,7 @@ class ContentComponentKeyword extends Component {
         this.AbortController && this.AbortController.abort();
         this.AbortController = new AbortController();
         const signal = this.AbortController.signal;
-        let url = 'https://www.liontravel.com/webhl/gethotelnamelist.ashx?';
+        let url = vacationTaiwan.keyword;
         fetch(url, {
             method: 'GET',
             mode: 'cors',
@@ -375,7 +376,7 @@ class Panel extends Component {
             { name: '5', value: 'carRental', text: '租車' }
         ];
         return (
-            <div className="vacation_taiwan_pc">
+            <div className="vacation_taiwan_pc m-t-xs">
                 <StRcln ClassName="m-b-sm fwb-b"
                     option={Country}
                     placeholder="出發地"
@@ -403,7 +404,7 @@ class Panel extends Component {
                     }
                 </div>
                 <div className="txt-right">
-                    <BtRcnb prop="string" className="m-r-sm" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
+                    <BtRcnb prop="string" className="md-m-t-md" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
                 </div>
             </div>
         );

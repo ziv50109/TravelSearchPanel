@@ -33,7 +33,7 @@ class Panel extends Component {
           <div className="activity container activePc">
               <div className="pcBtn">
                   <BtRcnb
-                      className={`m-smn m-l-xs mbBtn ${!home ? 'active' : ''}`}
+                      className={`m-smn r mbBtn ${!home ? 'active' : ''}`}
                       whenClick={() => {
                           this.setState({ home: false });
                           this._clearInput.current._clearInput();
@@ -42,7 +42,7 @@ class Panel extends Component {
             國外
                   </BtRcnb>
                   <BtRcnb
-                      className={`m-smn m-l-xs mbBtn ${home ? 'active' : ''}`}
+                      className={`m-smn r mbBtn ${home ? 'active' : ''}`}
                       whenClick={() => {
                           this.setState({ home: true });
                           this._clearInput.current._clearInput();
@@ -56,9 +56,8 @@ class Panel extends Component {
                   closePage={this.closePage}
                   onClickItem={this.onClickItem}
               />
-              <div className="emptyHeight" />
-              <div className="w-full txt-right">
-                  <BtRcnb className="search b-no">搜尋</BtRcnb>
+              <div className="w-full txt-right btn-wrap">
+                  <BtRcnb className="search b-no" lg radius>搜尋</BtRcnb>
               </div>
           </div>
       );

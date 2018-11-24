@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-let ip = require('ip');
+const ip = require('ip');
 
 module.exports = {
     mode: 'development',
@@ -57,6 +57,15 @@ module.exports = {
         port: 9000,
         host: ip.address()
     },
+    plugins: [
+        new webpack.EnvironmentPlugin(['ENV']),
+        new HtmlWebpackPlugin({
+            inject: true,
+            template: './preview.html',
+            filename: './preview.html',
+        }),
+        new webpack.HotModuleReplacementPlugin()
+    ],
     optimization: { // 使用可參考: https://juejin.im/post/5b99b9cd6fb9a05cff32007a
         splitChunks: {
             chunks: 'async',    // 'async', 'initial', 'all'
@@ -80,19 +89,11 @@ module.exports = {
             }
         }
     },
-    plugins: [
-        new HtmlWebpackPlugin({
-            inject: true,
-            template: './preview.html',
-            filename: './preview.html',
-        }),
-        new webpack.HotModuleReplacementPlugin()
-    ],
     externals: {
         // 'react': 'React',
         // 'react-dom': 'ReactDOM',
         // 'dayjs': 'dayjs',
-        // 'Magaele': 'magaele'
+        // 'Magaele': 'magaele/core/core.js'
     },
     resolve: {
         alias: {

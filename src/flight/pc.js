@@ -4,20 +4,20 @@ import International from './international/pc';
 import Chiness from './chinese/pc';
 import Taiwan from './taiwan/pc';
 
-const flight = () => {
+const flight = ({ hrefTarget }) => {
     return (
         <NtbRcln
             activeIndex={0}
             customClass="search_panel_two"
         >
             <Tab label="國際機票預訂">
-                <International />
+                <International hrefTarget={hrefTarget} />
             </Tab>
             <Tab label="大陸境內機票">
-                <Chiness />
+                <Chiness hrefTarget={hrefTarget} />
             </Tab>
             <Tab label="台灣境內機票">
-                <Taiwan />
+                <Taiwan hrefTarget={hrefTarget} />
             </Tab>
         </NtbRcln>
     );

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import { fetchJsToObj } from '../../../utils';
@@ -37,7 +37,7 @@ const Label = ({ text, removeData }) => {
         </p>
     );
 };
-class WrapperDtmRcln extends Component {
+class WrapperDtmRcln extends PureComponent {
     static defaultProps = {
         max: 3,
         minimumStringQueryLength: 2,
@@ -77,16 +77,18 @@ class WrapperDtmRcln extends Component {
         super(props);
         this.searchInput = React.createRef();
         this.state = {
+            fetchData: [],
             keyword: '',
             showDtm: true,
             showAct: false,
             selectedData: this.props.selectedData
         };
-        this.fetchData = [];
     }
     componentDidMount () {
-        this.getData(this.props.fetchPath);
+        // this.getData(this.props.fetchPath);
+        this._getDataCallBack(this.props.dataSource);
     }
+
     // fetch data
     getData = (source) => {
         if (source.indexOf('.json') !== -1) { // 若檔案格式為json
@@ -141,8 +143,10 @@ class WrapperDtmRcln extends Component {
                 }
             }
         }
-        this.fetchData = arr.filter(item => item.text.indexOf('不限') === -1);
-        this.forceUpdate();
+        let newArr = arr.filter(item => item.text.indexOf('不限') === -1);
+        this.setState({
+            fetchData: newArr
+        });
     }
     // 通知 parent component data 更新
     emitPushData = (data) => {
@@ -252,6 +256,7 @@ class WrapperDtmRcln extends Component {
             fetchPath
         } = this.props;
         const {
+            fetchData,
             keyword,
             showAct,
             showDtm,
@@ -313,7 +318,7 @@ class WrapperDtmRcln extends Component {
                 </div>
                 <ActRacp
                     InputIsFocus={showAct}
-                    url={this.fetchData}
+                    url={fetchData}
                     minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
                     minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
                     searchKeyWord={keyword} // 傳入篩選的字串
@@ -344,23 +349,26 @@ class WrapperDtmRcln extends Component {
                 />
                 <p className="dtm_rcfr-label">{sublabel}</p>
                 <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : ''}`}>
-                    <DtmRcfr
-                        levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
-                        orderMaps={{
-                            vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
-                        }}
-                        onClickItem={this.handlePushData}
-                        dataResouce={fetchPath}
-                        selectedData={selected}
-                        transformFetchData={(d) => {
-                            if (typeof d === 'string') {
-                                let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
-                                return JSON.parse('{' + newVariable + '}');
-                            } else {
-                                return d;
-                            }
-                        }}
-                    />
+                    {
+                        Object.keys(this.props.dataSource).length && <DtmRcfr
+                            levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
+                            orderMaps={{
+                                vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
+                            }}
+                            onClickItem={this.handlePushData}
+                            dataResouce={fetchPath}
+                            selectedData={selected}
+                            transformFetchData={(d) => {
+                                // if (typeof d === 'string') {
+                                //     let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
+                                //     return JSON.parse('{' + newVariable + '}');
+                                // } else {
+                                //     return d;
+                                // }
+                                return this.props.dataSource;
+                            }}
+                        />
+                    }
                 </div>
             </div>
         );

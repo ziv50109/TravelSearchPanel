@@ -26,13 +26,16 @@ $color_brown: #444;
 }
 
 .activity {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 118px);
   .bt_rcnb {
     border: 1px solid $color_05;
     background: #fff;
     color: $color_brown;
     width: 55px;
-    height: 32px;
-    border-radius: 3px;
+    // height: 32px;
+    // border-radius: 3px;
     padding: 0;
     margin: 0 10px 0 0;
     line-height: 14px;
@@ -41,15 +44,15 @@ $color_brown: #444;
       width: 96px;
     }
     &.search {
-      border-radius: 5px;
-      background-color: red;
+      // border-radius: 5px;
+      background-color: #e10500;
       color: white;
       font-size: 16px;
       left: 0;
       bottom: 0;
-      height: 45px;
-      width: 95%;
-      margin: 15px 11px;
+      // height: 45px;
+      width: 100%;
+      // margin: 15px 11px;
     }
     &:hover,
     &.active {
@@ -60,9 +63,10 @@ $color_brown: #444;
     &.sureBtn {
       background-color: #e10500;
       color: white;
-      height: 40px;
-      min-width: 0;
-      flex-grow: 0;
+      border: 0;
+    //   height: 40px;
+    //   min-width: 0;
+    //   flex-grow: 0;
     }
   } //button
 
@@ -171,18 +175,21 @@ $color_brown: #444;
     font-size: 14px;
     margin-left: 15px;
   }
+  .btn-wrap {
+      margin-top: auto;
+  }
 
   ////////////////////////////////////////PC/////////////////////////////////////////////////////////////////
   &.activePc {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    .pcBtn {
-      margin-top: 10px;
-    }
+    height: 100%;
     .bt_rcnb {
       &.search {
         width: initial;
         background-color: $color_06;
-        margin: 10px 5px;
+        margin: 0;
       }
       &:hover,
       &.active {
@@ -271,8 +278,10 @@ $color_brown: #444;
         }
       }
     }
-    .emptyHeight {
-      min-height: 200px;
+    .btn-wrap {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
     }
   }
 }

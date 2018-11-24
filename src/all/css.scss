@@ -1,13 +1,10 @@
 // 所有panel組裝的css
-body {
-    font-family: "微軟正黑體", "Microsoft JhengHei", "微軟雅黑體", "Microsoft YaHei";
-}
-
 .search_panel {
     // 單一面板樣式
     &-singlePanel {
         position: relative;
         display: block;
+        min-width: 390px;
         min-height: 410px;
         padding: 10px 10px 10px 15px;
         box-shadow: 0 0 8px 0 rgba(68, 68, 68, 0.3), 0 0 8px 0 rgba(0, 0, 0, 0.25);
@@ -30,6 +27,8 @@ body {
         // 單一面板 M 樣式
         &.search_panel-m {
             width: 100%;
+            min-width: 100%;
+            padding: 10px;
             box-shadow: none;
             &:before, &:after {
                 display: none;
@@ -38,6 +37,18 @@ body {
         // 單一面板 PC 樣式
         &.search_panel-pc {
             display: inline-flex;
+            &.search_panel-sm > div {
+                width: 470px;
+            }
+            &.search_panel-md > div {
+                width: 710px;
+            }
+            &.search_panel-lg > div {
+                width: 835px;
+            }
+            &.search_panel-inFlight {
+                width: 835px !important;
+            }
         }
     }
     // all M 板樣式
@@ -71,19 +82,26 @@ body {
         .ctns {
             width: 100%;
             .panel {
-                padding: 15px;
+                padding: 0px;
             }
+        }
+        > .ctns > .panel {
+            padding: 10px;
         }
         .search_panel_two {
             > .tabs {
                 > li.active {
                     min-width: 116px;
                 }
+                > li:last-child {
+                    margin-right: 0;
+                }
             }
         }
     }
     // M 版 Head
     &-mobileHead {
+        font-family: Verdana, Arial, "微軟正黑體", "Microsoft JhengHei", "微軟雅黑體", "Microsoft YaHei";
         padding: 10px 15px;
         background-color: #e10500;
         &_cnt {
@@ -108,7 +126,7 @@ body {
     // all PC 板樣式
     &_all_pc {
         display: inline-flex;
-        min-width: 470px;
+        width: 470px;
         min-height: 410px;
         box-shadow: 0 5px 10px #666;
         > .tabs {
@@ -148,11 +166,26 @@ body {
                         min-width: 116px;
                     }
                 }
+                > li:last-child {
+                    margin-right: 0;
+                }
             }
+        }
+        &.search_panel-sm > div {
+            width: 470px;
+        }
+        &.search_panel-md > div {
+            width: 710px;
+        }
+        &.search_panel-lg > div {
+            width: 835px;
+        }
+        &.search_panel-inFlight {
+            width: 835px !important;
         }
     }
     &-block {
-        display: block;
+        display: block !important;
     }
 }
 

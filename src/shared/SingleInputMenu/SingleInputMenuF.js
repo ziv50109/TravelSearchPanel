@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { flightInternational } from '../../../source.config';
 
 // 單純組件
 import Label from '../../../magaele/int_rctg/components/Label/Label';    // 外框
@@ -103,7 +104,7 @@ class SingleInputMenu extends Component {
         };
     }
     componentDidMount () {
-        this.getData('./json/flightsInternationaldestinationcsutommenu.js');
+        this.getData(flightInternational.place);
 
     }
     UNSAFE_componentWillReceiveProps (nextProps) {
@@ -308,7 +309,7 @@ class SingleInputMenu extends Component {
                             </div>
                             <ActRacp
                                 InputIsFocus={showAct}
-                                url={'./json/GetArrayTkt6.js'}
+                                url={flightInternational.placeAutoComplete}
                                 minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
                                 minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
                                 searchKeyWord={keyword} // 傳入篩選的字串
@@ -349,7 +350,7 @@ class SingleInputMenu extends Component {
                                         this.emitPushData(data);
                                         this.handleCloseMenu();
                                     }}
-                                    dataResouce={'./json/flightsInternationaldestinationcsutommenu.js'}
+                                    dataResouce={flightInternational.place}
                                     selectedData={selected}
                                     transformFetchData={(d) => {
                                         if (typeof d === 'string') {

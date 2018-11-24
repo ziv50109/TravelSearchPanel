@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { throttle } from 'lodash';
+import { vacationPersonal } from '../../../../source.config';
 import IntRcln from '../../../../magaele/int_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
 import ActRajx from '../../../../magaele/act_rajx';
@@ -32,7 +33,7 @@ class Page extends PureComponent {
         const DestinationSearch = splitDest.length > 1 ? [splitDest[0], splitDest[1]].join('_') : '';
 
         // call API
-        fetch('https://uvacation.liontravel.com/search/keyword', {
+        fetch(vacationPersonal.keyword, {
             method: 'POST',
             body: `Destination=${DestinationSearch}&sKeyWord=${inputText}`,
             headers: {

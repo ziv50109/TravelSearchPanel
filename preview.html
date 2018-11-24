@@ -6,21 +6,46 @@
 <title>Main Page</title>
 </head>
 <body>
-		<div id="root"></div>
-    </div>
+    <div id="root"></div>
 </body>
 <script>
     var panel = new SearchPanel({
+        width: 'search_panel-sm',
         panel: 'all',
         type: 'pc',
         target: '_blank',
         mTitle: '搜尋面板',
         mCloseBtn: function () {
-            console.log('asd');
+            console.log(panel);
         },
         renderNode: 'root'
     });
-    console.log(panel);
+    /*
+        width:
+            'search_panel-sm', 'search_panel-md', 'search_panel-lg'
+        panel:
+            'travel',
+            'internationalFlight',
+            'ChineseFlight',
+            'TaiwanFlight',
+            'hotel',
+            'personalVacation',
+            'groupVacation',
+            'taiwanVacation',
+            'themeTravel',
+            'activity',
+            'all'
+        type:
+            'pc', 'm'
+        target:
+            '_blank', '_self'
+        mTitle:
+            [String]
+        mCloseBtn:
+            [Function]
+        renderNode:
+            [String]
+    */
 </script>
 
 </html>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { fetchJsToObj } from '../../../../utils/';
 import cx from 'classnames';
+import { vacationTaiwan } from '../../../../source.config';
 
 // 單純組件
 import Label from '../../../../magaele/int_rctg/components/Label/Label.js';
@@ -56,7 +57,7 @@ class DestinationContentComponent extends Component {
             dptSelectedData: [],
             dtnSelectedData: []
         };
-        this.fetchPath = '../../../../json/freeTaiwan.js';
+        this.fetchPath = vacationTaiwan.destination;
     }
 
     // 交換
@@ -184,7 +185,7 @@ class ContentComponentKeyword extends Component {
         this.AbortController = new AbortController();
         const signal = this.AbortController.signal;
 
-        let url = 'https://www.liontravel.com/webhl/gethotelnamelist.ashx';
+        let url = vacationTaiwan.keyword;
 
         fetch(url, {
             method: 'GET',
@@ -538,7 +539,7 @@ class Panel extends Component {
             { name: '5', value: 'carRental', text: '租車' }
         ];
         return (
-            <div className="vacation_taiwan_m">
+            <div className="vacation_taiwan_m m-t-sm">
                 {/* <StRcln ClassName="fwb-b m-b-sm"
                     option={Country}
                     placeholder="出發地"
@@ -621,7 +622,7 @@ class Panel extends Component {
                     }
                 </div>
                 <div className="txt-right">
-                    <BtRcnb prop="string" className="m-r-sm" md radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
+                    <BtRcnb prop="string" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
                 </div>
             </div>
         );

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { hotel } from '../../../source.config';
 import styles from './css.scss';
 import IntRcln from '../../../magaele/int_rcln';
 import IcRcln from '../../../magaele/ic_rcln';
@@ -49,8 +50,8 @@ class Panel extends Component {
             otherEndDay: null,
             actShowData: [], // 補字選單show的資料
             rajxDataUrl: '',
-            rajxHead: 'https://hotel.liontravel.com/search/keyword?keyWord=',
-            dtmDataSrc: './json/hotelMenu.json',
+            rajxHead: hotel.destinationAutoComplete,
+            dtmDataSrc: hotel.destination,
             actRules: [
                 {
                     title: '城市',
@@ -258,7 +259,7 @@ class Panel extends Component {
         }));
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-            const rajxDataUrl = rajxHead + encodeURI(inputText);
+            const rajxDataUrl = rajxHead + '?keyWord=' + encodeURI(inputText);
             this.fetchDestnActData(rajxDataUrl, inputText);
         }, 500);
     }
@@ -436,7 +437,7 @@ class Panel extends Component {
                         <BtRcnb
                             className="search_button"
                             radius
-                            md
+                            lg
                             whenClick={() => {
                                 onSubmit(Object.assign(this.state, { hrefTarget: this.props.hrefTarget }));
                             }}
@@ -453,7 +454,7 @@ class Panel extends Component {
                         <NvbGoBack onClick={this.closeDestnMenu} />
                         <div className="nvb_content">
                             <header>
-                                <h3 className="txt-center m-b-md">目的地</h3>
+                                <h3 className="txt-center m-t-sm m-b-md">目的地</h3>
                                 <div className="search_input">
                                     <IntRcln
                                         placeholder="目的地、地標、區域、飯店名稱"

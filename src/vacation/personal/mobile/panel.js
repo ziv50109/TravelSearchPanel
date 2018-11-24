@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
+import { vacationPersonal } from '../../../../source.config';
 import IntRcln from '../../../../magaele/int_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
 import StRcln from '../../../../magaele/st_rcln';
@@ -61,7 +62,7 @@ class Panel extends Component {
     }
 
     componentDidMount () {
-        fetch('/json/vacationDeparture.json')
+        fetch(vacationPersonal.departure)
             .then(r => r.json())
             .then(data => {
                 this.setState(() => ({
@@ -190,7 +191,7 @@ class Panel extends Component {
                     />
                     <span className="cal_icon">→</span>
                     <IntRcln
-                        placeholder="目的地"
+                        placeholder="更多目的地，請輸入關鍵字"
                         label="目的地"
                         breakline
                         request
@@ -278,7 +279,7 @@ class Panel extends Component {
                 <BtRcnb
                     className="search_button"
                     radius
-                    md
+                    lg
                     whenClick={() => {
                         onSubmit(Object.assign(this.state, { hrefTarget: this.props.hrefTarget }));
                     }}
@@ -316,6 +317,7 @@ class Panel extends Component {
                     <DestinationPage
                         className={showDestinationPage ? '' : 'd-no'}
                         inputText={destinationInput}
+                        placeholder={'更多目的地，請輸入關鍵字'}
                         onClickConfirm={this.destinationPageConfirm}
                     />
                     {

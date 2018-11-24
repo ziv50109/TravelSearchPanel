@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --open --colors --progress --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js",
-    "build:umd": "webpack --progress --config webpack.umd.js",
-    "dev:umd": "webpack --watch --progress --config webpack.umd.js",
-    "storybook": "start-storybook -p 9001 -s ./ -c .storybook"
+    "start": "cross-env ENV=dev webpack-dev-server --open --colors --progress --config webpack.dev.js",
+    "build:dev": "cross-env ENV=dev webpack --config webpack.prod.js",
+    "build:rel": "cross-env ENV=rel webpack --config webpack.prod.js",
+    "build:prod": "cross-env ENV=prod webpack --config webpack.prod.js",
+    "storybook": "cross-env ENV=dev start-storybook -p 9001 -s ./ -c .storybook",
+    "build:storybook": "cross-env ENV=dev build-storybook -o dist.storybook"
   },
   "keywords": [],
   "author": "",

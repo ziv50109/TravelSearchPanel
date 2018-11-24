@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { vacationTaiwan } from '../../../../source.config';
 
 // 單純組件
 import Label from '../../../../magaele/int_rctg/components/Label/Label';    // 外框
@@ -69,7 +70,7 @@ class SingleInputMenuM extends Component {
             showAct: false
         };
         this.fetchData = [];
-        this.fetchPath = '../../../../json/freeTaiwan.js';
+        this.fetchPath = vacationTaiwan.destination;
     }
     componentDidMount () {
         this.getData(this.props.fetchPath);

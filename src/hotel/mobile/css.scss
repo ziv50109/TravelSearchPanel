@@ -42,7 +42,7 @@ $classname: 'hotelsRectM';
             font-weight: bold;
             font-size: 16px;
             line-height: 16px;
-        } 
+        }
         .booking {
             position: relative;
             margin: 0 0 10px 0;
@@ -52,20 +52,24 @@ $classname: 'hotelsRectM';
                     @include fontBase(16px);
                 }
                 .int_rcln  {
-                    max-width: 112px;
+                    // max-width: 112px;
+                    height: auto;
                 }
                 .int_rcln_input {
+                    width: 100%;
                     padding: 0;
                     border: none;
-                    &:not(:empty){
-                        max-width: 95px;
-                        .int_rcln {
-                            width: 90px;
-                        }
-                    }
-                    &:not(input):empty:before {
-                        color: $color_gray;
-                    }
+                    color: #0077b3;
+                    font-weight: bold;
+                    // &:not(:empty){
+                    //     max-width: 95px;
+                    //     .int_rcln {
+                    //         width: 90px;
+                    //     }
+                    // }
+                    // &:not(input):empty:before {
+                    //     color: $color_gray;
+                    // }
                 }
                 .int_rcln > .int_rcln_input:not(:empty){
                     width: 95px;
@@ -73,8 +77,8 @@ $classname: 'hotelsRectM';
             }
         }
         .searchBtn {
-            margin-top: 80px;
-            width: calc(100% - 20px);
+            // width: calc(100% - 20px);
+            margin: 80px auto 0;
             text-align: center;
             .bookingToday {
                 display: inline-block;
@@ -88,7 +92,7 @@ $classname: 'hotelsRectM';
             }
         }
         .chkbox-group {
-            padding-top: 10px;
+            // padding-top: 10px;
         }
     }
     @media screen and (min-width: $screen-tablet) {
@@ -166,6 +170,7 @@ $classname: 'hotelsRectM';
         background-color: #fff;
         .wrap_container {
             width: 100%;
+            padding-top: 10px;
             .dtm_rcfr{
                 height: calc(100vh - 130px);
                 overflow-y: auto;
@@ -173,6 +178,9 @@ $classname: 'hotelsRectM';
             .dtm_rcfr-label {
                 padding-left: 25px;
                 @include fontBase(14px);
+                & + .dtm_rcfr {
+                    margin-top: 10px;
+                }
             }
         }
         .act_wrap_container {

@@ -1,5 +1,5 @@
 import Loadable from 'react-loadable';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import NtbRcln, { Tab } from '../../../magaele/ntb_rcln';
 import IcRcln from '../../../magaele/ic_rcln';
@@ -65,7 +65,7 @@ const LoadComponent = (src, hrefTarget) => {
     return <Component hrefTarget={hrefTarget} />;
 };
 
-class SearchPanelAllMobile extends Component {
+class SearchPanelAllMobile extends PureComponent {
     constructor (props) {
         super(props);
         this.state = {
@@ -73,6 +73,38 @@ class SearchPanelAllMobile extends Component {
         };
     }
 
+    switchFlight = (show, hrefTarget) => {
+        return String(show)[0] === '1' &&
+            <NtbRcln activeTabIndex={0} customClass="search_panel_two" onClick={(i) => this.setState({ show: Number('1' + i) })}>
+                <Tab label="國際機票預訂">
+                    {(show === 1 || show === 10) && LoadComponent(import(/* webpackChunkName: "internationalFlight-m" */ '../../flight/international/mobile'), hrefTarget)}
+                </Tab>
+                <Tab label="大陸境內機票">
+                    {show === 11 && LoadComponent(import(/* webpackChunkName: "chineseFlight-m" */ '../../flight/chinese/mobile'), hrefTarget)}
+                </Tab>
+                <Tab label="台灣境內機票">
+                    {show === 12 && LoadComponent(import(/* webpackChunkName: "taiwanFlight-m" */ '../../flight/taiwan/mobile'), hrefTarget)}
+                </Tab>
+            </NtbRcln>;
+    }
+    switchVacation = (show, hrefTarget) => {
+        return String(show)[0] === '3' &&
+            <NtbRcln customClass="search_panel_two" onClick={(i) => this.setState({ show: Number('3' + i) })}>
+                <Tab label="國外">
+                    <NtbRcln activeTabIndex={0} customClass="search_panel_three" onClick={(j) => this.setState({ show: Number('30' + j) })}>
+                        <Tab label={<Label3 />}>
+                            {(show === 3 || show === 30 || show === 300) && LoadComponent(import(/* webpackChunkName: "personalVacation-m" */ '../../vacation/personal/mobile'), hrefTarget)}
+                        </Tab>
+                        <Tab label={<Label4 />}>
+                            {(show === 30 || show === 301) && LoadComponent(import(/* webpackChunkName: "groupVacation-m" */ '../../vacation/group/mobile'), hrefTarget)}
+                        </Tab>
+                    </NtbRcln>
+                </Tab>
+                <Tab label="國內">
+                    {show === 31 && LoadComponent(import(/* webpackChunkName: "taiwanVacation-m" */ '../../vacation/taiwan/mobile'), hrefTarget)}
+                </Tab>
+            </NtbRcln>;
+    }
     render () {
         const { show } = this.state;
         const { hrefTarget } = this.props;
@@ -83,27 +115,13 @@ class SearchPanelAllMobile extends Component {
                     {show === 0 && LoadComponent(import(/* webpackChunkName: "travel-m" */ '../../travel/mobile'), hrefTarget)}
                 </Tab>
                 <Tab label="機票">
-                    {show === 1 && LoadComponent(import(/* webpackChunkName: "flight-m" */ '../../flight/mobile'), hrefTarget)}
+                    {this.switchFlight(show, hrefTarget)}
                 </Tab>
                 <Tab label="訂房">
                     {show === 2 && LoadComponent(import(/* webpackChunkName: "hotel-m" */ '../../hotel/mobile'), hrefTarget)}
                 </Tab>
                 <Tab label="自由行">
-                    <NtbRcln customClass="search_panel_two" onClick={(i) => this.setState({ show: 30 + i })}>
-                        <Tab label="國外">
-                            <NtbRcln activeTabIndex={0} customClass="search_panel_three">
-                                <Tab label={<Label3 />}>
-                                    {(show === 3 || show === 30) && LoadComponent(import(/* webpackChunkName: "personalVacation-pc" */ '../../vacation/personal/mobile'), hrefTarget)}
-                                </Tab>
-                                <Tab label={<Label4 />}>
-                                    {(show === 3 || show === 30) && LoadComponent(import(/* webpackChunkName: "groupVacation-m" */ '../../vacation/group/mobile'), hrefTarget)}
-                                </Tab>
-                            </NtbRcln>
-                        </Tab>
-                        <Tab label="國內">
-                            {show === 31 && LoadComponent(import(/* webpackChunkName: "taiwanVacation-m" */ '../../vacation/taiwan/mobile'), hrefTarget)}
-                        </Tab>
-                    </NtbRcln>
+                    {this.switchVacation(show, hrefTarget)}
                 </Tab>
                 <Tab label={<span><span className="search_panel-block">主題</span>旅遊</span>}>
                     {show === 4 && LoadComponent(import(/* webpackChunkName: "themeTravel-m" */ '../../themeTravel/mobile'), hrefTarget)}

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import cx from 'classnames';
+import { vacationPersonal } from '../../../../source.config';
 import VacationDaparture from '../VacationDaparture'; // 出發地下拉
 import CrRcln from '../../../../magaele/cr_rcln';
 import StRcln from '../../../../magaele/st_rcln';
@@ -43,7 +44,7 @@ class Panel extends Component {
     }
 
     componentDidMount () {
-        fetch('/json/vacationDeparture.json')
+        fetch(vacationPersonal.departure)
             .then(r => r.json())
             .then(data => {
                 this.setState(() => ({

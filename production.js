@@ -1,10 +1,11 @@
+/* eslint-disable complexity */
 import Loadable from 'react-loadable';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import '@babel/polyfill';
 
-import(/* webpackChunkName: "magaele.core" */ './magaele/core/core.scss');
+import(/* webpackChunkName: "magaele.core" */ './src/all/base.scss');
 
 // loading 時的 component
 const MyLoadingComponent = (props) => {
@@ -20,6 +21,7 @@ const MyLoadingComponent = (props) => {
 // 暴露在全域的方法
 const SearchPanel = function (opts = {}) {
     const {
+        width,
         panel,
         type,
         target,
@@ -28,6 +30,7 @@ const SearchPanel = function (opts = {}) {
         renderNode
     } = opts;
 
+    this.width = width || 'search_panel-sm';
     this.panel = panel || 'all';
     this.type = type;
     this.target = target || '_blank';
@@ -62,12 +65,12 @@ SearchPanel.prototype.init = function () {
     });
 
     ReactDOM.render(
-        <div>
+        <React.Fragment>
             {this.type === 'm' && <MobileHead title={this.mTitle} onClick={this.mCloseBtn} />}
-            <div className={this.panelClass}>
+            <div className={this.panelClass + ' ' + this.width}>
                 <Templete hrefTarget={this.target} />
             </div>
-        </div>,
+        </React.Fragment>,
         this.renderNode
     );
 };
@@ -77,9 +80,15 @@ SearchPanel.prototype.returnPanel = function () {
         case 'travel':
             return (this.type === 'm') ?
                 import(/* webpackChunkName: "travel-m" */ './src/travel/mobile') : import(/* webpackChunkName: "travel-pc" */ './src/travel/pc');
-        case 'flight':
+        case 'internationalFlight':
             return (this.type === 'm') ?
-                import(/* webpackChunkName: "flight-m" */ './src/flight/international/mobile') : import(/* webpackChunkName: "flight-pc" */ './src/flight/international/pc');
+                import(/* webpackChunkName: "internationalFlight-m" */ './src/flight/international/mobile') : import(/* webpackChunkName: "internationalFlight-pc" */ './src/flight/international/pc');
+        case 'ChineseFlight':
+            return (this.type === 'm') ?
+                import(/* webpackChunkName: "chineseFlight-m" */ './src/flight/chinese/mobile') : import(/* webpackChunkName: "ChineseFlight-pc" */ './src/flight/chinese/pc');
+        case 'TaiwanFlight':
+            return (this.type === 'm') ?
+                import(/* webpackChunkName: "taiwanFlight-m" */ './src/flight/taiwan/mobile') : import(/* webpackChunkName: "TaiwanFlight-pc" */ './src/flight/taiwan/pc');
         case 'hotel':
             return (this.type === 'm') ?
                 import(/* webpackChunkName: "hotel-m" */ './src/hotel/mobile') : import(/* webpackChunkName: "hotel-pc" */ './src/hotel/pc');

@@ -202,7 +202,7 @@ class Panel extends Component {
                             selectedData={dptSelectedData} // 所選擇的資料集
                             // max={this.WrapperDtmRclnMax}
                             /* int_rcln */
-                            placeholder="請選擇/可輸入出發地" // placeholder 輸入提示字
+                            placeholder="請輸入國家/城市/機場" // placeholder 輸入提示字
                             /* act_racp */
                             minimumStringQueryLength={2} // 最少輸入幾個字
                             minimumStringQuery="請輸入至少兩個文字" // 尚未輸入文字字數到達要求會顯示此字串

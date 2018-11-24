@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { fetchJsToObj } from '../../../../utils';
+import { vacationGroup } from '../../../../source.config';
 
 import StRcln from '../../../../magaele/st_rcln';      // select
 import IcRcln from '../../../../magaele/ic_rcln';      // icon
@@ -41,8 +42,7 @@ class Panel extends Component {
             IsSold: false,
         };
         this.WrapperDtmRclnMax = 3;
-        // this.fetchPath = './json/TRS1NEWTRAVEL.js';
-        this.fetchPath = './json/TRS1NEWTRAVELFIT.js';
+        this.fetchPath = vacationGroup.place;
         this.option1 = [];
     }
 
@@ -236,7 +236,7 @@ class Panel extends Component {
                 />
 
                 <ComposeCalendar
-                    onChange= {(e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue })}
+                    onChange={(e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue })}
                     setEndDate={36}
                     setActiveEnd={36}
                 />

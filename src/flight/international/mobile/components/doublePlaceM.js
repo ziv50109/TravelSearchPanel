@@ -1,12 +1,12 @@
 import React from 'react';
+import { flightInternational } from '../../../../../source.config';
 import IntRcln from '../../../../../magaele/int_rcln';
 import IcRcln from '../../../../../magaele/ic_rcln';
 import NvbRslb from '../../../../../magaele/nvb_rslb';
-import Label from '../../../../../magaele/int_rctg/components/Label/Label';
 import SingleInputMenuFM from '../../../../shared/SingleInputMenu/SingleInputMenuFM';
 
 const DoublePlace = (props) => {
-    const fetchPath = './json/TRS1NEWTRAVEL.js';
+    const fetchPath = flightInternational.place;
     return (
         <React.Fragment>
             <div className={props.customClass}>
@@ -48,7 +48,7 @@ const DoublePlace = (props) => {
                         iconName={'toolmap'}
                         fetchPath={fetchPath}
                         selectedData={props.selectDate1}
-                        placeholder="請選擇/可輸入目的地"
+                        placeholder="請輸入國家/城市/機場"
                         minimumStringQueryLength={2}
                         minimumStringQuery="請輸入至少兩個文字"
                         noMatchText="很抱歉，找不到符合的項目"
@@ -75,7 +75,7 @@ const DoublePlace = (props) => {
                         iconName={'toolmap'}
                         fetchPath={fetchPath}
                         selectedData={props.selectDate2}
-                        placeholder="請選擇/可輸入目的地"
+                        placeholder="請輸入國家/城市/機場"
                         minimumStringQueryLength={2}
                         minimumStringQuery="請輸入至少兩個文字"
                         noMatchText="很抱歉，找不到符合的項目"

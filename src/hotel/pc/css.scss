@@ -76,9 +76,19 @@ $blue: #0077b3;
                 position: absolute;
                 top:50px;
                 left:0;
+                padding: 16px 14px 0;
                 z-index: 10;
                 background-color: #fff;
                 border: 1px solid #ddd;
+                .dtm_rcfr {
+                    margin-top: 10px;
+                    > .ntb_rcln > .tabs {
+                        li, .active {
+                            width: 96px !important;
+                            min-width: 96px;
+                        }
+                    }
+                }
             }
             .act_wrap_container{
                 position: absolute;
@@ -103,7 +113,7 @@ $blue: #0077b3;
                         line-height: 30px;
                         padding:10px;
                     }
-                }  
+                }
             }
         }
         .booking{
@@ -192,9 +202,9 @@ $blue: #0077b3;
                         }
                     }
                 }
-            }            
+            }
         }
-    
+
     }
 
     @media screen and (min-width: $screen-tablet) {
@@ -210,14 +220,14 @@ $blue: #0077b3;
                 margin-right: 0px;
                 margin-bottom: 10px;
             }
-        } 
+        }
         .ntb_rcln{
             &.search_panel_two{
                 > .tabs{
                     margin-bottom:10px;
                 }
             }
-        } 
+        }
     }
     @media screen and (min-width: $screen-lg-desktop) {
         // style on desktop device

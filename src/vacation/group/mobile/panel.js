@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
 import { fetchJsToObj } from '../../../../utils';
+import { vacationGroup } from '../../../../source.config';
 
 import NvbRslb from '../../../../magaele/nvb_rslb';    // M版滑出
 import StRcln from '../../../../magaele/st_rcln';      // select
@@ -17,6 +18,7 @@ import WrapperDtmRcln from '../component/WrapperDtmRcln_m.js';      // 目的地
 import Label from '../../../../magaele/int_rctg/components/Label/Label';
 import Multiple from '../../../../magaele/int_rctg/components/Multiple/Multiple';
 
+import '../../../component/input_group.scss';
 import '../css.scss';
 
 // [ popup ]
@@ -55,8 +57,7 @@ class Panel extends Component {
             activeInput: 0,
         };
         this.WrapperDtmRclnMax = 3;
-        // this.fetchPath = './json/TRS1NEWTRAVEL.js';
-        this.fetchPath = './json/TRS1NEWTRAVELFIT.js';
+        this.fetchPath = vacationGroup.place;
         this.option1 = [];
     }
     componentDidMount () {

@@ -3,6 +3,8 @@ import IntGpct from '../../../magaele/int_gpct';
 import StRcln from '../../../magaele/st_rcln';
 import { isArray } from 'util';
 
+import './css.scss';
+
 // 從間數人數物件轉字串
 function calcShowText (Rooms) {
     // 間數

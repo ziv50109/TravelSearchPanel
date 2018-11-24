@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { flightInternational } from '../../../source.config';
 
 // 單純組件
 import DtmRcfr from '../../../magaele/dtm_rcfr';
@@ -105,7 +106,6 @@ class SingleInputMenu extends Component {
         };
     }
     componentDidMount () {
-        this.getData('./json/flightsInternationaldestinationcsutommenu.js');
         let keywordValue = this.searchInput.current.props.value;
         if (this.props.selectedData[0] && !this.props.selectedData[0].hasOwnProperty('value')) {
             this.setState({
@@ -129,33 +129,6 @@ class SingleInputMenu extends Component {
         return nextState !== this.state || nextProps !== this.props;
     }
 
-    // fetch data
-    getData = (source) => {
-        if (source.indexOf('.json') !== -1) { // 若檔案格式為json
-            fetch(source, {
-                method: 'GET',
-            }).then(response => {
-                return response.json();
-            }).then(data => {
-                this._getDataCallBack(data);
-            });
-        } else {
-            fetchJsToObj(source, (data) => {
-                this._getDataCallBack(data);
-            });
-        }
-    }
-    // 處理 fetch 回來的 data
-    _getDataCallBack = (data) => {
-        // 重構 city 資料
-        let arr = [];
-        for (let key in data.city) {
-            if (Object.prototype.hasOwnProperty.call(data.city, key)) {
-                arr.push(data.city[key]);
-            }
-        }
-        this.setState({ newCity: Object.assign({}, ...arr) });
-    }
     // 通知 parent component data 更新
     emitPushData = (data) => {
         let keyword = this.searchInput.current.props.value;
@@ -327,7 +300,7 @@ class SingleInputMenu extends Component {
 
                 <ActRacp
                     InputIsFocus={true}
-                    url={'./json/GetArrayTkt6.js'}
+                    url={flightInternational.filter}
                     minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
                     minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
                     searchKeyWord={keyword} // 傳入篩選的字串

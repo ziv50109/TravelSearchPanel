@@ -49,7 +49,7 @@ Temporary Items
 # Node Modules
 /node_modules
 
-# Cache
+# .cache
 .cache
 
 # SVN
@@ -61,3 +61,4 @@ Temporary Items
 
 # Documents
 /dist
+/dist.storybook

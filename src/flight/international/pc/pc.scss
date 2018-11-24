@@ -37,16 +37,20 @@ $input-color: #0077b3;
         }
     }
 
-    .panel {
-        .cr_rcln {
-            z-index: 1;
-            margin-bottom: 10px;
+    .dropdown-label.breakline {
+        font-weight: normal;
+    }
 
-            &:nth-of-type(2) {
-                margin-left: 20px;
-            }
+    .cr_rcln {
+        z-index: 1;
+        margin-top: 10px;
+
+        &:nth-of-type(2) {
+            margin-left: 20px;
         }
+    }
 
+    .panel {
         .toolif {
             color: #24a07d;
             margin-right: 3px;
@@ -63,18 +67,20 @@ $input-color: #0077b3;
     }
 
     .ZeroOneRtowStyle {
-        > * {
+        >* {
             margin-top: 10px;
         }
+
         margin-bottom: 10px;
     }
+
     .ThreeRtowStyle {
         display: flex;
         height: 50px;
         margin-top: 10px;
     }
 
-    
+
 
     .int-col {
         input {
@@ -87,37 +93,47 @@ $input-color: #0077b3;
             font-size: 16px;
             width: 100%;
             color: $input-color;
+            font-weight: bold;
         }
     }
+
     .AppendContainer {
         margin-top: 10px;
+
         &:after {
             content: '';
             display: block;
             clear: both;
         }
+
         &.show {
             display: block;
         }
+
         &.hide {
             display: none;
         }
+
         .AppendItemStyle {
             margin-bottom: 10px;
             float: left;
             display: flex;
             align-items: center;
             flex: 1;
+
             .minus-items {
                 margin: 0;
                 min-width: 32px;
                 height: 32px;
                 border-radius: 3px;
                 padding: 0;
-                background-color:#ff615d;
+                background-color: #fff;
+                border: 1px solid #ddd;
                 margin-right: 10px;
+                color: #666;
             }
         }
+
         // 增加按鈕
         .mulitAdd {
             min-width: 32px;
@@ -125,7 +141,7 @@ $input-color: #0077b3;
             border-radius: 3px;
             float: left;
             padding: 0;
-            background-color:#ff615d;
+            background-color: #ff615d;
             margin-top: 9px;
         }
 
@@ -133,54 +149,120 @@ $input-color: #0077b3;
 
     .ItemStyle {
         display: flex;
-        width: 100%;
         height: 50px;
-        > * {
+
+        >* {
             margin-right: 10px;
         }
     }
 
     .single-change {
         border: none;
-        > * {
+
+        .SingleInputMenu {
+            &.flights {
+                width: 50%;
+
+                .int_rctg {
+                    box-sizing: border-box;
+
+                    .act_racp {
+                        width: 100%
+                    }
+
+                    .act_racp-future {
+                        padding: 0;
+
+                        .section {
+                            width: 98%;
+                        }
+
+                        .noMatchText {
+                            padding: 12px 30px 7px 10px;
+                        }
+                    }
+                }
+            }
+
+            .dtm_rcfr-close_btn {
+                padding: 10px;
+            }
+
+            .dtm_rcfr-wrap {
+                width: 657px;
+                height: 284px;
+                padding: 10px 15px 0;
+            }
+
+            .dtm_rcfr-label {
+                margin: 0 0 8px;
+            }
+        }
+
+        >* {
             &:first-child {
                 border: 1px solid #ddd;
                 border-right: none;
             }
+
             &:last-child {
                 border: 1px solid #ddd;
                 border-left: none;
             }
         }
+
         .changeBtn {
             margin: 0;
-            width: 23px;
+            margin-left: -25px;
+            width: 25px;
             height: 50px;
             background-size: 13px;
-            border-top:  1px solid #ddd;
-            border-bottom:  1px solid #ddd;
+            opacity: .5;
         }
-     }
+    }
+
+    .int_rcln.breakline>.int_rcln_label {
+        top: 6px;
+    }
 
     .calendarStyle {
         display: flex;
-        position: relative;
-        z-index: 1;
+        position: absolute;
+        z-index: 2;
+        margin-top: -1px;
+        border: 1px solid #e3e3e3;
+        padding: 40px 10px 10px;
+        width: 595px;
+        background: #fff;
+
         .close_btn {
+            position: absolute;
+            top: -45px;
+            right: 0px;
             cursor: pointer;
+            font-size: 30px;
+            font-weight: bold;
         }
     }
+
+    .calendarStyleIn {
+        position: relative;
+    }
+
     .st_rnls {
         .int_rcln_input {
             padding-top: 21px;
             color: $input-color;
+            font-weight: bold;
         }
     }
+
     .int_rctg {
-        .int-col{
-            padding: 0 10px;
+        .int-col {
+            padding: 0 5px;
+
             .int-label {
-                margin: 0;
+                margin-bottom: 3px;
             }
         }
     }
@@ -190,48 +272,43 @@ $input-color: #0077b3;
     }
 
     .openMoreOptions {
+        margin-top: 6px;
+
         .clp_rcdp_title_text {
             font-size: 14px;
         }
-        margin-top: 10px;
     }
 
-    
-
-    // 人數艙等
-    &.peopleCabinStyle {
-        .dropdown-place-holder {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: rgb(68, 68, 68);
-        }
-        .num-people {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-    }
-    
     // 更多搜尋選項
     .clp_rcdp_content {
         background-color: #f1f1f1;
         padding: 10px;
+
         .searchMoreTop {
             display: flex;
+
             .dropdown-place-holder {
                 &.breakline {
-                    padding: 8px;
+                    padding: 7px 5px;
+                    font-weight: bold;
+
+                    span {
+                        margin-bottom: 3px;
+                    }
+
                 }
             }
-            > * {
+
+            >* {
                 flex: 1;
                 margin-right: 11px;
+
                 &:last-child {
                     margin-right: 0;
                 }
             }
         }
+
         .checkBoxMagin {
             margin-top: 10px;
             margin-left: 0;
@@ -241,42 +318,50 @@ $input-color: #0077b3;
     // 雙月曆樣式
     .doubleCanlendarStyle {
         display: flex;
-        // border: 1px solid #ddd; 
+
+        // border: 1px solid #ddd;
         .int_rctg {
+
             // border: none;
             &:first-child {
                 border-right: none;
             }
+
             &:last-child {
-                border-left: none; 
+                border-left: none;
+
                 .int-col {
                     border-left: 1px solid #e3e3e3;
                 }
             }
         }
-        
+
     }
 
     // 送出按鈕
     .submitBtn {
+        margin-top: 24px;
         width: 90px;
         height: 50px;
         border-radius: 5px;
         float: right;
+
     }
 
-    .inputStyle {
+    .int-tags-single {
         position: relative;
+
         .clearBtn {
+            position: absolute;
+            right: 20px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
             width: 14px;
             height: 14px;
             background-color: #999999;
             border-radius: 50%;
-            position: absolute;
-            right: 10px;
-            top: 0;
-            bottom: 0;
-            margin: auto;
+
             &:before {
                 content: '';
                 width: 60%;
@@ -290,6 +375,7 @@ $input-color: #0077b3;
                 margin: auto;
                 transform: rotate(45deg);
             }
+
             &:after {
                 content: '';
                 width: 60%;
@@ -305,5 +391,97 @@ $input-color: #0077b3;
             }
         }
     }
-   
+
+    .ntb_rcln {
+        >.ctns>.panel.active {
+            padding: 0;
+        }
+    }
+
+    .dtm_rcfr {
+        .sec {
+            padding: 0;
+        }
+
+        .item {
+            width: 49%;
+            margin-right: 1%;
+        }
+    }
+}
+
+// 人數艙等
+.flight_international {
+    margin-top: -12px;
+    margin-left: -7px;
+
+    .st_rcln {
+        width: 290px;
+
+        .dropdown-place-holder {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: rgb(68, 68, 68);
+
+            .dropdown-label {
+                line-height: 18px;
+                height: 18px;
+            }
+        }
+    }
+
+    .con-people {
+        margin-top: 10px;
+        width: 180px;
+
+        .num-people {
+            line-height: 32px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+
+    .con-tooltip {
+        margin-top: 10px;
+        color: #24a07d;
+    }
+}
+
+.st_rnls_descendant_content {
+    .st_rnls_descendant_content_close {
+        font-size: 30px;
+        font-weight: bold;
+        right: 8px;
+        top: -2px;
+    }
+}
+
+
+@media (min-width: 980px) {
+    .#{$className} {
+        .ntb_rcln {
+            &.one_floor>.tabs>li {
+                font-size: 15px;
+                padding: 5px 8px;
+            }
+        }
+
+        .clp_rcdp_content {
+            width: 370px;
+        }
+
+        .dtm_rcfr {
+            .sec {
+                padding: 0;
+            }
+
+            .item {
+                width: 24%;
+                margin-right: 1%;
+            }
+        }
+    }
 }

@@ -90,7 +90,7 @@ class SearchInput extends Component {
                         }
                     </span>
                 </div>
-                <BtRcnb className="sureBtn m-smn m-r-sm" whenClick={closePage}>確定</BtRcnb>
+                <BtRcnb className="sureBtn m-smn" radius whenClick={closePage}>確定</BtRcnb>
             </div>
         );
     }

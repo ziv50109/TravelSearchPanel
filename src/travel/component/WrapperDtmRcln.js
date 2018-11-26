@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { fetchJsToObj, ClickOutSide } from '../../../utils';
+import { ClickOutSide } from '../../../utils';
 import DtmRcfr from '../../../magaele/dtm_rcfr';
 import ActRacp from '../../../magaele/act_racp';
 import IntRcln from '../../../magaele/int_rcln';
@@ -73,7 +73,6 @@ class WrapperDtmRcln extends PureComponent {
 
     constructor (props) {
         super(props);
-        this.searchInput = React.createRef();
         this.state = {
             fetchData: [],
             keyword: '',
@@ -81,41 +80,34 @@ class WrapperDtmRcln extends PureComponent {
             showAct: false
         };
     }
-    componentDidMount () {
-        // this.getData(this.props.fetchPath);
-        // this._getDataCallBack(this.props.dataSource);
-    }
 
     componentDidUpdate (prevProps, prevState) {
         prevProps.dataSource !== this.props.dataSource && this._getDataCallBack(this.props.dataSource);
     }
 
-
-    // fetch data
-    getData = (source) => {
-        if (source.indexOf('.json') !== -1) { // 若檔案格式為json
-            fetch(source, {
-                method: 'GET',
-            }).then(response => {
-                return response.json();
-            }).then(data => {
-                // fetchObject[source] = data; // 把data存起來,若下次再fetch相同網址直接取用就好,不用再發送http request
-                this._getDataCallBack(data);
-            });
-        } else {
-            fetchJsToObj(this.props.fetchPath, (data) => {
-                this._getDataCallBack(data);
-            });
-        }
-    }
-    // 處理 fetch 回來的 data
+    // 處理父層 fetch 回來的 data
     _getDataCallBack = (data) => {
         const { vLine, vLinetravel, vLinewebarea } = data;
         let arr = [];
+        const _level3 = (key1, key2) => {
+            for (let key3 in vLinewebarea[key2]) {
+                if (vLinewebarea[key2].hasOwnProperty(key3)) {
+                    arr.push({
+                        vLine: key1,
+                        vLinetravel: key2,
+                        vLinewebarea: key3,
+                        vLineText: vLine[key1],
+                        vLinetravelText: vLinetravel[key1][key2],
+                        text: `${vLinewebarea[key2][key3]}`,
+                        value: `${key1}-${key2}-${key3}`
+                    });
+                }
+            }
+        };
         for (let key1 in vLine) {
-            if (Object.prototype.hasOwnProperty.call(vLine, key1)) {
+            if (vLine.hasOwnProperty(key1)) {
                 for (let key2 in vLinetravel[key1]) {
-                    if (Object.prototype.hasOwnProperty.call(vLinetravel[key1], key2)) {
+                    if (vLinetravel[key1].hasOwnProperty(key2)) {
                         arr.push({
                             vLine: key1,
                             vLinetravel: key2,
@@ -125,25 +117,12 @@ class WrapperDtmRcln extends PureComponent {
                             text: key2 === '_' ? vLine[key1] : vLinetravel[key1][key2],
                             value: `${key1}-${key2}-_`
                         });
-                        (() => {
-                            for (let key3 in vLinewebarea[key2]) {
-                                if (Object.prototype.hasOwnProperty.call(vLinewebarea[key2], key3)) {
-                                    arr.push({
-                                        vLine: key1,
-                                        vLinetravel: key2,
-                                        vLinewebarea: key3,
-                                        vLineText: vLine[key1],
-                                        vLinetravelText: vLinetravel[key1][key2],
-                                        text: `${vLinewebarea[key2][key3]}`,
-                                        value: `${key1}-${key2}-${key3}`
-                                    });
-                                }
-                            }
-                        })();
+                        _level3(key1, key2);
                     }
                 }
             }
         }
+
         let newArr = arr.filter(item => item.text.indexOf('不限') === -1);
         this.setState({
             fetchData: newArr
@@ -161,23 +140,11 @@ class WrapperDtmRcln extends PureComponent {
         });
     }
     handleCloseMenu = () => {
-        if (this.isMouseDown) return;
         this.setState({
             showAct: false,
             showDtm: false,
             keyword: ''
         });
-    }
-    handleMouseDown = () => {
-        this.isMouseDown = true;
-    }
-    handleMouseUp = () => {
-        this.isMouseDown = false;
-    }
-    // 通知 parent component 移除 data
-    handleEmitRemoveData = (e, data) => {
-        e.stopPropagation();
-        this.emitPushData(data);
     }
 
     render () {
@@ -205,7 +172,11 @@ class WrapperDtmRcln extends PureComponent {
             } else {
                 text = `${item.text}-${item.vLinetravelText}`;
             }
-            return <Label key={item.value} text={text} removeData={(e) => this.handleEmitRemoveData(e, item)} />;
+            return <Label
+                key={item.value}
+                text={text}
+                removeData={() => this.emitPushData(item)}
+            />;
         });
 
         // DtmRcfr highlight
@@ -220,7 +191,6 @@ class WrapperDtmRcln extends PureComponent {
                         {showText}
                     </div>
                     <IntRcln
-                        ref={this.searchInput}
                         placeholder={placeholder}
                         onFocus={this.handleOpenMenu}
                         value={keyword}
@@ -259,8 +229,8 @@ class WrapperDtmRcln extends PureComponent {
                         } else {
                             this.handleCloseMenu();
                         }
-                    }} // 鍵盤上下鍵改變選取項目
-                    emitSecondData={(d) => {
+                    }}
+                    emitSecondData={(d) => { // 按任意處觸發的function，回傳目前搜尋結果
                         if (keyword.length >= minimumStringQueryLength && d.length > 0) {
                             this.emitPushData(d[0]);
                             this.setState({
@@ -288,8 +258,8 @@ class WrapperDtmRcln extends PureComponent {
                                 vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
                             }}
                             onClickItem={this.emitPushData}
-                            dataResouce={fetchPath}
                             selectedData={selected}
+                            dataResouce={fetchPath}
                             transformFetchData={(d) => {
                                 // if (typeof d === 'string') {
                                 //     let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');

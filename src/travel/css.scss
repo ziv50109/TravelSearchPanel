@@ -232,7 +232,7 @@ $blue: #0077b3;
     // [目的地] 補字選單
     & .act_racp,
     &-nvb .act_racp {
-        box-shadow: none;
+        box-shadow: none !important;
         outline: none;
         left: 0;
         min-width: 100%;
@@ -240,9 +240,9 @@ $blue: #0077b3;
         max-height: 100%;
         margin-top: 40px;
         &-future {
-            & .m-place .close,
-            & .noMatchText .close {
-                display: none;
+            .m-place .close,
+            .noMatchText .close {
+                display: none !important;
             }
             .noMatchText {
                 color: #999;
@@ -312,11 +312,11 @@ $blue: #0077b3;
         height: auto;
         max-height: 360px;
         margin-top: auto;
-        box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+        box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7) !important;
         &-future {
-            & .m-place .close,
-            & .noMatchText .close {
-                display: block;
+            .m-place .close,
+            .noMatchText .close {
+                display: block !important;
             }
             .noMatchText {
                 color: #24a07d;

@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import { vacationPersonal } from '../../../../source.config';
 import IntRcln from '../../../../magaele/int_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';

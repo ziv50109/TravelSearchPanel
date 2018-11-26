@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import cx from 'classnames';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import { vacationPersonal } from '../../../../source.config';
 import IntRcln from '../../../../magaele/int_rcln';
 import ActRajx from '../../../../magaele/act_rajx';

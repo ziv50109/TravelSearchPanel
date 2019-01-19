@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+<title>Main Page</title>
+</head>
+<body>
+    <div id="root"></div>
+<script type="text/javascript" src="app.js"></script></body>
+<script>
+    var panel = new SearchPanel({
+        width: 'search_panel-sm',
+        panel: 'all',
+        type: 'pc',
+        target: '_blank',
+        mTitle: '搜尋引擎',
+        mCloseBtn: function () {
+            console.log(panel);
+        },
+        renderNode: 'root'
+    });
+    // var panel = new SearchPanel({
+    //     panel: 'tw_vacationSearch',
+    //     type: 'm',
+    //     target: '_blank',
+    //     renderNode: 'root'
+    // });
+</script>
+
+</html>

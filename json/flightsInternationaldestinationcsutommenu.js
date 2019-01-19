@@ -159,7 +159,7 @@ let city = {
     },
     '_9': {
         'TPE': '中華民國(TW)__台北<(桃園/松山)>-Taipei(TPE)',
-        'TCH': '中華民國(TW)__台中-Taichung(RMQ)',
+        'RMQ': '中華民國(TW)__台中-Taichung(RMQ)',
         'TNN': '中華民國(TW)__台南-Tainan(TNN)',
         'HUN': '中華民國(TW)__花蓮-Hua Lien City(HUN)',
         'KHH': '中華民國(TW)__高雄-Kaohsiung(KHH)'

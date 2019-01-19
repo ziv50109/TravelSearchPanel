@@ -26,6 +26,20 @@ class Module extends PureComponent {
         isMinMonth: this.isMinMonth(),
         isMaxMonth: this.isMaxMonth(),
     };
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.activeEnd !== this.props.activeEnd) {
+            this.isActiveEndUpdate();
+        }
+    }
+
+    isActiveEndUpdate = () => {
+        const { activeEnd, selectedStartDate } = this.props;
+        const activeEndMonth = getYearAndMonth(activeEnd)[1];
+        const selectedStartDateMonth = getYearAndMonth(selectedStartDate)[1];
+
+        const isMaxMonth = selectedStartDateMonth >= activeEndMonth;
+        this.setState({ isMaxMonth });
+    }
 
     isMinMonth () {
         let {
@@ -125,6 +139,8 @@ class Module extends PureComponent {
     }
     render () {
         const {
+            startTxt,
+            endTxt,
             doubleMonth,
             ...other
         } = this.props;
@@ -154,12 +170,16 @@ class Module extends PureComponent {
                     onClick={this.goNextMonth}
                 />
                 <CalendarBox
+                    startTxt={startTxt}
+                    endTxt={endTxt}
                     startMonth={startMonth}
                     {...other}
                 />
                 {
                     doubleMonth ?
                         <CalendarBox
+                            startTxt={startTxt}
+                            endTxt={endTxt}
                             startMonth={nextMonth}
                             {...other}
                         /> :

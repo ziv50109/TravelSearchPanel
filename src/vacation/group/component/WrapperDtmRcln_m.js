@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { fetchJsToObj } from '../../../../utils';
 import DtmRcfr from '../../../../magaele/dtm_rcfr';
 import ActRacp from '../../../../magaele/act_racp';
 import IntRcln from '../../../../magaele/int_rcln';
@@ -33,11 +32,11 @@ const Label = ({ text, removeData }) => {
     return (
         <p className="dtm_rcfr-selected" onClick={removeData}>
             <span title={text}>{text}</span>
-            <i><svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg></i>
+            <i>x</i>
         </p>
     );
 };
-class WrapperDtmRcln extends Component {
+class WrapperDtmRcln extends PureComponent {
     static defaultProps = {
         max: 3,
         minimumStringQueryLength: 2,
@@ -77,42 +76,40 @@ class WrapperDtmRcln extends Component {
         super(props);
         this.searchInput = React.createRef();
         this.state = {
+            fetchData: [],
             keyword: '',
             showDtm: true,
             showAct: false,
             selectedData: this.props.selectedData
         };
-        this.fetchData = [];
     }
     componentDidMount () {
-        this.getData(this.props.fetchPath);
+        this._getDataCallBack(this.props.travelDataSource);
     }
-    // fetch data
-    getData = (source) => {
-        if (source.indexOf('.json') !== -1) { // 若檔案格式為json
-            fetch(source, {
-                method: 'GET',
-            }).then(response => {
-                return response.json();
-            }).then(data => {
-                // fetchObject[source] = data; // 把data存起來,若下次再fetch相同網址直接取用就好,不用再發送http request
-                this._getDataCallBack(data);
-            });
-        } else {
-            fetchJsToObj(this.props.fetchPath, (data) => {
-                this._getDataCallBack(data);
-            });
-        }
-        this.handleLabelWrapClick();
-    }
-    // 處理 fetch 回來的 data
+
+    // 處理父層 fetch 回來的 data
     _getDataCallBack = (data) => {
         const { vLine, vLinetravel, vLinewebarea } = data;
         let arr = [];
+        const _level3 = (key1, key2) => {
+            for (let key3 in vLinewebarea[key2]) {
+                if (vLinewebarea[key2].hasOwnProperty(key3)) {
+                    arr.push({
+                        vLine: key1,
+                        vLinetravel: key2,
+                        vLinewebarea: key3,
+                        vLineText: vLine[key1],
+                        vLinetravelText: vLinetravel[key1][key2],
+                        text: `${vLinewebarea[key2][key3]}`,
+                        value: `${key1}-${key2}-${key3}`
+                    });
+                }
+            }
+        };
         for (let key1 in vLine) {
-            if (Object.prototype.hasOwnProperty.call(vLine, key1)) {
+            if (vLine.hasOwnProperty(key1)) {
                 for (let key2 in vLinetravel[key1]) {
-                    if (Object.prototype.hasOwnProperty.call(vLinetravel[key1], key2)) {
+                    if (vLinetravel[key1].hasOwnProperty(key2)) {
                         arr.push({
                             vLine: key1,
                             vLinetravel: key2,
@@ -122,32 +119,22 @@ class WrapperDtmRcln extends Component {
                             text: key2 === '_' ? vLine[key1] : vLinetravel[key1][key2],
                             value: `${key1}-${key2}-_`
                         });
-                        (() => {
-                            for (let key3 in vLinewebarea[key2]) {
-                                if (Object.prototype.hasOwnProperty.call(vLinewebarea[key2], key3)) {
-                                    arr.push({
-                                        vLine: key1,
-                                        vLinetravel: key2,
-                                        vLinewebarea: key3,
-                                        vLineText: vLine[key1],
-                                        vLinetravelText: vLinetravel[key1][key2],
-                                        text: `${vLinewebarea[key2][key3]}`,
-                                        value: `${key1}-${key2}-${key3}`
-                                    });
-                                }
-                            }
-                        })();
+                        _level3(key1, key2);
                     }
                 }
             }
         }
-        this.fetchData = arr.filter(item => item.text.indexOf('不限') === -1);
-        this.forceUpdate();
+
+        let newArr = arr.filter(item => item.text.indexOf('不限') === -1);
+        this.setState({
+            fetchData: newArr
+        });
     }
     // 通知 parent component data 更新
     emitPushData = (data) => {
         this.props.emitPushData && this.props.emitPushData(data);
     }
+    // 選取資料暫存在 selectedData
     handlePushData = (data) => {
         const { selectedData } = this.state;
         if (selectedData.some(item => data.value === item.value)) {
@@ -162,7 +149,6 @@ class WrapperDtmRcln extends Component {
             return;
         }
     }
-
     changeDestination = (() => {
         return {
             add: (data) => {
@@ -220,23 +206,11 @@ class WrapperDtmRcln extends Component {
         });
     }
     handleCloseMenu = () => {
-        if (this.isMouseDown) return;
         this.setState({
             showAct: false,
             showDtm: false,
             keyword: ''
         });
-    }
-    handleMouseDown = () => {
-        this.isMouseDown = true;
-    }
-    handleMouseUp = () => {
-        this.isMouseDown = false;
-    }
-    // 通知 parent component 移除 data
-    handleEmitRemoveData = (e, data) => {
-        e.stopPropagation();
-        this.handlePushData(data);
     }
     // 點擊 label wrap 就 focus search input
     handleLabelWrapClick = () => {
@@ -250,9 +224,10 @@ class WrapperDtmRcln extends Component {
             minimumStringQuery,
             noMatchText,
             sublabel,
-            fetchPath
+            travelDataSource
         } = this.props;
         const {
+            fetchData,
             keyword,
             showAct,
             showDtm,
@@ -267,101 +242,102 @@ class WrapperDtmRcln extends Component {
             } else {
                 text = `${item.text}-${item.vLinetravelText}`;
             }
-            return <Label key={item.value} text={text} removeData={(e) => this.handleEmitRemoveData(e, item)} />;
+            return <Label
+                key={item.value}
+                text={text}
+                removeData={() => this.handlePushData(item)}
+            />;
         });
 
         // DtmRcfr highlight
         const selected = selectedData.map(item => item.value);
 
         return (
-            <div>
+            <div className="vacationGroup_panel-m_destination">
                 <svg viewBox="0 0 10 10" display="none"><path id="dtm_rcfr-x" d="M10 8.59L8.59 10 5 6.41 1.41 10 0 8.59 3.59 5 0 1.41 1.41 0 5 3.59 8.59 0 10 1.41 6.41 5z" /></svg>
-
-                <h3 className="txt-center page_title m-t-sm m-b-sm">目的地</h3>
-                <div className="dtm_rcfr-row">
-                    <div className="dtm_rcfr-input-wrap">
-                        <div className="dtm_rcfr-selected-wrap" onClick={this.handleLabelWrapClick}>
-                            {showText}
+                <header className="vacationGroup_panel-m_header-wrap">
+                    <h3 className="txt-center page_title m-t-sm m-b-sm">目的地</h3>
+                    <div className="dtm_rcfr-row">
+                        <div className="dtm_rcfr-input-wrap">
+                            <div className="dtm_rcfr-selected-wrap-m">
+                                {showText}
+                            </div>
+                            <IntRcln
+                                ref={this.searchInput}
+                                placeholder={!selectedData.length ? placeholder : ''}
+                                onFocus={this.handleOpenMenu}
+                                value={keyword}
+                                onChange={(e) => {
+                                    if (!e.target.value) {
+                                        this.setState({
+                                            keyword: '',
+                                            showAct: false,
+                                            showDtm: true
+                                        });
+                                    } else {
+                                        this.setState({
+                                            keyword: e.target.value,
+                                            showAct: true,
+                                            showDtm: false
+                                        });
+                                    }
+                                }}
+                                onClearValue={() => this.setState({
+                                    keyword: '',
+                                    showAct: false,
+                                    showDtm: true
+                                })}
+                            />
                         </div>
-                        <IntRcln
-                            ref={this.searchInput}
-                            placeholder={placeholder}
-                            onFocus={this.handleOpenMenu}
-                            value={keyword}
-                            onChange={(e) => {
-                                if (!e.target.value) {
-                                    this.setState({
-                                        keyword: '',
-                                        showAct: false,
-                                        showDtm: true
-                                    });
-                                } else {
-                                    this.setState({
-                                        keyword: e.target.value,
-                                        showAct: true,
-                                        showDtm: false
-                                    });
-                                }
-                            }}
-                            onClearValue={() => this.setState({
-                                keyword: '',
-                                showAct: false,
-                                showDtm: true
-                            })}
-                        />
+                        <BtRcnb className="dtm-btn" md radius whenClick={() => this.emitPushData(selectedData)}>確定</BtRcnb>
                     </div>
-                    <BtRcnb md radius whenClick={() => this.emitPushData(selectedData)}>確定</BtRcnb>
-                </div>
-                <ActRacp
-                    InputIsFocus={showAct}
-                    url={this.fetchData}
-                    minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
-                    minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
-                    searchKeyWord={keyword} // 傳入篩選的字串
-                    noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
-                    ClassName={(!showAct && 'd-no')} // 傳入custom class
-                    footer={false} // 是否顯示footer
-                    theme={'future'} // 樣式調整: future(站長平台)
-                    closeActcallback={(data) => {
-                        if (typeof data !== 'undefined') {
-                            this.setState({ showAct: false, keyword: '' });
-                            this.handlePushData(data);
-                        } else {
-                            this.handleCloseMenu();
-                        }
-                    }} // 鍵盤上下鍵改變選取項目
-                    emitSecondData={(d) => {
-                        if (keyword.length >= minimumStringQueryLength && d.length > 0) {
-                            this.emitPushData(d[0]);
-                            this.setState({
-                                keyword: '',
-                                showAct: false,
-                                showDtm: true
-                            });
-                        }
-                    }}//若補字未選擇即離開選單,直接選擇補字選單第一項
-                    changeKey={actRacpChangeKey}
-                    catalogue={catalogueCallBack}
-                />
-                <p className="dtm_rcfr-label m-t-xs">{sublabel}</p>
-                <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : ''}`}>
-                    <DtmRcfr
-                        levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
-                        orderMaps={{
-                            vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
+                    <p className="dtm_rcfr-label">{sublabel}</p>
+                </header>
+                <div className="vacationGroup_panel-m_dtm-wrap">
+                    <ActRacp
+                        InputIsFocus={showAct}
+                        url={fetchData}
+                        minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
+                        minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
+                        searchKeyWord={keyword} // 傳入篩選的字串
+                        noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
+                        ClassName={(!showAct && 'd-no')} // 傳入custom class
+                        footer={false} // 是否顯示footer
+                        theme={'future'} // 樣式調整: future(站長平台)
+                        closeActcallback={(data) => {
+                            if (typeof data !== 'undefined') {
+                                this.setState({ showAct: false, keyword: '' });
+                                this.handlePushData(data);
+                            }
+                            this.handleOpenMenu();
                         }}
-                        onClickItem={this.handlePushData}
-                        dataResouce={fetchPath}
-                        selectedData={selected}
-                        transformFetchData={(d) => {
-                            if (typeof d === 'string') {
-                                let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
-                                return JSON.parse('{' + newVariable + '}');
-                            } else {
-                                return d;
+                        emitSecondData={(d) => { // 按任意處觸發的function，回傳目前搜尋結果
+                            if (keyword.length >= minimumStringQueryLength && d.length > 0) {
+                                this.handlePushData(d[0]);
+                                this.setState({
+                                    keyword: '',
+                                    showAct: false,
+                                    showDtm: true
+                                });
                             }
                         }}
+                        changeKey={actRacpChangeKey}
+                        catalogue={catalogueCallBack}
                     />
+                    <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : ''}`}>
+                        {
+                            Object.keys(travelDataSource).length && <DtmRcfr
+                                levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
+                                orderMaps={{
+                                    vLine: ['_6', '_5', '_7', '_3', '_1', '_2', '_9']
+                                    // vLine: ['_5'] // rel
+                                }}
+                                onClickItem={this.handlePushData}
+                                selectedData={selected}
+                                dataResouce={travelDataSource}
+                            />
+                        }
+                    </div>
                 </div>
             </div>
         );

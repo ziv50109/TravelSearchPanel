@@ -6,7 +6,9 @@ const CloseButton = ({ onClick }) => (
         className="close_btn"
         onClick={onClick}
     >
-        X
+        <svg viewBox="0 0 10 10">
+            <path d="M10 8.59L8.59 10 5 6.41 1.41 10 0 8.59 3.59 5 0 1.41 1.41 0 5 3.59 8.59 0 10 1.41 6.41 5z" />
+        </svg>
     </button>
 );
 
@@ -52,17 +54,18 @@ function transformFetchData (data) {
             dataObj.City[parent][City] = text;
         });
     });
-
     return dataObj;
 }
 
 // 補字選單調整fetch到的資料格式
 function transformActFetchData (data) {
+    let newData = typeof data === 'string' ? JSON.parse(data) : data;
     const {
         Line,
         City,
         Country,
-    } = data;
+        AirportList
+    } = newData;
     const dataArray = [];
 
     for (let i = 0; i < Line.length; i++) {
@@ -92,8 +95,9 @@ function transformActFetchData (data) {
             }
         }
     }
-
-    return dataArray;
+    // const mixData = [...dataArray, ...transformArpData(newData)];
+    const mixData = [...dataArray]; // rel
+    return mixData;
 }
 // AiportData 資料重組
 function transformArpData (data) {
@@ -113,12 +117,12 @@ function transformArpData (data) {
                 dataObj = {};
                 const country = item.City;
                 dataObj.Airport = ele.Airport;
-                dataObj.Line = '';
-                dataObj.Country = '';
                 dataObj.City = country;
-                dataObj.level3 = ele.Airport;
                 dataObj.level2 = item.level2 ? item.level2 : '機場';
+                dataObj.level3 = ele.Airport;
                 dataObj.txt = `${ele.AirportName} (${ele.AirportEName})`;
+                dataObj.Country = '';
+                dataObj.Line = '';
                 arr.push(dataObj);
             });
         });
@@ -150,7 +154,6 @@ function transformRawProductData (data) {
             arr.push(dataObj);
         });
     }
-    console.log(arr);
     return arr;
 }
 // 航空公司下拉options

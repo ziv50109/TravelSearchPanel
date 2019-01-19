@@ -30,6 +30,7 @@ const DoubleCalendar = (props) => {
                 />
             </div>
             <NvbRslb
+                className="flight_m_calendar"
                 visible={visible}
                 direction="right"
             >
@@ -46,7 +47,7 @@ const DoubleCalendar = (props) => {
                             startMonth={today().format('YYYY-MM')}
                             endMonth={today().add(12, 'months').format('YYYY-MM')}
                             startDate={today().format('YYYY-MM-DD')}
-                            endDate={today().add(1, 'years').format('YYYY-MM-DD')}
+                            endDate={today().add(361, 'days').format('YYYY-MM-DD')}
                             startLabelTitle="去程日期"
                             endLabelTitle="回程日期"
                             ref={props.calendarRef}

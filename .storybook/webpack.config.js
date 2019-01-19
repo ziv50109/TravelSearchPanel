@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
     module: {
@@ -39,5 +40,8 @@ module.exports = {
                 loader: 'file-loader?name=fonts/[name].[ext]'
             }
         ]
-    }
+    },
+    plugins: [
+        new webpack.EnvironmentPlugin(['ENV'])
+    ],
 };

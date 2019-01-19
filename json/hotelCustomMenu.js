@@ -1,4 +1,4 @@
-﻿var vLine ={
+var vLine ={
     "_1":"美洲",
     "_2":"大洋洲",
     "_3":"歐洲",
@@ -122,7 +122,8 @@ var vCity ={
        "NZ_TPO":"陶波湖(TAUPO) TPO-紐西蘭",
        "AU_DRW":"達爾文(DARWIN) DRW-澳洲",
        "PF_BOB":"BORA BORA-大溪地",
-       "NZ_ROT":"羅吐魯阿(ROTOROA) ROT-紐西蘭"
+       "NZ_ROT":"羅吐魯阿(ROTOROA) ROT-紐西蘭",
+ 
     },
     "_PCTZ_2":{
        "AU_SYD_01":"市中心區-雪梨(SYDNEY) SYD-澳洲",

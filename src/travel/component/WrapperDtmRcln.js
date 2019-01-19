@@ -32,7 +32,7 @@ const Label = ({ text, removeData }) => {
     return (
         <p className="dtm_rcfr-selected" onClick={removeData}>
             <span title={text}>{text}</span>
-            <i><svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg></i>
+            <i><svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg></i>
         </p>
     );
 };
@@ -82,7 +82,7 @@ class WrapperDtmRcln extends PureComponent {
     }
 
     componentDidUpdate (prevProps, prevState) {
-        prevProps.dataSource !== this.props.dataSource && this._getDataCallBack(this.props.dataSource);
+        prevProps.travelDataSource !== this.props.travelDataSource && this._getDataCallBack(this.props.travelDataSource);
     }
 
     // 處理父層 fetch 回來的 data
@@ -134,7 +134,7 @@ class WrapperDtmRcln extends PureComponent {
     }
 
     handleOpenMenu = () => {
-        this.setState({
+        !this.state.showDtm && this.setState({
             showAct: false,
             showDtm: true
         });
@@ -154,8 +154,8 @@ class WrapperDtmRcln extends PureComponent {
             minimumStringQuery,
             noMatchText,
             sublabel,
-            fetchPath,
-            selectedData
+            selectedData,
+            travelDataSource
         } = this.props;
         const {
             fetchData,
@@ -249,26 +249,18 @@ class WrapperDtmRcln extends PureComponent {
                         className="dtm_rcfr-close_btn"
                         onClick={this.handleCloseMenu}
                     >
-                        <svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg>
+                        <svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg>
                     </span>
                     {
-                        Object.keys(this.props.dataSource).length && <DtmRcfr
+                        Object.keys(travelDataSource).length && <DtmRcfr
                             levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
                             orderMaps={{
                                 vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
+                                // vLine: ['_6', '_5', '_7', '_3', '_1', '_9'] // rel
                             }}
                             onClickItem={this.emitPushData}
                             selectedData={selected}
-                            dataResouce={fetchPath}
-                            transformFetchData={(d) => {
-                                // if (typeof d === 'string') {
-                                //     let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
-                                //     return JSON.parse('{' + newVariable + '}');
-                                // } else {
-                                //     return d;
-                                // }
-                                return this.props.dataSource;
-                            }}
+                            dataResouce={travelDataSource}
                         />
                     }
                 </div>

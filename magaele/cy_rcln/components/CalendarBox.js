@@ -79,6 +79,8 @@ const Day = ({
     // 去除0
     const dateVal = dateStr.slice(0, 10);
     const showday = dateStr.slice(8, 10).replace(/0+(\d)/gi, '$1');
+    const d = new Date();
+    const today = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     return (
         <div
             className={cx('date', {
@@ -98,7 +100,7 @@ const Day = ({
                 onMouseEnter(dateVal);
             }}
         >
-            <div className="date_box">
+            <div className={`date_box ${today === dateVal ? 'today' : ''}`}>
                 <span className="date_num">{showday}</span>
                 <span className="txt">{txt}</span>
             </div>

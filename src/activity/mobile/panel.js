@@ -1,90 +1,132 @@
 import React, { Component } from 'react';
-import NvbRslb from '../../../magaele/nvb_rslb';
-import '../activity.scss';
 import BtRcnb from '../../../magaele/bt_rcnb';
-import IcRcln from '../../../magaele/ic_rcln';
-import App from './App';
-// import Container from "./Container";
+import Foreign from './Foreign';
+import Taiwan from './Taiwan';
+import useLocalStorage from '../../../utils/useLocalStorage';
+import today from 'dayjs';
+import '../activity.scss';
 
 class Panel extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            visible: false,
-            isClick: true,
-            home: false
+            home: false,
+            visible: 0,
+            taiwanSelectData: {},
+            foreignSelectData: {}
         };
-        this.aa = React.createRef();
     }
-  openPage = () => {
-      this.setState({
-          visible: true
-      });
-  };
-  closePage = () => {
-      this.setState({
-          visible: false
-      });
-  };
-  onClickItem = data => {
-      this.setState(prevState => (data));
-  }
-  render () {
-      const { isClick, home, inputValue } = this.state;
-      return (
-          <div className="activity container">
-              <div>
-                  <BtRcnb
-                      className={`m-smn r mbBtn ${!home ? 'active' : ''}`}
-                      whenClick={() => {
-                          this.setState({ home: false });
-                          this.aa.current._clearInput();
-                      }}
-                  > 國外 </BtRcnb>
-                  <BtRcnb
-                      className={`m-smn r mbBtn ${home ? 'active' : ''}`}
-                      whenClick={() => {
-                          this.setState({ home: true });
-                          this.aa.current._clearInput();
-                      }}
-                  > 國內 </BtRcnb>
-              </div>
-              <input
-                  type="text"
-                  value={inputValue}
-                  placeholder="輸入城市、景點、體驗行程或活動名稱"
-                  className="outSideSearchInput wrapper-xs m-t-sm"
-                  onClick={this.openPage}
-              />
+    componentDidMount () {
+        useLocalStorage({
+            panel: 'activity',
+            methods: 'get',
+        }, (data) => {
+            this.validataLocalstorageData(data);
+        });
+    }
 
-              <NvbRslb
-                  visible={this.state.visible}
-                  direction="right"
-                  width="100%"
-                  className="custom"
-              >
-                  <span className="nvb_rslb_goBack fz-xxl" onClick={this.closePage}>
-                      <IcRcln name="toolbefore" />
-                  </span>
-                  {/* container */}
-                  <div className="activity">
-                      <div className="w-full">
-                          <h3 className="txt-center font-bold m-t-sm">目的地</h3>
-                          <App
-                              home={home}
-                              ref={this.aa}
-                              placeholder="輸入城市、景點、體驗行程或活動名稱"
-                              closePage={this.closePage}
-                              onClickItem={this.onClickItem}
-                          />
-                      </div>
-                  </div>
-              </NvbRslb>
-              <div className="w-full btn-wrap">
-                  <BtRcnb className="search b-no" lg radius>搜尋</BtRcnb>
-              </div>
-          </div>
-      );
-  }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        if (localStorageRecordTime < new Date(today().format('YYYY-MM-DD')).getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'activity',
+                methods: 'delete',
+            });
+        }
+        this.setState({
+            foreignSelectData: data.destination['foreignSelectData'],
+            taiwanSelectData: data.destination['taiwanSelectData']
+        });
+    };
+
+    openPage = (index) => {
+        this.setState({
+            visible: index
+        });
+    };
+    closePage = () => {
+        this.setState({
+            visible: 0
+        });
+    };
+    onClickItem = data => {
+        this.setState(prevState => (data));
+    };
+
+    handlePost = () => {
+        const {
+            home,
+            foreignSelectData,
+            taiwanSelectData
+        } = this.state;
+        const hasValue = home ? taiwanSelectData : foreignSelectData;
+        if (!Object.keys(hasValue).length) {
+            alert('請填選您想要去的城市、景點、體驗行程或活動名稱喲！');
+        }
+
+        const PostTime = new Date().setHours(0, 0, 0, 0);
+        const destination = { foreignSelectData, taiwanSelectData };
+        useLocalStorage({
+            panel: 'activity',
+            methods: 'post',
+            data: {
+                destination,
+                PostTime
+            }
+        });
+    };
+
+    render () {
+        const {
+            visible,
+            home,
+            foreignSelectData,
+            taiwanSelectData
+        } = this.state;
+        const foreignText = foreignSelectData.text || foreignSelectData.txt || '';
+        const taiwanText = taiwanSelectData.text || taiwanSelectData.txt || '';
+        const showForeign = visible === 1;
+        const showTaiwan = visible === 2;
+        const showNvbRslb = showForeign || showTaiwan;
+
+        return (
+            <div className="activity activityM container">
+                <div>
+                    <BtRcnb
+                        className={`m-smn r mbBtn ${!home ? 'active' : ''}`}
+                        whenClick={() => this.setState({ home: false })}
+                    >國外</BtRcnb>
+                    <BtRcnb
+                        className={`m-smn r mbBtn ${home ? 'active' : ''}`}
+                        whenClick={() => this.setState({ home: true })}
+                    >國內</BtRcnb>
+                </div>
+                {!home && (
+                    <Foreign
+                        outsideInputValue={foreignText}
+                        openPage={this.openPage}
+                        nvbRslbVisible={showNvbRslb}
+                        closePage={this.closePage}
+                        appSelectedData={foreignSelectData}
+                        onClickItem={this.onClickItem}
+                        handlePost={this.handlePost}
+                    />
+                )}
+                {home && (
+                    <Taiwan
+                        outsideInputValue={taiwanText}
+                        openPage={this.openPage}
+                        nvbRslbVisible={showNvbRslb}
+                        closePage={this.closePage}
+                        appSelectedData={taiwanSelectData}
+                        onClickItem={this.onClickItem}
+                        handlePost={this.handlePost}
+                    />
+                )}
+            </div>
+        );
+    }
 }
+
 export default Panel;

@@ -29,14 +29,19 @@ class Module extends Component {
             direction,
             ContentComponent,
             children,
+            zIndex,
+            bgColor,
+            noShadow
         } = this.props;
 
         let classes = cx('nvb_rslb', className, {
             active: visible,
+            nvb_rslb_noShadow: noShadow
         });
-
         let divStyle = {
             width,
+            zIndex,
+            backgroundColor: bgColor
         };
 
         return ReactDOM.createPortal(

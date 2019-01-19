@@ -3,6 +3,8 @@
 
 $className: 'flight_chinese';
 
+$dropdown-content-text-color: #222222;
+
 @mixin position($value) {
     display: flex;
     justify-content: $value;
@@ -12,29 +14,78 @@ $className: 'flight_chinese';
 $selected: #0077b3;
 
 .#{$className} {
+    &::placeholder {
+        color: $selected;
+    }
+    .doubleChangeStyle{
+        background-color: red;
+    }
     // 出發機場
     .st_rcln {
+        background-color: green;
+        cursor: pointer;
         .ic_rcln {
             color: #999;
         }
         .dropdown-place-holder {
-            font-weight: bold;
+            font-weight: normal;
             font-size: 16px;
             color: $selected;
+            border:solid 1px #bbb;
             .dropdown-label {
                 font-weight: normal;
                 font-size: 14px;
-                color: #999;
+                color: #222;
             }
             input {
                 width: 100%;
                 color: $selected;
+                background-color: transparent;
             }
             .cy_rcln {
                 color: black;
             }
             &.selected {
                 color: $selected;
+            }
+            &.breakline {
+                line-height: 27px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+            }
+        }
+    }
+    .cy_rcln {
+        .week_row,
+        .week {
+            color: #222;
+        }
+        .calendar_box {
+            .date {
+                font-size: 14px;
+                font-weight: normal;
+            }
+            .year_month .title {
+                margin-bottom: 10px;
+                font-weight: normal;
+            }
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+        .date {
+            height: 40px;
+        }
+        .week {
+            height: auto;
+            span {
+                font-size: 12px;
+            }
+        }
+        .date_box {
+            width: 40px;
+            .txt {
+                margin-top: 0;
             }
         }
     }
@@ -44,19 +95,22 @@ $selected: #0077b3;
         padding-left: 5px;
         color: #999;
     }
-    .int_rcln{
-        &.icon{
-            >i{
+    .int_rcln {
+
+        &.icon {
+            > i {
                 left: 0;
             }
         }
+        &.breakline * {
+            cursor: pointer;
+        }
     }
     .int_rcln_input {
+        border:solid 1px #bbb;
         color: $selected;
-        font-weight: bold;
-        &::-webkit-input-placeholder {
-            color: $selected;
-        }
+        
+        font-weight: normal;
     }
     .dpt {
         &:after {
@@ -66,41 +120,42 @@ $selected: #0077b3;
     }
     .bor-right {
         .int_rcln_input {
+           
             border-right: 1px solid #e3e3e3;
-        }
-    }
-    .peopleAndCabin {
-        .int_rcln_label {
-            font-size: 14px;
-        }
-        .int_rcln_input {
-            padding-top: 22px;
         }
     }
     .footer {
         button {
-            width: 100%;
-            margin-top: 80px;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 90px;
+            float: right;
+            margin-top: 24px;
         }
         .footerInfo {
             color: #1c9c9d;
-            margin: 10px 0;
+            margin: 10px 0 0;
             a {
                 text-decoration: none;
                 cursor: pointer;
             }
         }
-        @media (min-width: $screen-desktop) {
+    }
+    &.mobile {
+        .footer {
             button {
-                width: 90px;
-                float: right;
-                margin-top: 24px;
+                position: static;
+                width: 100%;
+                margin-top: 30px;
             }
         }
     }
     .st_rnls_descendant_content {
+        padding-top: 40px;
         padding-right: 30px;
         .st_rcln {
+            background-color: green;
             width: auto;
             .dropdown-place-holder {
                 color: $selected;
@@ -111,7 +166,7 @@ $selected: #0077b3;
             @include position(space-between);
         }
         .st_rnls_descendant_content_close {
-            font-size: 16px;
+            font-size: 28px;
         }
     }
     .cy_rcln {
@@ -123,23 +178,92 @@ $selected: #0077b3;
             z-index: 99;
         }
     }
-    .pcCalendarCont{
+    .pcCalendarCont {
         position: relative;
-        .cy_rcln{
+        .int_rcln_label{
+            color:#222;
+        }
+        input {
+            font-weight: bold;
+        }
+        .int_rcln_input {
+           
+            font-weight: normal;
+            position: relative;
+            background-color: transparent;
+        }
+        .content {
+            padding: 0 10px 10px 10px;
+            padding-top: 41px;
+            border: solid 1px #ddd;
+            background-color: #fff;
             position: absolute;
-            top: 26px;
+            top: 100%;
             left: 0;
             z-index: 5;
+            .cy_rcln  {
+                display: inline-flex;
+                position: relative;
+                padding: 0;
+                .calendar_box {
+                    border: solid 1px #e3e3e3;
+                    .title {
+                        color: #222;
+                    }
+                }
+            }
+            .close_btn {
+                position: absolute;
+                right: 0;
+                top: 1px;
+                z-index: 1;
+                background-color: transparent;
+                border: none;
+                font-weight: bold;
+                outline: none;
+                font-size: 28px;
+                padding: 0 8px;
+            }
         }
     }
-    .peopleAndCabin{
+    // 人數艙等
+    .peopleAndCabin {
         position: relative;
-        .st_rnls_descendant_content{
+        .int_rcln_label {
+            font-size: 14px;
+            color:#222
+        }
+        .int_rcln_input {
+            font-weight: normal;
+            padding-top: 22px;
+        }
+        .st_rnls_descendant_content {
             position: absolute;
             top: 49px;
             left: 0;
             width: 100% !important;
             z-index: 5;
+            .st_rcln {
+                background-color: green;
+                .dropdown-place-holder {
+                    display: flex;
+                    align-items: center;
+                    color: $dropdown-content-text-color;
+                    font-weight: normal;
+                }
+            }
+        }
+        .nvbrslbStyle__top input {
+            font-weight: normal !important;
+        }
+        .int_rcln_input {
+            font-weight: normal;
+            padding-top: 22px;
+            position: relative;
+            color:#0077b3;
+            background-color: transparent;
+            font-weight: normal;
         }
     }
+
 }

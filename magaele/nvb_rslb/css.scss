@@ -21,6 +21,9 @@ $resource-path: resource-path($classname);
 	top: 0;
     z-index: 10;
     // box-shadow: inset -1px 0px 1px #c2c1b9;
+    &.#{$classname}_noShadow {
+        box-shadow: none;
+    }
 	& + button[type="button"]{
 		width: 100%;
     	margin: auto;

@@ -1,0 +1,67 @@
+$className: 'peopleAndCabin';
+
+$option-color: #222222;
+$footer-text-color: #24a07d;
+$text-color: #0077b3;
+
+.#{$className} {
+    .int_rcln.breakline > .int_rcln_input {
+        padding-top: 22px;
+        color: $text-color;
+        font-weight: bold;
+    }
+    .nvbrslbStyle {
+        margin-top: 19px;
+        .int_gpct.xin > .minus,
+        .int_gpct.xin .add {
+            color: #999;
+        }
+        
+        &__top {
+            display: flex;
+            padding: 0 16px 12px 16px;
+            box-shadow: 0 1px 0 0;
+            input {
+                font-size: 16px;
+                color: $text-color;
+                font-weight: bold;
+                border: none;
+                display: flex;
+                align-items: center;
+                width: 100%;
+                padding: 0 10px;
+                border: 2px solid #ff8b88;
+                margin-right: 9px;
+            }
+        }
+        &__bottom {
+            &:before {
+                content: '';
+                display: block;
+                height: 10px;
+                width: 100%;
+                background-color: #f1f1f1;
+            }
+            &__content {
+                padding: 15px;
+                .dropdown-place-holder {
+                    display: flex;
+                    align-items: center;
+                    color: $option-color;
+                    &.selected {
+                        color: $option-color;
+                    }
+                }
+                .num-people {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 50%;
+                    margin-top: 15px;
+                }
+                .con-tooltip {
+                    color: $footer-text-color;
+                }
+            }
+        }
+    }
+}

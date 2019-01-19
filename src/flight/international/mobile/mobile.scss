@@ -7,10 +7,14 @@ $flight_theme_blue: #0077b3;
 $flight_tooltip: #1c9c9d;
 
 @mixin inputStyle {
+    .int_rcln_label{
+        color:#222;
+    }
     .int_rcln_input {
         border: none;
         color: $flight_theme_blue;
-        font-weight: bold;
+        font-weight: normal;
+
         padding-top: 23px;
     }
 
@@ -21,11 +25,15 @@ $flight_tooltip: #1c9c9d;
     .int_rcln .int_rcln_input:not(input):empty::before {
         height: auto;
         line-height: normal;
+        color: #aaa;
     }
 }
 
 $className: 'flight_international_mobile';
 
+.int_rcln .int_rcln_input:not(input):empty::before {
+    color: #999;
+}
 .#{$className} {
 
     // 單程、來回、多個目的地 menu
@@ -78,6 +86,11 @@ $className: 'flight_international_mobile';
         display: none;
     }
 
+    .int_rcln > .int_rcln_input {
+        position: relative;
+        background-color: transparent;
+    }
+
     .threeStyle {
         margin-top: 10px;
 
@@ -94,8 +107,8 @@ $className: 'flight_international_mobile';
             height: 30px;
             border-radius: 3px;
             background-color: #fff;
-            color: #666;
-            border: 1px solid #ddd;
+            color: #ff615d;
+            border: 1px solid #ff615d;
             padding: 0;
             margin: 10px 10px 0 10px;
         }
@@ -116,8 +129,16 @@ $className: 'flight_international_mobile';
         display: flex;
         align-items: center;
         margin: 10px 0;
-        border: 1px solid #ddd;
-
+        border: 1px solid #bbb;
+        .int_rcln.breakline{
+            .int_rcln_input{
+                font-weight:normal;
+            }
+            .int_rcln_label{
+                color:#222;
+                left: 6px;
+            }
+        }
         .changeBtn {
             width: 12px;
             height: 50px;
@@ -132,8 +153,9 @@ $className: 'flight_international_mobile';
 
 
     .singleCalendar {
-        border: 1px solid #ddd;
+        border: 1px solid #bbb;
         @include inputStyle;
+
     }
 
     .doubleCalendar {
@@ -175,8 +197,8 @@ $className: 'flight_international_mobile';
         .int_rcln_input {
             border: none;
             color: $flight_theme_blue;
-            font-weight: bold;
-            padding-top: 23px;
+            font-weight: normal;
+            padding-top: 23x;
 
             &[data-placeholder] {
                 background-color: #ddd !important;
@@ -192,6 +214,17 @@ $className: 'flight_international_mobile';
                 margin-left: 22px;
             }
         }
+        .cr_rcln{
+            .indicator{
+                border:solid 1px #bbb;
+            }
+        }
+    }
+
+    .MoreOptionThreeRtow {
+        .searchMoreTop, .flightTransfer {
+            flex: 1;
+        }
     }
 
     .openMoreOptions {
@@ -202,6 +235,11 @@ $className: 'flight_international_mobile';
         .clp_rcdp_content {
             padding: 10px;
             background-color: #f1f1f1;
+            .cr_rcln{
+                .indicator{
+                    border:solid 1px #bbb;
+                }
+            }
         }
 
         .searchMoreTop {
@@ -233,12 +271,13 @@ $className: 'flight_international_mobile';
 
     .submitBtn {
         border-radius: 5px;
-        margin-top: 10px;
+        margin-top: 30px;
         width: 100%;
     }
 
     &.peopleCabinStyle {
         .dropdown-place-holder {
+            
             display: flex;
             align-items: center;
             font-size: 14px;
@@ -254,16 +293,70 @@ $className: 'flight_international_mobile';
 
     .flightTransfer {
         @include inputStyle;
+        background-color: #fff;
+       
     }
 
     .aviation {
         .dropdown-place-holder.breakline {
             padding: 8px 8px 0 8px;
-            font-weight: bold;
-
+            font-weight: normal;
+            border:solid 1px #bbb;
             span {
+                color:#222;
                 font-weight: normal;
             }
         }
+    }
+}
+
+// 目的地M 側開
+.flight_m_place{
+    .SingleInputMenu.flights-m{
+
+        .dtm_rcfr .panel:last-child .sec_content > .item{
+            width: 50%;
+        }
+        .dtm_rcfr-row{
+            .bt_rcnb {
+                min-width: 50px;
+            }
+        }
+        .int-tags-single{
+            .clearBtn{
+                right: 0;
+                bottom: 0;
+            }
+        }
+        .act_racp{
+            margin:0;
+            margin-top:10px;
+            padding-right:16px;
+        }
+        .int_rcln_input{
+            font-weight: normal;
+        }
+    }
+}
+
+
+//月曆M 側開
+.flight_m_calendar{
+    .confirm_btn span{
+        display: none;
+    }
+}
+.peopleAndCabin{
+    .int_rcln.breakline{
+        .int_rcln_input{
+            border:solid 1px #bbb;
+            font-weight:normal !important;
+        }
+        .int_rcln_label{
+            color:#222;
+        }
+    }
+    .nvbrslbStyle__top input {
+        font-weight: normal !important;
     }
 }

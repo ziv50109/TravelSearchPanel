@@ -36,7 +36,7 @@ const actRacpChangeKey = (data) => {
 //     return (
 //         <p className="dtm_rcfr-selected" onClick={removeData}>
 //             <span>{text}</span>
-//             <i><svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg></i>
+//             <i><svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg></i>
 //         </p>
 //     );
 // };
@@ -298,7 +298,7 @@ class SingleInputMenu extends Component {
                                     className="dtm_rcfr-close_btn"
                                     onClick={this.handleCloseMenu}
                                 >
-                                    <svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg>
+                                    <svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg>
                                 </span>
                                 <DtmRcfr
                                     levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}

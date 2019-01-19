@@ -15,7 +15,7 @@ const DoublePlace = (props) => {
                     value={props.value1}
                     onClick={props.nvbOpen1}
                     label="出發地"
-                    placeholder="請輸入國家 / 城市 / 機場"
+                    placeholder="城市/國家/機場"
                     breakline
                     readOnly
                 />
@@ -25,13 +25,13 @@ const DoublePlace = (props) => {
                     value={props.value2}
                     onClick={props.nvbOpen2}
                     label="目的地"
-                    placeholder="請輸入國家 / 城市 / 機場"
+                    placeholder="城市/國家/機場"
                     breakline
                     readOnly
                 />
             </div>
             <NvbRslb
-                className="panel-nvb_rslb"
+                className="panel-nvb_rslb flight_m_place"
                 visible={props.visible1}
                 direction="right"
             >
@@ -48,7 +48,7 @@ const DoublePlace = (props) => {
                         iconName={'toolmap'}
                         fetchPath={fetchPath}
                         selectedData={props.selectDate1}
-                        placeholder="請輸入國家/城市/機場"
+                        placeholder="城市/國家/機場"
                         minimumStringQueryLength={2}
                         minimumStringQuery="請輸入至少兩個文字"
                         noMatchText="很抱歉，找不到符合的項目"
@@ -58,7 +58,7 @@ const DoublePlace = (props) => {
                 }
             </NvbRslb>
             <NvbRslb
-                className="panel-nvb_rslb"
+                className="panel-nvb_rslb flight_m_place"
                 visible={props.visible2}
                 direction="right"
             >
@@ -71,11 +71,11 @@ const DoublePlace = (props) => {
                         className="SingleInputMenu"
                         isRequired
                         size="lg"
-                        label={'出發地'}
+                        label={'目的地'}
                         iconName={'toolmap'}
                         fetchPath={fetchPath}
                         selectedData={props.selectDate2}
-                        placeholder="請輸入國家/城市/機場"
+                        placeholder="城市/國家/機場"
                         minimumStringQueryLength={2}
                         minimumStringQuery="請輸入至少兩個文字"
                         noMatchText="很抱歉，找不到符合的項目"

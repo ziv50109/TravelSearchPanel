@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
-import { fetchJsToObj } from '../../../utils';
+import { addDate, fetchJsToObj, isJsonString } from '../../../utils';
 import { themeTravel } from '../../../source.config';
 
 import NvbRslb from '../../../magaele/nvb_rslb';    // M版滑出
@@ -9,8 +9,8 @@ import IcRcln from '../../../magaele/ic_rcln';      // icon
 import BtRcnb from '../../../magaele/bt_rcnb';      // button
 import IntRcln from '../../../magaele/int_rcln';    // input
 import CrRcln from '../../../magaele/cr_rcln';      // checkbox
-import PpRcln from '../../../magaele/pp_rcln';      // popup
 import CyRcmn from '../../../magaele/cy_rcmn';
+import LbxRcln from '../../component/LbxRcln';
 
 import WrapperDtmRcln from '../component/WrapperDtmRcln_m.js';      // 目的地
 // import ComposeCalendar from '../component/ComposeCalendar';      // 日曆
@@ -24,11 +24,11 @@ import '../css.scss';
 // [ popup ]
 const ContentComponent = (props) => {
     return (
-        <div className="popup">
-            <p>本公司「已成團」之旅遊團體，係指報名參團人數已達出團標準，但團體出發前若遇有以下情事，將依國外（內）團體旅遊定型化契約書取消出團：</p>
+        <div className={`themeTravel-pp_rcln-popup ${props.className}`}>
+            <p>本公司「成團」之旅遊團體，係指報名參團人數已達出團標準，但團體出發前若遇有以下情事，將依國外（內）團體旅遊定型化契約書取消出團：</p>
             <ul>
                 <li><span>一、</span><p>不可抗力、不可歸責於雙方當事人之事由，如颱 風、海嘯、地震、洪災等不可抗力之天然災害；或罷工、戰亂抗爭、官方封閉旅遊地區、重大疫情等不可歸責之人為因素。</p></li>
-                <li><span>二、</span><p>「已成團」之旅遊團體所遊覽地區或國家，經外交部領事事務局或交通部觀光局或其他官方單位列為橙色警示、或紅色警示。</p></li>
+                <li><span>二、</span><p>「成團」之旅遊團體所遊覽地區或國家，經外交部領事事務局或交通部觀光局或其他官方單位列為橙色警示、或紅色警示。</p></li>
             </ul>
         </div>
     );
@@ -47,46 +47,94 @@ const NvbGoBack = ({ onClick }) => (
 class Panel extends Component {
     constructor (props) {
         super(props);
+        this.WrapperDtmRclnMax = 3;
+        this.fetchPath = themeTravel.place;
+        this.date = new Date();
+        this.year = this.date.getFullYear();
+        this.month = this.date.getMonth() + 1;
+        this.day = this.date.getDate();
+        this.today = `${this.year}-${this.month}-${this.day}`;
+        this.defaultStartDate = `${addDate(this.today, 15)[1]}-${addDate(this.today, 15)[2]}-${addDate(this.today, 15)[3]}`;
+        this.defaultEndtDate = `${addDate(this.today, 30)[1]}-${addDate(this.today, 30)[2]}-${addDate(this.today, 30)[3]}`;
+
         this.state = {
+            data: {},
             ThemeID: '',
             DepartureID: '',
-            wrapperDtmRcln: [],
-            CyRcln1: [],
+            destination: [],
+            CyRcln1: [this.defaultStartDate, this.defaultEndtDate],
             Days: '',
             Keywords: '',
             IsEnsureGroup: false,
             IsSold: false,
-            activeInput: 0,
+            activeInput: null,
+            themeOptions: [],
+            option1: [],
+            // option2: [
+            //     { text: '不限', value: '' },
+            //     { text: '1日', value: 1 },
+            //     { text: '2日', value: 2 },
+            //     { text: '3日', value: 3 },
+            //     { text: '4日', value: 4 },
+            //     { text: '5日', value: 5 },
+            //     { text: '6日', value: 6 },
+            //     { text: '7日', value: 7 },
+            //     { text: '8日', value: 8 },
+            //     { text: '9日', value: 9 },
+            //     { text: '10日及以上', value: 10 }
+            // ]
+            option2: [
+                { text: '不限', value: '' },
+                { text: '1~5天', value: '1,2,3,4,5' },
+                { text: '6~10天', value: '6,7,8,9,10' },
+                { text: '10天以上', value: '10' }
+            ],
+            lbxRclnisOpen: false
         };
-        this.WrapperDtmRclnMax = 3;
-        this.fetchPath = themeTravel.place;
-        this.themeOptions = [];
-        this.option1 = [];
-        this.option2 = [
-            { text: '不限', value: '' },
-            { text: '1日', value: 1 },
-            { text: '2日', value: 2 },
-            { text: '3日', value: 3 },
-            { text: '4日', value: 4 },
-            { text: '5日', value: 5 },
-            { text: '6日', value: 6 },
-            { text: '7日', value: 7 },
-            { text: '8日', value: 8 },
-            { text: '9日', value: 9 },
-            { text: '10日及以上', value: 10 }
-        ];
     }
     componentDidMount () {
-        fetchJsToObj(this.fetchPath, (d) => {
-            this.themeOptions = this.objToOption(d.vPsubject);
-            this.option1 = this.objToOption(d.vCity);
-            this.forceUpdate();
-        });
+        console.log(this.state.inputIsBlur);
+        const sessionData = sessionStorage.getItem(this.fetchPath);
+        if (sessionData && isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            this.setState({
+                data: jsonData,
+                themeOptions: this.objToOption(jsonData.vPsubject),
+                option1: this.objToOption(jsonData.vCity)
+            });
+        } else {
+            fetchJsToObj(this.fetchPath, (d) => {
+                let stringifyData = JSON.stringify(d);
+                this.setState({
+                    data: d,
+                    themeOptions: this.objToOption(d.vPsubject),
+                    option1: this.objToOption(d.vCity)
+                });
+                sessionStorage.setItem(this.fetchPath, stringifyData);
+            });
+        }
+
+        // useLocalStorage({
+        //     panel: 'themeTravel',
+        //     methods: 'get',
+        // }, (data) => {
+        //     this.localStorageDataToState(data);
+        // });
     }
 
     shouldComponentUpdate (nextProps, nextState) {
         return this.state !== nextState;
     }
+
+    // localStorageDataToState = (data) => {
+    //     let newData = { ...data };
+    //     if (new Date(data.CyRcln1[0]).getTime() < this.date.getTime()) {
+    //         newData.CyRcln1 = [this.defaultStartDate, this.defaultEndtDate];
+    //         newData.GoDateStart = this.defaultStartDate;
+    //         newData.GoDateEnd = this.defaultEndtDate;
+    //     }
+    //     this.setState({ ...newData });
+    // }
 
     objToOption = (obj) => {
         let arr = [];
@@ -102,8 +150,37 @@ class Panel extends Component {
     };
 
     handleSubmit = () => {
+        // const {
+        //     ThemeID,
+        //     DepartureID,
+        //     destination,
+        //     CyRcln1,
+        //     Days,
+        //     Keywords,
+        //     IsEnsureGroup,
+        //     IsSold
+        // } = this.state;
+        // const GoDateStart = CyRcln1[0];
+        // const GoDateEnd = CyRcln1[1];
+
         this.validate((boolean, warnings) => {
             if (boolean) {
+                // useLocalStorage({
+                //     panel: 'themeTravel',
+                //     methods: 'post',
+                //     data: {
+                //         ThemeID,
+                //         DepartureID,
+                //         destination,
+                //         GoDateStart,
+                //         GoDateEnd,
+                //         CyRcln1,
+                //         Days,
+                //         Keywords,
+                //         IsEnsureGroup,
+                //         IsSold
+                //     }
+                // });
                 window.open('https://travel.liontravel.com/search?' + this.filterAllState(), this.props.hrefTarget);
                 console.log('網址列參數===', this.filterAllState());
             } else {
@@ -115,13 +192,13 @@ class Panel extends Component {
     // cbfn = callback function. return 驗證結果[boolean] & 警告文字[array]
     validate = (cbfn) => {
         const {
-            wrapperDtmRcln,
+            destination,
             CyRcln1,
             GoDateStart,
             GoDateEnd
         } = this.state;
         let warningText = [];
-        if (wrapperDtmRcln.length < 1) {
+        if (destination.length < 1) {
             warningText.push('請輸入 / 選擇目的地');
         }
         if (CyRcln1.length < 2) {
@@ -135,7 +212,7 @@ class Panel extends Component {
         const {
             ThemeID,
             DepartureID,
-            wrapperDtmRcln,
+            destination,
             CyRcln1,
             Days,
             Keywords,
@@ -143,7 +220,7 @@ class Panel extends Component {
             IsSold,
         } = this.state;
         // 目的地
-        const ArriveID = wrapperDtmRcln.map(item => {
+        const ArriveID = destination.map(item => {
             // 第一層
             if (item.vLinewebarea === '_' && item.vLinetravel === '_') {
                 return `-${item.vLine.split('_').join('-')},`;
@@ -155,12 +232,14 @@ class Panel extends Component {
                 return `${item.vLinewebarea.match(/^.(.*)$/)[1]}${item.vLinetravel.split('_').join('-')},`;
             }
         });
+        const _ThemeID = ThemeID.split('_').join('');
+        const _DepartureID = DepartureID.split('_').join('');
 
-        const ArriveTEXT = wrapperDtmRcln.map(item => {
+        const ArriveTEXT = destination.map(item => {
             return `${item.text}-${item.vLinetravelText}`;
         });
 
-        return `Country=TW&WebCode=B2C&TravelType=0&Page=1&PageSize=20&ThemeID=${ThemeID}&DepartureID=${DepartureID}&GoDateStart=${CyRcln1[0]}&GoDateEnd=${CyRcln1[1]}&Days=${Days}&IsEnsureGroup=${IsEnsureGroup}&IsSold=${IsSold}&Keywords=${Keywords}&ArriveID=${ArriveID.join('')}&ArriveTEXT=${ArriveTEXT}`;
+        return `Country=TW&WebCode=B2C&TravelType=0&Page=1&PageSize=20&ThemeID=${_ThemeID}&DepartureID=${_DepartureID}&GoDateStart=${CyRcln1[0]}&GoDateEnd=${CyRcln1[1]}&Days=${Days}&IsEnsureGroup=${IsEnsureGroup}&IsSold=${IsSold}&Keywords=${Keywords}&ArriveID=${ArriveID.join('')}&ArriveTEXT=${ArriveTEXT}`;
     }
 
     handleOpenPage = (value) => {
@@ -170,25 +249,44 @@ class Panel extends Component {
     }
     handleClosePage = () => {
         this.setState({
-            activeInput: 0,
+            activeInput: null,
         });
     }
 
     submitBtn () {
         console.log('click');
     }
+    handleMultipleClick = (el) => {
+        if (el.current != null) {
+            el.current.blur();
+        }
+    }
+    toggleLbxRcln = () => {
+        this.setState((prevState) => ({ lbxRclnisOpen: !prevState.lbxRclnisOpen }));
+    }
     render () {
         const {
-            wrapperDtmRcln,
+            data,
             activeInput,
-            CyRcln1
+            ThemeID,
+            DepartureID,
+            destination,
+            CyRcln1,
+            Days,
+            Keywords,
+            IsEnsureGroup,
+            IsSold,
+            themeOptions,
+            option1,
+            option2,
+            lbxRclnisOpen
         } = this.state;
 
-        const showCalendarPage = activeInput === 2;
-        const showDestinationPage = activeInput === 1;
+        const showCalendarPage = activeInput === 0 || activeInput === 1;
+        const showDestinationPage = activeInput === 2;
         const pageVisible = showCalendarPage || showDestinationPage;
 
-        const query = wrapperDtmRcln.map(item => {
+        const query = destination.map(item => {
             let text = '';
             if (item.vLinewebarea === '_') {
                 text = item.txt || item.text;
@@ -199,112 +297,120 @@ class Panel extends Component {
         });
         return (
 
-            <div className="themeTravel">
+            <div className="themeTravel mobile">
 
                 <StRcln
-                    option={this.themeOptions}
+                    option={themeOptions}
                     placeholder="請選擇"
                     label="旅遊主題"
                     icon={<IcRcln name="productrefer" />}
-                    defaultValue={'_'}
+                    defaultValue={ThemeID || '_'}
                     ClassName="strcln_custom m-b-sm"
                     req
                     breakline
-                    onChangeCallBack={(e) => this.setState({ ThemeID: e.split('_').join('') })}
+                    onChangeCallBack={(e) => this.setState({ ThemeID: e })}
                 />
 
                 <StRcln
-                    option={this.option1}
+                    option={option1}
                     placeholder="請選擇"
                     label="出發地"
                     icon={<IcRcln name="toolmap" />}
-                    defaultValue={'_'}
+                    defaultValue={DepartureID || '_'}
                     ClassName="strcln_custom m-b-sm"
                     req
                     breakline
-                    onChangeCallBack={(e) => this.setState({ DepartureID: e.split('_').join('') })}
+                    onChangeCallBack={(e) => this.setState({ DepartureID: e })}
                 />
 
                 <Label
                     isRequired
                     label="目的地"
                     iconName="toolmap"
+                    onClick={() => this.handleOpenPage(2)}
                     subComponent={
-                        <div onClick={() => this.handleOpenPage(1)}>
+                        <div className="m-dtm_wrap" onClick={() => this.handleOpenPage(2)}>
                             <Multiple
                                 maxLength={this.WrapperDtmRclnMax}
-                                placeholder={'請選擇/可輸入目的地、景點關鍵字'}
+                                placeholder={!destination.length ? '請選擇/可輸入目的地、景點' : ''}
                                 query={query}
+                                onClick={this.handleMultipleClick}
                             />
                         </div>
                     }
                 />
 
-                <div className="input_group calendar_compose" onClick={() => this.handleOpenPage(2)}>
+                <div className="input_group calendar_compose">
                     <IntRcln
                         request
                         readOnly
                         placeholder="YYYY/MM/DD"
                         label="出發日期"
                         icon={<IcRcln name="tooldate" />}
+                        onClick={() => this.handleOpenPage(0)}
                         value={CyRcln1[0] && CyRcln1[0].replace(/\-/g, '/')}
                     />
                     <span className="cal_icon">~</span>
                     <IntRcln
                         readOnly
                         placeholder="YYYY/MM/DD"
+                        onClick={() => this.handleOpenPage(1)}
                         value={CyRcln1[1] && CyRcln1[1].replace(/\-/g, '/')}
                     />
                 </div>
 
                 <StRcln
-                    option={this.option2}
+                    option={option2}
                     placeholder="請選擇"
                     label="旅遊天數"
                     icon={<IcRcln name="tooldate" />}
-                    defaultValue={''}
+                    defaultValue={Days || ''}
                     ClassName="strcln_custom m-b-sm"
                     breakline
                     onChangeCallBack={(e) => this.setState({ Days: e })}
                 />
-
-                <IntRcln
-                    placeholder="可輸入團號"
-                    label="產品名稱/關鍵字"
-                    className="m-b-sm"
-                    breakline
-                    onChange={(e, data) => {
-                        this.setState({ Keywords: data });
-                    }}
-                    onClearValue={(inputDOM) => {
-                        inputDOM.value = '';
-                        this.setState({ Keywords: '' }); // 用 setState 去清除
-                    }}
-                />
+                <div className="intRclnWrap">
+                    <IntRcln
+                        placeholder="可輸入團號"
+                        label="產品名/關鍵字"
+                        className="m-b-sm"
+                        value={Keywords}
+                        breakline
+                        onChange={(e, data) => {
+                            this.setState({ Keywords: data });
+                        }}
+                        onClearValue={(inputDOM) => {
+                            inputDOM.value = '';
+                            this.setState({ Keywords: '' }); // 用 setState 去清除
+                        }}
+                    />
+                </div>
 
                 <CrRcln
                     type="checkbox"
-                    textContent="只找保證出團"
+                    textContent="只找成團"
                     className="d-ib"
+                    checked={IsEnsureGroup}
                     whenChange={(e) => this.setState({ IsEnsureGroup: e })}
                 />
-                <PpRcln
-                    CustomComponent={<IcRcln name="toolif" className="md-fz-smd" />}
-                    ContentComponent={<ContentComponent />}
-                    moduleClassName="PpRcln1 m-l-xs lightgray"
-                    events={['click']}
-                    width="360px"
-                    position={['bottom', 'horizon_center']}
+                <IcRcln
+                    name="toolif"
+                    size="x1"
+                    className="pp_rcln m-l-xs m-r-md"
+                    onClick={this.toggleLbxRcln}
                 />
-
+                <LbxRcln open={lbxRclnisOpen} closeLbxRcln={this.toggleLbxRcln}>
+                    <ContentComponent className="lbx_wrap" />
+                </LbxRcln>
                 <CrRcln
                     type="checkbox"
                     textContent="只找可報名團體"
                     className="d-ib m-l-xl"
+                    checked={IsSold}
                     whenChange={(e) => this.setState({ IsSold: e })}
                 />
 
-                <BtRcnb prop="string" className="h-sm fluid m-t-80" whenClick={this.handleSubmit} md radius>搜尋</BtRcnb>
+                <BtRcnb prop="string" className="h-sm fluid m-t-30" whenClick={this.handleSubmit} md radius>搜尋</BtRcnb>
 
                 <NvbRslb
                     className="themeTravel-nvb"
@@ -315,34 +421,39 @@ class Panel extends Component {
                     {
                         showDestinationPage &&
                             <WrapperDtmRcln
+                                travelDataSource={data}
                                 fetchPath={this.fetchPath}
-                                selectedData={wrapperDtmRcln}
+                                selectedData={destination}
                                 max={this.WrapperDtmRclnMax}
                                 // int rcln
-                                placeholder="請選擇/可輸入目的地、景點關鍵字"
+                                placeholder="請選擇/可輸入目的地、景點"
                                 // act racp
                                 minimumStringQueryLength={2}            // 最少輸入幾個字
                                 minimumStringQuery="請輸入至少兩個文字"  // 尚未輸入文字字數到達要求會顯示此字串
                                 noMatchText="很抱歉，找不到符合的項目"   // 當沒有配對資料時顯示那些文字
                                 // dtm rcln
-                                sublabel="找不到選項？請輸入關鍵字查詢"
-                                parentData={wrapperDtmRcln}
+                                sublabel="找不到選項?請輸入關鍵字查詢 / 最多可選擇3則目的地"
+                                parentData={destination}
                                 emitPushData={(array) => {
                                     this.setState({
-                                        wrapperDtmRcln: array,
-                                        activeInput: 0
+                                        destination: array,
+                                        activeInput: null
                                     });
                                 }}
                             />
                     }
                     {
                         showCalendarPage &&
+                        <div className="themeTravel-cyRcmnWrap">
                             <CyRcmn
                                 doubleChoose
                                 selectedStartDate={CyRcln1[0]}
                                 selectedEndDate={CyRcln1[1]}
                                 startLabelTitle="最早出發日"
                                 endLabelTitle="最晚出發日"
+                                startTxt="最早"
+                                endTxt="最晚"
+                                activeInput={activeInput}
                                 endMonth={dayjs().add(3, 'years').format('YYYY-MM')}
                                 endDate={dayjs().add(3, 'years').format('YYYY-MM-DD')}
                                 ref={e => { this.calendar = e }}
@@ -353,7 +464,7 @@ class Panel extends Component {
                                     } = this.calendar.state;
                                     this.setState({
                                         CyRcln1: [selectedStartDate, selectedEndDate],
-                                        activeInput: 0
+                                        activeInput: null
                                     });
                                 }}
                                 customDiffTxt={diffDate => {
@@ -361,6 +472,7 @@ class Panel extends Component {
                                     return '共' + showTxt + '天';
                                 }}
                             />
+                        </div>
                     }
                 </NvbRslb>
             </div>

@@ -21,11 +21,15 @@ function onSubmit (panelState) {
     } = panelState;
 
     if (!FromDate.length) {
-        return alert('請輸入出發時間');
+        return alert('請輸入出發日期');
     }
 
     if (!ToDate.length) {
-        return alert('請輸入回程時間');
+        return alert('請輸入回程日期');
+    }
+
+    if (new Date(FromDate) > new Date(ToDate)) {
+        return alert('出發日起日需小於迄日');
     }
 
     if (!(Destination.length || Keywords.length)) {

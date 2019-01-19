@@ -165,24 +165,36 @@ class Module extends Component {
         const data = dataMap[dataResouce];
         // 如果沒有data就發fetch
         if (typeof data === 'undefined') {
-            fetch(dataResouce)
-                .then(r => {
-                    const contentType = r.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        return r.json();
-                    } else if (contentType && contentType.includes('application/javascript')) {
-                        return r.text();
-                    } else {
-                        throw new TypeError('Response from "' + dataResouce + '" has unexpected "content-type"');
-                    }
-                })
-                .then(d => {
-                    let data = d;
-                    if (typeof transformFetchData === 'function') data = transformFetchData(d);
-                    dataMap[dataResouce] = data;
-                    this.dataSource = data;
-                    this.forceUpdate();
-                });
+            if (typeof dataResouce === 'string') {
+                fetch(dataResouce)
+                    .then(r => {
+                        const contentType = r.headers.get('content-type');
+                        if (contentType && contentType.indexOf('json') !== -1) {
+                            return r.json();
+                        } else if (contentType && contentType.indexOf('javascript') !== -1) {
+                            return r.text();
+                        } else {
+                            throw new TypeError('Response from "' + dataResouce + '" has unexpected "content-type"');
+                        }
+                    })
+                    .then(d => {
+                        let newD;
+                        if (d[0] === '{') {
+                            newD = typeof d === 'string' ? JSON.parse(d) : d;
+                        } else {
+                            newD = d;
+                        }
+
+                        let data = newD;
+                        if (typeof transformFetchData === 'function') data = transformFetchData(newD);
+                        dataMap[dataResouce] = data;
+                        this.dataSource = data;
+                        this.forceUpdate();
+                    });
+            } else {
+                this.dataSource = dataResouce;
+                this.forceUpdate();
+            }
         } else {
             this.dataSource = data;
             this.forceUpdate();

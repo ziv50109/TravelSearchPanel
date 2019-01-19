@@ -13,13 +13,17 @@ import SingleCalendar from '../components/singleCalendar';
 import DoubleCalendar from '../components/doubleCalendar';
 import FlightTransfer from '../components/flightTransfer';
 import PeopleNumAdd from '../components/peopleNumAdd';
+import { useLocalStorage } from '../../../../../utils';
+
+
+import InternationalNvb from '../../component/InternationalNvb';
 
 class International extends Component {
     constructor (props) {
         super(props);
         this.state = {
             // 月曆
-            selectedStartDate: '', // 去程
+            selectedStartDate: today().format('YYYY-MM-DD'), // 去程
             selectedEndDate: '',   // 回程
             showCalendar: false,
             activeInput: null,
@@ -70,8 +74,47 @@ class International extends Component {
     }
 
     componentDidMount () {
-        const { multiItems } = this.state;
-        this.props.setDepDateItems('multiItems', multiItems);
+        // const { multiItems } = this.state;
+        // this.props.setDepDateItems('multiItems', multiItems);
+        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
+        useLocalStorage(
+            {
+                panel: 'internationalFlight',
+                methods: 'get'
+            },
+            ({ depdate1, depdate2, departure, destination, mobmultiItems, mobmultiItemsDpt, mobmultiItemsDtn, multDptTxt, multDtnTxt, dptSelectDate, dtnSelectDate }) => {
+                let nowday = today().format('YYYY-MM-DD');
+                let depDate = depdate1 && depdate1 >= nowday ? depdate1 : nowday;
+                let dtnDate = depdate2 ? (depdate2 >= nowday ? depdate2 : nowday) : '';
+                let multDate = mobmultiItems ? (mobmultiItems >= nowday ? mobmultiItems : nowday) : '';
+                let dptPlace = departure ? departure : [];
+                let dtnPlace = destination ? destination : [];
+                let multDpt = mobmultiItemsDpt ? mobmultiItemsDpt : [];
+                let multDtn = mobmultiItemsDtn ? mobmultiItemsDtn : [];
+                clone[0].selectDate1 = multDpt;
+                clone[0].selectDate2 = multDtn;
+                clone[0].dptSelectDate = multDptTxt;
+                clone[0].dtnSelectDate = multDtnTxt;
+                clone[0].selectedStartDate = multDate;
+                this.setState(
+                    {
+                        selectedStartDate: depDate,
+                        selectedEndDate: dtnDate,
+                        selectDate1: dptPlace,
+                        selectDate2: dtnPlace,
+                        dptSelectDate: dptSelectDate ? dptSelectDate : [],
+                        dtnSelectDate: dtnSelectDate ? dtnSelectDate : [],
+                        multiItems: clone,
+                    }
+                );
+                this.props.setPlace('dptSelectDate', dptSelectDate);
+                this.props.setPlace('dtnSelectDate', dtnSelectDate);
+                this.props.setPlace('departure', dptPlace);
+                this.props.setPlace('destination', dtnPlace);
+                this.props.setDepDateItems('multiItems', clone);
+
+            }
+        );
     }
 
     // 雙月曆
@@ -121,7 +164,7 @@ class International extends Component {
                 maxDate = compareVal;
             }
         }
-        return maxDate; // 跟陣列比大小
+        return maxDate; // 回傳最大日期
     }
 
     // 增加
@@ -137,7 +180,8 @@ class International extends Component {
             arr.push({
                 id: newId,
                 startDate: maxDate,
-                selectedStartDate: maxDate,
+                // selectedStartDate: maxDate,
+                selectedStartDate: '',
                 showCalendar: false,
 
                 nvbOpen1: false,
@@ -168,7 +212,30 @@ class International extends Component {
         if (this.props.setDepDateItems) {
             this.props.setDepDateItems('multiItems', newArr);
         }
-        this.setState({ multiItems: newArr });
+        this.setState({ multiItems: newArr }, this.restMulti);
+    }
+
+    // 減少按鈕點下時 陣列重新整理
+    restMulti () {
+        const { multiItems, selectedStartDate } = this.state;
+        console.log(multiItems);
+        for (let i = 0; i < multiItems.length; i++) {
+            if (typeof multiItems[i - 1] === 'undefined') {
+                if (selectedStartDate !== '') {
+                    multiItems[i].startDate = selectedStartDate;
+                } else {
+                    multiItems[i].startDate = today().format('YYYY-MM-DD');
+                }
+            } else {
+                if (multiItems[i - 1].startInputValue !== '') {
+                    multiItems[i].startDate = multiItems[i - 1].selectedStartDate;
+                    multiItems[i].activeStart = multiItems[i - 1].selectedStartDate.substr(0, 7);
+                } else {
+                    multiItems[i].startDate = multiItems[i - 1].startDate;
+                    multiItems[i].activeStart = multiItems[i - 1].startDate.substr(0, 7);
+                }
+            }
+        }
     }
 
     // 轉換格式
@@ -189,7 +256,9 @@ class International extends Component {
 
         arr.forEach(ele => {
             ele.startDate = selectedStartDate;
-            ele.selectedStartDate = this.compare(selectedStartDate);
+            if (ele.selectedStartDate !== '') {
+                ele.selectedStartDate = this.compare(selectedStartDate);
+            }
         });
 
         this.setState({
@@ -243,6 +312,7 @@ class International extends Component {
     }
 
     updateState = (key, val, nowId) => {
+        console.log('key', key, 'val', val);
         const { multiItems } = this.state;
         if (typeof nowId === 'undefined') { // 假如有傳 id 就更新 陣列
             this.setState({ [key]: val });
@@ -268,8 +338,10 @@ class International extends Component {
         if (typeof nowId === 'undefined') {
             if (selectKey === 'selectDate1') {
                 this.props.setPlace('departure', arr);
+                this.props.setPlace('dptSelectDate', keyword);
             } else if (selectKey === 'selectDate2') {
                 this.props.setPlace('destination', arr);
+                this.props.setPlace('dtnSelectDate', keyword);
             }
             this.setState({
                 [datakey]: arr.length ? keyword : '',
@@ -291,7 +363,16 @@ class International extends Component {
 
         const text1 = dtnSelectDate;
         const text2 = dptSelectDate;
-
+        if (obj2.length !== 0) {
+            if (typeof obj2[0].value !== 'undefined') {
+                obj2[0].value = '__';
+            }
+        }
+        if (obj1.length !== 0) {
+            if (typeof obj1[0].value !== 'undefined') {
+                obj1[0].value = '__';
+            }
+        }
         this.props.setPlace('departure', obj1);
         this.props.setPlace('destination', obj2);
 
@@ -350,6 +431,7 @@ class International extends Component {
         const isShow = rtow === 3 ? ' show' : ' hide';
         const doubleisShow = rtow === 1 ? 'show' : 'hide';
         const singleisShow = rtow === 0 || rtow === 3 ? 'show' : 'hide';
+        const moreOptionsStyle = rtow === 3 ? ' MoreOptionThreeRtow' : '';
 
         return (
             <React.Fragment>
@@ -379,7 +461,7 @@ class International extends Component {
                     {/* 去程日期 */}
                     <div className={singleisShow}>
                         <SingleCalendar
-                            customClass={'singleCalendar'}
+                            customClass={'singleCalendar m-b-sm'}
                             dateVal={selectedStartDate}
                             visible={showCalendar}
                             calendarRef={e => { this.calendar = e }}
@@ -471,7 +553,7 @@ class International extends Component {
                     </div>
                 )}
 
-                {/* 人數 / 艙等 */}
+                {/* 人數 / 艙等
                 <StRnls
                     CustomComponent={
                         <IntRcln
@@ -513,6 +595,16 @@ class International extends Component {
                     appendToBody
                     width="100%"
                     innerComponentClass={['outClass']}
+                /> */}
+
+                <InternationalNvb
+                    customClass={'peopleAndCabin m-t-sm'}
+                    title={'人數 / 艙等'}
+                    clstypeLevel={this.props.clstype} // 艙等
+                    adult={this.props.adt} // 大人
+                    child={this.props.chd} // 小孩
+                    baby={this.props.inf} // 嬰兒
+                    confirm={this.props.peopleConfirm} // 確認送出
                 />
 
                 {/* 直飛、只有找機位 */}
@@ -525,8 +617,9 @@ class International extends Component {
                     <CrRcln
                         className="checkBoxMagin"
                         type="checkbox"
-                        textContent="只找有機位"
+                        textContent="只想找有機位的結果"
                         whenChange={e => this.props.setHaveSeat('haveseat', e ? 1 : 2)}
+                        defaultChecked
                     />
                 </div>
 
@@ -542,6 +635,7 @@ class International extends Component {
                                     fetchPath={this.fetchPath}
                                     setNonprefertrans={this.props.setNonprefertrans}
                                 />
+                                {rtow === 3 ? null :
                                 <StRcln
                                     ClassName="aviation"
                                     option={this.cheapFlightOptions}
@@ -553,6 +647,7 @@ class International extends Component {
                                     }
                                     defaultValue={1}
                                 />
+                                }
                             </div>
                             <CrRcln
                                 className="checkBoxMagin"
@@ -566,7 +661,7 @@ class International extends Component {
                             />
                         </React.Fragment>
                     }
-                    moduleClassName="openMoreOptions"
+                    moduleClassName={'openMoreOptions' + moreOptionsStyle}
                     isRightLeft={{
                         destination: 'right',
                         name: 'toolnext'

@@ -44,8 +44,8 @@ class Multiple extends Component {
         if (this.props.onChange) this.props.onChange(e);
         setValues({ inputValue: e.target.value });
     }
-    handleClick () {
-        if (this.props.onClick) this.props.onClick();
+    handleClick (e) {
+        if (this.props.onClick) this.props.onClick(e);
     }
     handleFocus () {
         if (this.props.onFocus) this.props.onFocus();
@@ -144,7 +144,7 @@ class Multiple extends Component {
         return tags;
     }
     render () {
-        const { placeholder, inputValue } = this.props;
+        const { placeholder, inputValue, ...other } = this.props;
         const classes = cx('int_rctg', {
             isMax: this.state.isMax,
         });
@@ -160,6 +160,8 @@ class Multiple extends Component {
                     handleChange={this.handleChange}
                     handleFocus={this.handleFocus}
                     handleKeyUp={this.handleKeyUp}
+                    handleClick={this.handleClick}
+                    {...other}
                 />
             </div>
         );

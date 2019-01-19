@@ -384,17 +384,19 @@ class Module extends Component {
             }
             if (e.keyCode === 13) {
                 if (diffData(secondData, select) === -1) {
-                    return;
-                }
-                e.target.blur();
-                this.onItemSelect(
-                    secondData[diffData(secondData, select)], // 傳入被選取的物件
-                    secondData[diffData(secondData, select)].dataIndex // 傳入被選取的索引值
-                );
-                this.props.closeActcallback &&
+                    this.props.closeActcallback && this.props.closeActcallback(secondData[0]);
+                } else {
+                    e.target.blur();
+                    this.onItemSelect(
+                        secondData[diffData(secondData, select)], // 傳入被選取的物件
+                        secondData[diffData(secondData, select)].dataIndex // 傳入被選取的索引值
+                    );
+                    this.props.closeActcallback &&
                     this.props.closeActcallback(
                         secondData[diffData(secondData, select)]
                     );
+                }
+
             }
         }
     }
@@ -807,7 +809,7 @@ class Module extends Component {
                 {!this.props.showText &&
                     this.props.searchKeyWord.length <
                         this.props.minimumStringQueryLength && (
-                    <div className="noMatchText">
+                        <div className="noMatchText">
                         <button
                             onMouseDown={() =>
                                 this.props.closeActcallback &&

@@ -1,16 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { vacationTaiwan } from '../../../../source.config';
 
 // 單純組件
-import Label from '../../../../magaele/int_rctg/components/Label/Label';    // 外框
 import DtmRcfr from '../../../../magaele/dtm_rcfr';
 import ActRacp from '../../../../magaele/act_racp';
 import IntRcln from '../../../../magaele/int_rcln';
+import BtRcnb from '../../../../magaele/bt_rcnb';
 // Utils
-import { fetchJsToObj, ClickOutSide } from '../../../../utils';
+import { fetchJsToObj, isJsonString } from '../../../../utils';
 
-import './SingleInputMenu.scss';
 // 補字選單分區的callBack
 // e.g. "祕魯(PE)__利馬-(LIM)".split('__') = ['祕魯(PE)', '利馬-(LIM)']
 //      "泰國(TH)__烏汶-(UBP)__烏汶機場(UBP)".split('__') = ['泰國(TH)', '烏汶-(UBP)', '烏汶機場(UBP)']
@@ -27,6 +25,8 @@ const actRacpChangeKey = (data) => {
     });
     return data;
 };
+
+const vLine = JSON.parse(`{ "vLine": { "_9": "台灣" } }`);
 
 class SingleInputMenuM extends Component {
     static defaultProps = {
@@ -65,12 +65,12 @@ class SingleInputMenuM extends Component {
         super(props);
         this.searchInput = React.createRef();
         this.state = {
-            keyword: '',
+            keyword: this.props.selectedData.length ? this.props.selectedData[0].text : '',
             showDtm: true,
-            showAct: false
+            destinationDtm: {},
+            showAct: false,
+            destinationAct: {}
         };
-        this.fetchData = [];
-        this.fetchPath = vacationTaiwan.destination;
     }
     componentDidMount () {
         this.getData(this.props.fetchPath);
@@ -86,18 +86,21 @@ class SingleInputMenuM extends Component {
     }
     // fetch data
     getData = (source) => {
-        if (source.indexOf('.json') !== -1) { // 若檔案格式為json
-            fetch(source, {
-                method: 'GET',
-            }).then(response => {
-                return response.json();
-            }).then(data => {
-                // fetchObject[source] = data; // 把data存起來,若下次再fetch相同網址直接取用就好,不用再發送http request
-                this._getDataCallBack(data);
+        const sessionData = sessionStorage.getItem(source);
+        if (sessionData && isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            this.setState({
+                destinationDtm: Object.assign(jsonData, vLine)
             });
+            this._getDataCallBack(jsonData);
         } else {
-            fetchJsToObj(this.props.fetchPath, (data) => {
-                this._getDataCallBack(data);
+            fetchJsToObj(source, (d) => {
+                let stringifyData = JSON.stringify(d);
+                this.setState({
+                    destinationDtm: Object.assign(d, vLine)
+                });
+                this._getDataCallBack(d);
+                sessionStorage.setItem(source, stringifyData);
             });
         }
     }
@@ -124,8 +127,9 @@ class SingleInputMenuM extends Component {
                 arr.push(obj);
             });
         });
-        this.fetchData = arr;
-        this.forceUpdate();
+        this.setState({
+            destinationAct: arr
+        });
     }
     // 通知 parent component data 更新
     emitPushData = (data) => {
@@ -175,6 +179,10 @@ class SingleInputMenuM extends Component {
     // 通知 parent component 移除 data
     handleEmitRemoveData = (e, data) => {
         this.emitPushData([]);
+        this.setState({
+            showAct: false,
+            showDtm: true
+        });
     }
     // 點擊 label wrap 就 focus search input
     handleLabelWrapClick = () => {
@@ -209,79 +217,73 @@ class SingleInputMenuM extends Component {
         const {
             keyword,
             showAct,
-            showDtm
+            destinationAct,
+            showDtm,
+            destinationDtm
         } = this.state;
 
         // DtmRcfr highlight
         const selected = selectedData.map(item => item.value);
         return (
-            <div
-                className="SingleInputMenu m-b-sm w-80p">
-                <Label
-                    size={size}             // 高度
-                    iconName={iconName}     // icon
-                    subComponent={
-                        <ClickOutSide onClickOutside={this.handleCloseMenu}>
-                            <div className="dtm_rcfr-row">
-                                {/* <div className="dtm_rcfr-selected-wrap" onClick={this.handleLabelWrapClick}>
-                                    {showText}
-                                </div> */}
-                                <IntRcln
-                                    className="int_rcln int-tags-single"
-                                    ref={this.searchInput}
-                                    placeholder={placeholder}
-                                    value={keyword}
-                                    onChange={(e) => this.handleChange(e)}
-                                    onClearValue={(e) => this.handleEmitRemoveData(e, selectedData)}
-                                />
-
-                            </div>
-                            <ActRacp
-                                InputIsFocus={showAct}
-                                url={this.fetchData}
-                                minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
-                                minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
-                                searchKeyWord={keyword} // 傳入篩選的字串
-                                noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
-                                ClassName={(!showAct && 'd-no')} // 傳入custom class
-                                footer={false} // 是否顯示footer
-                                theme={'future'} // 樣式調整: future(站長平台)
-                                closeActcallback={(data) => {
-                                    if (typeof data !== 'undefined') {
-                                        this.setState({ showAct: false, keyword: '' });
-                                        this.emitPushData(data);
-                                    } else {
-                                        this.handleCloseMenu();
-                                    }
-                                }} // 鍵盤上下鍵改變選取項目
-                                changeKey={actRacpChangeKey}
-                                catalogue={catalogueCallBack}
-                            />
-                            <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : null}`}>
-                                <p className="dtm_rcfr-label">{subLabel}</p>
-                                <span
-                                    className="dtm_rcfr-close_btn"
-                                    onClick={this.handleCloseMenu}
-                                >
-                                </span>
-                                <DtmRcfr
-                                    levelKey={['vLine', 'vArea', 'vTcity']}
-                                    onClickItem={this.emitPushData}
-                                    dataResouce={fetchPath}
-                                    selectedData={selected}
-                                    transformFetchData={(d) => {
-                                        if (typeof d === 'string') {
-                                            d = '"vLine":{"_9":"台灣"},' + d;
-                                            let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
-                                            return JSON.parse('{' + newVariable + '}');
-                                        }
-                                        else { return d }
-                                    }}
-                                />
-                            </div>
-                        </ClickOutSide>
+            <div className="SingleInputMenu vacation_taiwan_m">
+                <header className="dtm_rcfr-titleWrap">
+                    <div className="txt-center dtm_rcfr-title">目的地</div>
+                    <div className="dtm_rcfr-row">
+                        <IntRcln
+                            className="int_rcln int-tags-single"
+                            ref={this.searchInput}
+                            placeholder={placeholder}
+                            value={keyword}
+                            onChange={(e) => this.handleChange(e)}
+                            onClearValue={(e) => this.handleEmitRemoveData(e, selectedData)}
+                        />
+                        <BtRcnb prop="string" className="m-l-sm" md radius whenClick={this.props.getSelect}>確定</BtRcnb>
+                    </div>
+                    <p className="dtm_rcfr-label">{subLabel}</p>
+                </header>
+                <div className="dtm_rcfr-content">
+                    {Object.keys(destinationAct).length &&
+                        <ActRacp
+                            InputIsFocus={showAct}
+                            url={destinationAct}
+                            minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
+                            minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
+                            searchKeyWord={keyword} // 傳入篩選的字串
+                            noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
+                            ClassName={(!showAct && 'd-no')} // 傳入custom class
+                            footer={false} // 是否顯示footer
+                            theme={'future'} // 樣式調整: future(站長平台)
+                            closeActcallback={(data) => {
+                                if (typeof data !== 'undefined') {
+                                    this.setState({ showAct: false, keyword: '' });
+                                    this.emitPushData(data);
+                                } else {
+                                    this.handleCloseMenu();
+                                }
+                            }} // 鍵盤上下鍵改變選取項目
+                            changeKey={actRacpChangeKey}
+                            catalogue={catalogueCallBack}
+                        />
                     }
-                />
+                    <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : null}`}>
+                        {Object.keys(destinationDtm).length &&
+                            <DtmRcfr
+                                levelKey={['vLine', 'vArea', 'vTcity']}
+                                onClickItem={this.emitPushData}
+                                dataResouce={destinationDtm}
+                                selectedData={selected}
+                                transformFetchData={(d) => {
+                                    if (typeof d === 'string') {
+                                        d = '"vLine":{"_9":"台灣"},' + d;
+                                        let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
+                                        return JSON.parse('{' + newVariable + '}');
+                                    }
+                                    else { return d }
+                                }}
+                            />
+                        }
+                    </div>
+                </div>
             </div>
         );
     }

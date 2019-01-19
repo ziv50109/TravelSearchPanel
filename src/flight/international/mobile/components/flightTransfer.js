@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { flightInternational } from '../../../../../source.config';
 import IntRcln from '../../../../../magaele/int_rcln';
 import NvbRslb from '../../../../../magaele/nvb_rslb';
 import SingleInputMenuFMdischange from '../../../../shared/SingleInputMenu/SingleInputMenuFMdischange';
@@ -15,14 +16,10 @@ class FlightTransfer extends Component {
         this.setState({ [key]: val });
     }
 
-    getSelectDate = (data, keyword) => {
-        let arr = [];
-        if (typeof data === 'object') {
-            arr.push(data);
-        }
+    getSelectDate = (data) => {
         if (this.props.setNonprefertrans) {
-            if (arr.length > 0) {
-                this.props.setNonprefertrans('nonprefertrans', arr[0].country);
+            if (data.length > 0) {
+                this.props.setNonprefertrans('nonprefertrans', data[0].country);
             } else {
                 this.props.setNonprefertrans('nonprefertrans', '');
             }
@@ -30,8 +27,8 @@ class FlightTransfer extends Component {
 
 
         this.setState({
-            selectPlace: arr,
-            selectedDataMkeyword: arr.length ? keyword : '',
+            selectPlace: data,
+            selectedDataMkeyword: data.length ? data[0].txt : '',
             nvbOpen: false
         });
     }
@@ -41,7 +38,6 @@ class FlightTransfer extends Component {
         return (
             <div className={this.props.customClass}>
                 <IntRcln
-                    request
                     value={selectedDataMkeyword || ''}
                     onClick={() => this.openAndClose('nvbOpen', true)}
                     label="排除轉機國家"
@@ -50,7 +46,7 @@ class FlightTransfer extends Component {
                     readOnly
                 />
                 <NvbRslb
-                    className="panel-nvb_rslb"
+                    className="panel-nvb_rslb flight_m_place"
                     visible={nvbOpen}
                     direction="right"
                 >
@@ -63,11 +59,11 @@ class FlightTransfer extends Component {
                             className="SingleInputMenu"
                             isRequired
                             size="lg"
-                            label={'出發地'}
+                            label={'排除轉機國家'}
                             iconName={'toolmap'}
-                            fetchPath={this.props.fetchPath}
+                            fetchPath={flightInternational.filter}
                             selectedData={selectPlace}
-                            placeholder="請輸入國家/城市/機場"
+                            placeholder="城市/國家/機場"
                             minimumStringQueryLength={2}
                             minimumStringQuery="請輸入至少兩個文字"
                             noMatchText="很抱歉，找不到符合的項目"

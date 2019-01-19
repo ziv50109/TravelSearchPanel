@@ -11,6 +11,7 @@ $white_two: #f1f1f1;
   */
 
 $classname: 'hotelsRectM';
+
 @mixin fontBase($fontSize) {
     height: $fontSize;
     border: 0;
@@ -19,6 +20,7 @@ $classname: 'hotelsRectM';
 }
 
 .#{$classname} {
+
     // style on phone device
     &>.#{$classname}_hotelCont {
         .destination {
@@ -28,39 +30,69 @@ $classname: 'hotelsRectM';
         .int_rcln {
             line-height: 16px;
             height: auto;
+
             &.icon {
                 >.int_rcln_input {
+                    position: relative;
+                    background-color: transparent;
                     color: #0077b3;
-                    font-weight: bold;
+                    font-weight: normal;
                 }
             }
+
+            &_label {
+                color: #222;
+            }
+
+            &_input {
+                border: 1px solid #bbb;
+            }
+
+            &_input:not(input):empty::before {
+                color: #999999;
+                font-weight: normal;
+            }
         }
+
         .nights {
             display: inline-flex;
             align-items: center;
             color: #0077b3;
-            font-weight: bold;
+            font-weight: normal;
             font-size: 16px;
             line-height: 16px;
         }
+
         .booking {
             position: relative;
             margin: 0 0 10px 0;
-            .input_group{
-                .cal_icon{
+
+            .int_rctg {
+                border: 1px solid #bbb;
+                .int-col {
+                    .int-label {
+                        color: #222;
+                    }
+                }
+            }
+
+            .input_group {
+                .cal_icon {
                     width: 16px;
                     @include fontBase(16px);
                 }
-                .int_rcln  {
+
+                .int_rcln {
                     // max-width: 112px;
                     height: auto;
                 }
+
                 .int_rcln_input {
                     width: 100%;
                     padding: 0;
                     border: none;
                     color: #0077b3;
-                    font-weight: bold;
+                    font-weight: normal;
                     // &:not(:empty){
                     //     max-width: 95px;
                     //     .int_rcln {
@@ -71,15 +103,17 @@ $classname: 'hotelsRectM';
                     //     color: $color_gray;
                     // }
                 }
-                .int_rcln > .int_rcln_input:not(:empty){
+                .int_rcln>.int_rcln_input:not(:empty) {
                     width: 95px;
                 }
             }
         }
+
         .searchBtn {
             // width: calc(100% - 20px);
-            margin: 80px auto 0;
+            margin: 30px auto 0;
             text-align: center;
+
             .bookingToday {
                 display: inline-block;
                 margin-bottom: 20px;
@@ -87,24 +121,35 @@ $classname: 'hotelsRectM';
                 text-decoration: none;
                 font-size: 14px;
             }
+
             .search_button {
                 width: 100%;
             }
         }
+
         .chkbox-group {
-            // padding-top: 10px;
+           .cr_rcln{
+               .indicator{
+                   border:solid 1px #bbb;
+               }
+           }
         }
     }
+
     @media screen and (min-width: $screen-tablet) {
         // style on tablet device
     }
+
     @media screen and (min-width: $screen-desktop) {
+
         // style on desktop device
         &_pcBtnShow {}
     }
+
     @media screen and (min-width: $screen-lg-desktop) {
         // style on desktop device
     }
+
     & .#{$classname}_descendant {}
 }
 
@@ -112,9 +157,16 @@ $classname: 'hotelsRectM';
     .cy_rcln {
         >.confirm_btn {
             span {
-                display: none;
+                display: inline-block;
             }
         }
+    }
+
+    .nvb_rslb>.nvb_content>header {
+        padding-top: 10px;
+        top: 0;
+        right: 0;
+        left: 0;
     }
 }
 
@@ -122,7 +174,7 @@ $classname: 'hotelsRectM';
     .int_rcln {
         >.int_rcln_input {
             color: #0077b3;
-            font-weight: bold;
+            font-weight: normal;
         }
     }
 }
@@ -130,88 +182,234 @@ $classname: 'hotelsRectM';
 .hotelsRectM-roomPage {
     .room_list_section {
         margin-bottom: 10px;
+
         .row_title {
-            text-align: right;
+            text-align: left;
+            min-width: 3em;
+            margin-right: 15px;
         }
+
         .room_count_title {
-            margin-bottom: 5px;
+            margin: 0px;
+            line-height: 30px;
+            margin-right: 15px;
         }
+
         .room_list_row {
             position: relative;
             display: inline-block;
             vertical-align: top;
+            margin-bottom: 10px;
+
             .int_rcln {
                 .clearBtn {
                     display: none;
                 }
             }
         }
+
         .childStCont {
+            margin-left: 30px;
+
             .children_age_select {
                 select {
                     width: 87px;
                 }
             }
         }
+
+        .st_childAge {
+            display: block;
+
+            .children_ages_section {
+                .age_select_section {
+                    display: flex;
+                    height: 30px;
+                    align-items: stretch;
+
+                    .children_age_select {
+                        flex: 0 0 70px;
+                        margin-right: 5px;
+                        position: relative;
+
+                        select {
+                            background-color: #fff;
+                            -webkit-appearance: none;
+                            -moz-appearance: none;
+                            appearance: none;
+                            width: 100%;
+                            height: 100%;
+                            padding: 0 5px;
+                            border-radius: 0;
+                            border: 1px solid #ccc;
+                            font-size: 16px;
+                        }
+
+                        &::after {
+                            content: '';
+                            position: absolute;
+                            top: 43%;
+                            right: 10px;
+                            width: 0;
+                            height: 0;
+                            border-style: solid;
+                            border-width: 6px 5px 0 5px;
+                            border-color: #000544 transparent transparent transparent;
+                            pointer-events: none;
+                        }
+                    }
+                }
+            }
+        }
+
+        .children_ages_section {
+            align-items: baseline;
+            display: inline-flex;
+
+            .row_title {
+                margin-right: 15px;
+            }
+        }
     }
+
     .hotelsRectM-roomList {
         padding: 10px;
         height: 100%;
         background-color: #fff;
+
         .psTxt {
             padding: 10px;
             color: #24a07d;
+        }
+
+        .dropdown-place-holder {
+            align-items: center;
+
+            >.dropdown-label {
+                line-height: 14px !important;
+            }
         }
     }
 }
 
 .hotelsRectM-destination {
+    .nvb_content {
+        padding-top: 125px !important;
+        background-color: #fff;
+
+        header {
+            .dtm_rcfr-label {
+                color: #24a07d;
+                margin-top: 5px !important;
+            }
+        }
+
+        .search_input {
+            .int_rcln_input {
+                color: #0077b3;
+                font-size: 16px;
+                font-weight: normal;
+            }
+        }
+    }
+
     .destinationOpation {
         background-color: #fff;
+        height: 100%;
+        overflow-y: auto;
+        touch-action: manipulation;
+
         .wrap_container {
             width: 100%;
             padding-top: 10px;
-            .dtm_rcfr{
+
+            .dtm_rcfr {
                 height: calc(100vh - 130px);
                 overflow-y: auto;
+
+                >.ntb_rcln>.ctns>.panel>.ntb_rcln>.ctns .sec_all {
+                    text-decoration: none;
+                    cursor: default;
+                }
+
+                .item {
+                    line-height: 25px;
+                }
             }
+
             .dtm_rcfr-label {
                 padding-left: 25px;
                 @include fontBase(14px);
-                & + .dtm_rcfr {
+
+                &+.dtm_rcfr {
                     margin-top: 10px;
                 }
             }
         }
+
         .act_wrap_container {
             width: 100%;
+
             .act_rajx {
+                max-height: none;
+                width: 100%;
+                top: 125px;
+                box-shadow: none;
+                border: none;
+                border-top: 2px solid #e3e3e3;
+
                 .section {
                     .title {
                         border-top: none;
                         color: #222;
                         font-weight: bold;
                         font-size: 16px;
+
                         i {
                             display: none;
                         }
                     }
                 }
+
                 .item {
                     padding: 10px;
                     line-height: 30px;
                 }
+
+                .noMatchText {
+                    color: #24a07d;
+                    font-size: 14px;
+                    padding: 10px 20px 0 5px;
+
+                    .close {
+                        display: none;
+                    }
+                }
+
+                .m-place {
+                    color: #24a07d;
+                    font-size: 14px;
+                    padding: 10px 20px 0 5px;
+
+                    .close {
+                        display: none;
+                    }
+                }
             }
         }
     }
+
     .ntb_rcln {
         &.search_panel_two {
             >.tabs {
                 padding: 15px 10px;
                 margin-bottom: 0;
                 background-color: $white_two;
+
                 li {
-                    &:last-child{
+                    width: 50%;
+
+                    &:last-child {
                         margin-right: 0;
                     }
 
@@ -219,6 +417,7 @@ $classname: 'hotelsRectM';
             }
         }
     }
+
     .int_rcln {
         input {
             padding: 10px;

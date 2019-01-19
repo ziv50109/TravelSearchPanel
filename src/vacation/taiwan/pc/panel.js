@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import cx from 'classnames';
 import { vacationTaiwan } from '../../../../source.config';
 
 // 單純組件
@@ -7,15 +6,14 @@ import { vacationTaiwan } from '../../../../source.config';
 import CrRcln from '../../../../magaele/cr_rcln';
 import StRcln from '../../../../magaele/st_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
-import IntRctg from '../../../../magaele/int_rctg';
-import IntRcln from '../../../../magaele/int_rcln';
-import DtmRcfr from '../../../../magaele/dtm_rcfr';
 import BtRcnb from '../../../../magaele/bt_rcnb';
 import ActRajax from '../../../../magaele/act_rajx';
-import ActRacp from '../../../../magaele/act_racp';
+
+import { ClickOutSide, useLocalStorage } from '../../../../utils';
 
 // 複合組件
-import SearchInput from '../../../../magaele/act_rajx/components/SearchInput';
+
+import SearchInput from '../SingleInput/SearchInput';
 import Label from '../../../../magaele/int_rctg/components/Label/Label.js';
 import ComposeCalendar from '../../../component/ComposeCalendar';
 import SingleInputMenu from '../SingleInputMenu/SingleInputMenu';
@@ -23,13 +21,22 @@ import SingleInputMenu from '../SingleInputMenu/SingleInputMenu';
 import '../css.scss';
 
 const Country = [
-    { text: '台北松山', value: 'TSA' },
-    { text: '台東豐年', value: 'TTT' },
-    { text: '高雄小港', value: 'KHH' },
-    { text: '台中', value: 'RMQ' },
-    { text: '花蓮', value: 'HUN' },
-    { text: '澎湖馬公', value: 'MZG' },
-    { text: '金門', value: 'KNH' }
+    { text: '不限', value: '_' },
+    { text: '台北', value: '_TPE' },
+    { text: '板橋', value: '_PAN' },
+    { text: '桃園', value: '_TAO' },
+    { text: '新竹', value: '_HCU' },
+    { text: '苗栗', value: '_MLI' },
+    { text: '台中', value: '_TCH' },
+    { text: '彰化', value: '_CHA' },
+    { text: '南投', value: '_NTO' },
+    { text: '雲林', value: '_YLI' },
+    { text: '嘉義', value: '_CYI' },
+    { text: '台南', value: '_TNN' },
+    { text: '高雄', value: '_KHH' },
+    { text: '屏東', value: '_PIN' },
+    { text: '花蓮', value: '_HLN' },
+    { text: '台東', value: '_TTT' }
 ];
 const inlineStyle = {
     display: 'inline-block',
@@ -159,7 +166,7 @@ class ContentComponentKeyword extends Component {
         if (this.timer) {
             clearTimeout(this.timer);
         }
-        this.props.getkeywordData(value, this.state.selectText);
+        this.props.getkeywordData(value);
         this.timer = setTimeout(() => {
             self.fetchData(value);
         }, 500);
@@ -170,9 +177,9 @@ class ContentComponentKeyword extends Component {
         this.AbortController = new AbortController();
         const signal = this.AbortController.signal;
         let url = vacationTaiwan.keyword;
-        fetch(url, {
+        this.props.parentStcity && fetch(`${url}?citycode=${this.props.parentStcity}`, {
             method: 'GET',
-            mode: 'cors',
+            mode: 'no-cors',
             signal,
             headers: new Headers({
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -184,86 +191,101 @@ class ContentComponentKeyword extends Component {
             .then(d => this.processData(d, value))
             .catch(res => console.error('request has error', res));
     }
+    filterData (arrData, inputText) {
+        let arr = [];
+        if (arrData.length) {
+            const matchStr = inputText.toUpperCase();
+            arr = arrData.filter(v => v.txt.indexOf(matchStr) !== -1);
+        }
+        return arr;
+    }
     clearWord (value) {
-        this.setState({ selectText: value });
+        this.setState({
+            searchKeyWord: value,
+            selectText: value
+        });
     }
     isFocus (bool) {
         let show = false;
         if (!this.state.show) {
             show = true;
         }
-        this.setState({ isFocus: bool, show: true });
+        this.setState({ isFocus: true, show: bool });
     }
-    processData (data, searchKeyWord) {
-        // Destinations 是 fetch的第一個key name
-        // Destinations 是 fetch的第一個key name
+    processData (d, value) {
         let p = new Promise(function (resolve, reject) {
-            data.Destinations.map((item) => {
-                item.level1 = item.Kind;
-                item.level2 = item.KindName;
-                item.level3 = item.Code;
-                item.txt = item.Name;
-                delete item.Kind;
-                delete item.KindName;
-                delete item.Code;
-                delete item.Name;
+            d.Data.map((item) => {
+                item.level2 = '飯店';
+                item.level3 = item.HotelCode;
+                item.txt = item.HotelName;
             });
-            resolve(data);
+            resolve(d);
         });
-        this.setState({ data: data.Destinations, searchKeyWord: searchKeyWord });
+        p.then(d => {
+            const arr = this.filterData(d.Data, value);
+            this.setState({ data: d.Data, showData: arr, searchKeyWord: value });
+        });
+
         return p;
     }
     getItemClickValueState (v) {
         this.setState({
             selectText: v.txt,
             show: false,
+            isFocus: false
         });
         this.props.getkeywordtxt(v.txt);
     }
+    closeDestnMenu = () => {
+        const { searchKeyWord, selectText, } = this.state;
+        searchKeyWord === selectText && this.props.getkeywordtxt(searchKeyWord);
+        this.setState({ isFocus: false });
+    }
+
     render () {
         const { selectedData, dptSelectedData, dtnSelectedData } = this.state;
         return (
-            <div className="pc_keyWord m-b-sm">
+            <ClickOutSide className="pc_keyWord m-b-sm" onClickOutside={this.closeDestnMenu}>
                 <Label
+                    ref={e => { this.qq = e }}
                     label="關鍵字"
                     subComponent={
                         <SearchInput
                             containerClass="int_rcln blue request"
                             labelClass="d-no"
                             inputClass=""
-                            placeholderText="飯店名稱、產品名稱或代碼"
+                            placeholderText="請輸入飯店名稱"
                             keyWord={this.state.selectText}
+                            parentStcity={this.props.parentStcity}
                             clearWord={(value) => this.clearWord(value)}
                             onChange={(value) => this._inputOnChangeHandler(value)}
                             isFocus={(bool) => this.isFocus(bool)}
                         />
                     }
                 />
-                <ActRajax
-                    containerClass={cx({ '': this.state.show }, { 'd-no': !this.state.show })}
-                    sectionClass={''}
-                    itemClass={''}
-                    titleClass={''}
-                    data={this.state.data}
-                    matchWord={this.state.searchKeyWord}
-                    closeBtnOnClick={() => this.setState({ show: false })}
-                    getItemClickValue={(v) => this.getItemClickValueState(v)}
-                    isFocus={this.state.isFocus}
-                    showText={this.state.showText}
-                    noMatchText="很抱歉，找不到符合的項目"
-                    minimumStringQuery={'請至少輸入兩個字'}
-                    minimumStringQueryLength={2}
-                    footer={true}
-                    rules={
-                        [
+                <div className="act_wrap">
+                    <span className={this.state.isFocus ? 'closeBtn' : 'closeBtn d-no'} onClick={this.closeDestnMenu}></span>
+                    <ActRajax
+                        containerClass={this.state.isFocus ? '' : 'd-no'}
+                        isFocus={this.state.isFocus}
+                        data={this.state.showData}
+                        matchWord={this.state.searchKeyWord}
+                        getItemClickValue={(v) => this.getItemClickValueState(v)}
+                        showText={this.state.showText}
+                        noMatchText="很抱歉，找不到符合的項目"
+                        minimumStringQuery={this.props.parentStcity ? '請至少輸入兩個字' : '請先選擇目的地'}
+                        minimumStringQueryLength={2}
+                        footer={true}
+                        closeBtnOnClick={() => setTimeout(this.closeDestnMenu, 0)}
+                        rules={[
                             {
                                 title: '飯店',
                                 icon: <IcRcln name="hotelforeignBookingf" key={1} />
                             }
-                        ]
-                    }
-                ></ActRajax>
-            </div>
+                        ]}
+                    ></ActRajax>
+                </div>
+            </ClickOutSide>
         );
     }
 }
@@ -349,6 +371,33 @@ class Panel extends Component {
     closeNvbRslb () {
         this.props.closeNvbRslb();
     }
+    componentDidMount () {
+        useLocalStorage(
+            {
+                panel: 'taiwanVacation',
+                methods: 'get'
+            },
+            ({ sFcity, sTcity, sDatef, sDatet, Tools, selectText }) => {
+                // console.log('=================', sFcity, sTcity, sDatef, sDatet, Tools, selectText);
+                const mmm = {
+                    'startInputValue': sDatef,
+                    'endInputValue': sDatet,
+                };
+                this.setState(
+                    {
+                        sFcity: sFcity,
+                        sTcity: sTcity,
+                        sDatef: sDatef,
+                        sDatet: sDatet,
+                        Tools: Tools,
+                        selectText: selectText,
+                    },
+                    this.getAlldate(mmm)
+                );
+
+            }
+        );
+    }
     handleAllSubmit () {
         const {
             sFcity,
@@ -357,12 +406,23 @@ class Panel extends Component {
             sDatet,
             Tools,
             selectText,
+            sHotelName
         } = this.state;
+        useLocalStorage({
+            panel: 'taiwanVacation',
+            methods: 'post',
+            data: {
+                sFcity,
+                sTcity,
+                sDatef,
+                sDatet,
+                Tools,
+                selectText,
+                sHotelName
+            }
+        });
 
-        const newsDatef = sDatef.replace(/-/g, '');
-        const newssDatet = sDatet.replace(/-/g, '');
-
-        window.open('https://www.liontravel.com/webft/webftse01.aspx?' + `sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${newsDatef}&sDatef=${newssDatet}&sTools=${Tools}&sHotelName=${selectText}`, this.props.hrefTarget);
+        window.open('https://www.liontravel.com/webft/webftse01.aspx?' + `sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${sDatef.replace(/-/g, '')}&sDatef=${sDatet.replace(/-/g, '')}&sTools=${Tools}&sHotelName=${sHotelName}`, this.props.hrefTarget);
     }
     render () {
         const selectedData = this.state.selectedData;
@@ -386,16 +446,24 @@ class Panel extends Component {
                     onChangeCallBack={(e) => this.kkk(e)}>
                 </StRcln>
                 <DestinationContentComponent getdatavTcity={(e) => this.getdatavTcity(e)}></DestinationContentComponent>
-                <ComposeCalendar ClassName="m-b-sm" onChange={(e) => this.getAlldate(e)}></ComposeCalendar>
+                <ComposeCalendar
+                    defaultStartDate={this.state.sDatef ? this.state.sDatef : ''}
+                    defaultEndDate={this.state.sDatet ? this.state.sDatet : ''}
+                    ClassName="m-b-sm"
+                    startTxt="最早"
+                    endTxt="最晚"
+                    onChange={(e) => this.getAlldate(e)}>
+                </ComposeCalendar>
                 <ContentComponentKeyword
                     getkeywordData={(e) => this.getkeywordData(e)}
                     getkeywordtxt={(txt) => this.getkeywordtxt(txt)}
+                    parentStcity={this.state.sTcity}
                 ></ContentComponentKeyword>
                 <div className="sss m-b-sm">
                     {
                         arrck.map((item, index) => {
                             return (
-                                <CrRcln type="checkbox" key={index} name={item.name} value={item.value}
+                                <CrRcln type="checkbox" defaultChecked={true} key={index} name={item.name} value={item.value}
                                     className="blue m-r-sm " textContent={item.text}
                                     whenChange={(e) => this.getTools(item.name - 1, e)}
                                 />
@@ -404,7 +472,7 @@ class Panel extends Component {
                     }
                 </div>
                 <div className="txt-right">
-                    <BtRcnb prop="string" className="md-m-t-md" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
+                    <BtRcnb prop="string" className="submitBtn" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
                 </div>
             </div>
         );

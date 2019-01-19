@@ -1,157 +1,302 @@
 /**
  * Import core mixins, variables, or others
  */
- @import '../../../magaele/core/core/mixins';
- @import '../../../magaele/core/core/variables';
- /**
+@import '../../../magaele/core/core/mixins';
+@import '../../../magaele/core/core/variables';
+/**
   * Define your classname
   */
 
 $classname: 'hotelsRectPC';
 $blue: #0077b3;
+
 .#{$classname} {
-    min-height: 390px;
-    position: relative;
+
+    // min-height: 390px;
+    // position: relative;
     // style on phone device
-    & > .#{$classname}_hotelCont {
-        .int_rcln{
-            .int_rcln_input{
-                border:none;
+    ::placeholder {
+        color: #999;
+        letter-spacing: -1px;
+    }
+
+    .input_group {
+        cursor: pointer;
+    }
+
+    .int_rcln {
+        * {
+            cursor: pointer;
+        }
+
+        .int_rcln_label {
+            color: #222;
+        }
+    }
+
+    &>.#{$classname}_hotelCont {
+        .int_rcln {
+            .int_rcln_input {
+                position: relative;
+                border: none;
             }
         }
-        .int_rctg{
+
+        .int_rctg {
             font-size: 16px;
             position: relative;
+
             .int-col {
                 flex: 1;
             }
-            .cyrcmnInput{
-                >div{
+
+            .cyrcmnInput {
+                >div {
                     display: inline-block;
                     vertical-align: bottom;
                 }
-                input{
-                    border:none;
+
+                input {
+                    border: none;
                 }
             }
-            .dtm_rcfr-row{
-                .int_rcln{
-                    .int_rcln_input{
-                        padding:1px 6px;
+
+            .dtm_rcfr-row {
+                .int_rcln {
+                    .int_rcln_input {
+                        padding: 1px 6px;
                     }
                 }
             }
         }
-        .close_btn{
+
+        .closeBtn {
             display: block;
             width: 30px;
             height: 30px;
             position: absolute;
-            top: 0px;
-            right: 0px;
+            top: 5px;
+            right: 6px;
             z-index: 15;
             color: transparent;
             cursor: pointer;
-            &:before,&:after{
+
+            &:before,
+            &:after {
                 content: '';
                 display: block;
                 width: 20px;
-                height: 2px;
+                height: 3px;
                 background-color: #444444;
                 position: absolute;
                 top: 14px;
                 left: 5px;
             }
-            &:before{
+
+            &:before {
                 transform: rotate(45deg);
             }
-            &:after{
+
+            &:after {
                 transform: rotate(-45deg);
             }
         }
-        .destination{
+
+        .destination {
             position: relative;
-            margin-bottom:10px;
-            .wrap_container{
+            margin-bottom: 10px;
+
+            .wrap_container {
                 position: absolute;
-                top:50px;
-                left:0;
+                top: 50px;
+                left: 0;
                 padding: 16px 14px 0;
                 z-index: 10;
                 background-color: #fff;
                 border: 1px solid #ddd;
+
                 .dtm_rcfr {
                     margin-top: 10px;
-                    > .ntb_rcln > .tabs {
-                        li, .active {
+
+                    >.ntb_rcln>.tabs {
+
+                        li,
+                        .active {
                             width: 96px !important;
                             min-width: 96px;
                         }
                     }
+
+                    >.ntb_rcln>.ctns>.panel>.ntb_rcln>.ctns .sec_all {
+                        text-decoration: none;
+                        cursor: default;
+                    }
+
+                    .item {
+                        vertical-align: top;
+                        line-height: 25px;
+                    }
                 }
             }
-            .act_wrap_container{
+
+            // 補字的外框
+            .act_wrap_container {
+                width: 100%;
+                overflow-y: auto;
+                max-height: 535px;
                 position: absolute;
-                top:50px;
-                left:0;
+                top: 50px;
+                left: 0;
                 z-index: 10;
                 background-color: #fff;
                 border: 1px solid #ddd;
-                .act_rajx{
-                    .section{
-                        .title{
-                            border-top:none;
+
+                &::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                /* Track */
+                &::-webkit-scrollbar-track {
+                    background: #fff;
+                }
+
+                /* Handle */
+                &::-webkit-scrollbar-thumb {
+                    background: #d8d8d8;
+                }
+
+                /* Handle on hover */
+                &::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
+
+                .act_rajx {
+                    position: static;
+                    border: none;
+                    font-size: 14px;
+                    background: transparent;
+                    box-shadow: none;
+
+                    .noMatchText {
+                        color: #24a07d;
+                        padding: 12px 46px 7px 10px;
+                    }
+
+                    .m-place {
+                        color: #24a07d;
+                        padding: 12px 46px 7px 10px;
+                    }
+
+                    .item {
+                        font-size: 14px;
+                        line-height: 45px;
+                        border-bottom: 1px solid #e3e3e3;
+                        padding: 0 10px;
+                    }
+
+                    .section {
+                        .title {
+                            border-top: none;
                             font-size: 16px;
                             font-weight: bold;
                             color: #222;
-                            i{
+
+                            i {
                                 display: none;
                             }
                         }
                     }
-                    .item{
-                        line-height: 30px;
-                        padding:10px;
+
+                    // 把act舊的X按鈕隱藏起來
+                    .close {
+                        display: none;
                     }
                 }
             }
+
+            .input_group {
+                border: 1px solid #bbb;
+
+                .int_rcln_input {
+                    font-weight: normal;
+                }
+            }
         }
-        .booking{
-            .cal_icon{
+
+        .booking {
+            .cal_icon {
                 padding-top: 18px;
             }
-            .nights{
+
+            .nights {
                 display: inline-flex;
                 align-items: center;
                 padding-top: 24px;
                 color: #0077b3;
-                font-weight: bold;
+                font-weight: normal;
                 font-size: 16px;
             }
-            .clearBtn{
-                display: none !important;
+
+            .input_group {
+                border: 1px solid #bbb;
+
+                .int_rcln {
+                    flex: 0 1 155px;
+
+                    &:last-of-type {
+                        flex: 0 1 130px;
+                    }
+
+                    .int_rcln_input {
+                        letter-spacing: -1px;
+                        font-weight: normal;
+                    }
+
+                    .clearBtnWrap {
+                        width: 18px;
+
+                        .clearBtn {
+                            right: 2px;
+                            bottom: 8px;
+                        }
+                    }
+                }
+            }
+
+            .clearBtnWrap:after {
+                background-color: white;
             }
         }
-        .searchBtn{
+
+        .searchBtn {
             position: absolute;
-            bottom:0;
-            left:0;
+            bottom: 10px;
+            right: 10px;
             width: 100%;
             text-align: right;
-            .bookingToday{
+
+            .bookingToday {
                 margin-right: 12px;
             }
         }
-        .roomSetting{
-            .clearBtn{
+
+        .roomSetting {
+            .clearBtn {
                 display: none !important;
             }
-            .input_group{
+
+            .input_group {
                 position: relative;
-                .stCont{
+                border: 1px solid #bbb;
+
+                .int_rcln_input {
+                    font-weight: normal;
+                }
+
+                .stCont {
                     position: absolute;
-                    top:50px;
-                    left:0;
+                    top: 50px;
+                    left: 0;
                     display: none;
                     width: 657px;
                     min-height: 100px;
@@ -159,81 +304,202 @@ $blue: #0077b3;
                     z-index: 10;
                     box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
                     border: solid 1px #ddd;
-                    padding:20px 15px 15px;
-                    .st_rcln{
+                    padding: 20px 15px 15px;
+
+                    .st_rcln {
                         width: 50%;
+
+                        >.dropdown-place-holder {
+                            align-items: baseline;
+                            color: #222;
+                        }
                     }
-                    &.show{
+
+                    &.show {
                         display: block;
                     }
-                    .int_rcln{
-                        &:last-of-type{
+
+                    .int_rcln {
+                        &:last-of-type {
                             height: auto;
-                            .int_rcln_input{
-                                padding-top:0;
+
+                            .int_rcln_input {
+                                padding-top: 0;
                             }
                         }
                     }
-                    .room_list_section{
-                        margin-bottom:10px;
-                        .room_count_title{
+
+                    .hotel_roomList {
+                        display: block;
+                        position: relative;
+                        line-height: 38px;
+                        height: 40px;
+                        width: 370px;
+                        margin-bottom: 10px;
+
+                        &::before {
+                            content: '\9593\6578:';
+                            color: #999;
+                            position: absolute;
+                            left: 10px;
+                            top: 0;
+                            line-height: 38px;
+                            z-index: 1;
+                        }
+
+                        &::after {
+                            content: '';
+                            position: absolute;
+                            top: 43%;
+                            right: 10px;
+                            width: 0;
+                            height: 0;
+                            border-style: solid;
+                            border-width: 6px 5px 0 5px;
+                            border-color: #000544 transparent transparent transparent;
+                            pointer-events: none;
+                        }
+
+                        >select {
+                            -webkit-appearance: none;
+                            -moz-appearance: none;
+                            appearance: none;
+                            padding-left: 5em;
+                            border: 1px solid #ccc;
+                            font-size: 16px;
+                            width: 100%;
+                            height: 100%;
+                            border-radius: 0;
+                        }
+                    }
+
+                    .room_list_section {
+                        .room_count_title {
                             display: inline-block;
                             vertical-align: middle;
                         }
-                        .room_list_row{
+
+                        .room_list_row {
                             display: inline-block;
                             vertical-align: middle;
-                            .row_title{
+                            margin-bottom: 0;
+
+                            .int_gpct {
+                                .int_rcln {
+                                    .int_rcln_input {
+                                        color: #222;
+                                        font-weight: normal;
+                                    }
+                                }
+                            }
+
+                            .row_title {
                                 min-width: auto;
-                                margin:0 10px;
+                                margin: 0 10px;
                                 text-align: right;
                             }
-                            .st_child{
+
+                            .st_child {
                                 display: inline-block;
                                 vertical-align: top;
                             }
-                            .st_childAge{
+
+                            .st_childAge {
                                 display: inline-block;
                                 vertical-align: top;
+
+                                .children_ages_section {
+                                    display: inline-flex;
+                                    align-items: center;
+                                }
                             }
-                            .children_age_select{
+
+                            .age_select_section {
+                                margin-top: 0;
+                                display: flex;
+                                flex: 1;
+                                height: 30px;
+                                align-items: stretch;
+                            }
+
+                            .children_age_select {
                                 width: 70px;
+                                margin-right: 5px;
+                                position: relative;
+
+                                select {
+                                    color: #999999;
+                                    background-color: #fff;
+                                    -webkit-appearance: none;
+                                    -moz-appearance: none;
+                                    appearance: none;
+                                    width: 100%;
+                                    height: 100%;
+                                    padding: 0 5px;
+                                    border-radius: 0;
+                                    border: 1px solid #ccc;
+                                    font-size: 16px;
+                                }
+
+                                &::after {
+                                    content: '';
+                                    position: absolute;
+                                    top: 43%;
+                                    right: 10px;
+                                    width: 0;
+                                    height: 0;
+                                    border-style: solid;
+                                    border-width: 6px 5px 0 5px;
+                                    border-color: #000544 transparent transparent transparent;
+                                    pointer-events: none;
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        .cr_rcln{
+            .indicator{
+                border:solid 1px #bbb;        
+            }
+        }
 
+    }
+
+    .wrap_container {
+        padding: 0px;
+        width: 660px;
     }
 
     @media screen and (min-width: $screen-tablet) {
         // style on tablet device
 
     }
+
     @media screen and (min-width: $screen-desktop) {
         // style on desktop device
 
-        .room_list_section{
+        .room_list_section {
             .room_count_title {
                 line-height: 30px;
                 margin-right: 0px;
+                margin-top: 10px;
                 margin-bottom: 10px;
             }
         }
-        .ntb_rcln{
-            &.search_panel_two{
-                > .tabs{
-                    margin-bottom:10px;
+
+        .ntb_rcln {
+            &.search_panel_two {
+                >.tabs {
+                    margin-bottom: 10px;
                 }
             }
         }
     }
+
     @media screen and (min-width: $screen-lg-desktop) {
         // style on desktop device
     }
 
-    & .#{$classname}_descendant {
-
-    }
 }

@@ -1,0 +1,303 @@
+@import '../../../magaele/core/core.scss'; // reset
+@import '../../../magaele/core/core/utility'; // grid and something ...
+@import '../share/skin.scss';
+@import '../share/SingleInputMenu.scss';
+
+$className: 'tw_vacation_search';
+
+// 變數區域
+// 各區域的寬度設定
+// $w-component: 987px; // 整體 component 寬
+// $w-depdtn: 270px;
+// $w-depRange: 320px;
+// $w-travelday: 155px;
+// $w-keyword: 145px;
+
+//文字區
+@mixin label {
+    font-size: 14px;
+    font-weight: normal;
+    color: #222222;
+}
+@mixin placeholder {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0077b3;
+}
+@mixin pp {
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.43;
+    color: #444444;
+}
+
+// 每欄間距
+@mixin share_margin {
+    margin-right: 5px;
+}
+
+// 置中
+@mixin row_center {
+    display: flex;
+    align-items: center;
+    @content;
+}
+
+.#{$className} {
+    
+    max-width: 1200px;
+    min-width: 960px;
+    position: relative;
+    z-index:999;
+    ::placeholder {
+        color: #aaa;
+    }
+    // font-family: Arial,'微軟正黑體';
+    // margin: 0 auto;
+    // 上半部
+    .search_top_container {
+        @include row_center;
+        .deptest {
+            position: relative;
+        }
+
+        .labelStyle {
+            @include share_margin; // 共同 margin
+        }
+
+        .pc_DepAndDtn {
+            background-color:#fff;
+            @extend .col-md-8;
+            background-color: white;
+            > .st_rcln {
+                @include placeholder;
+                width: 100%;
+                > .dropdown-place-holder {
+                    border: none;
+                    line-height: 1;
+                    .dropdown-label {
+                        height: auto;
+                    }
+                }
+                &::after {
+                    display: none;
+                }
+            }
+            > .SingleInputMenu {
+                width: 100%;
+            }
+            > span {
+                color: #ddd;
+                font-size: 20px;
+            }
+            > .int_rctg {
+                width: 80%;
+            }
+            .dropdown-place-holder {
+                .dropdown-label {
+                    @include label;
+                }
+            }
+        }
+        .pc_DepDateRange {
+            @extend .col-md-8;
+            > * {
+                background-color: white;
+
+            }
+            > .cal_icon {
+                color: #ddd;
+                font-size: 20px;
+            }
+        }
+        .pc_travelDay {
+            @extend .labelStyle;
+            @extend .col-md-3;
+            background-color:#fff;
+            height: 52px;
+            background-color: white;
+
+            > .dropdown-place-holder {
+                background-color: transparent;
+                border: none;
+                font-weight: bold;
+                @include placeholder;
+                > .breakline {
+                    padding-bottom: 17px;
+                    @include label;
+                }
+            }
+        }
+        .pc_noHotel {
+            @extend .col-md-3;
+            @include pp;
+            span:nth-child(3) {
+                margin-left: 20px;
+            }
+            > :nth-of-type(2) {
+                margin-left: 20px;
+            }
+            > .indicator{
+                border:1px solid #bbb;
+            }
+        }
+        .pc_searchBtn {
+            // margin-left: 41px;
+            @extend .col-md-2;
+        }
+    }
+
+    // 下半部
+    .search_bottom_container {
+        @include row_center {
+            margin-top: 9px;
+        }
+        .pc_Roompeople {
+            @extend .col-md-5;
+            padding: 0;
+            padding-right: 2px;
+            &>.input_compose{
+                background-color: #fff;
+            }
+            .room_list_wrap_container {
+                border-top: none;
+                .txt_green {
+                    line-height: 30px;
+                    &::before {
+                        content: 'ⓘ ';
+                        font-weight: bold;
+                    }
+                }
+                .close_btn {
+                    .tooladdb {
+                        font-size: 27px;
+                        font-weight: bold;
+                        right: 8px;
+                        top: 0px;
+                        color: #444;
+                    }
+                }
+                select::-ms-expand  {
+                    display: none;  
+                }
+            }
+            > * {
+                background-color: white;
+            }
+            
+        }
+        .pc_Transport {
+            // @extend .col-md-9 ;
+            width: 45.5%;
+            padding-left: 3px;
+            padding-right: 4px;
+            position: relative;
+            // top: 100%;
+            // margin-right: 5px;
+            &>.transBox{
+                background-color: #fff;
+            }
+            .st_rnls_descendant_content {
+                box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+                background-color: #fff;
+                border-top: none;
+                position: absolute;
+                width: 98.7% !important;
+                padding: 15px 10px;
+                > :nth-child(2) {
+                    width: 90%;
+                    > .cr_rcln {
+                        margin-top: 10px;
+                        width: 80px;
+                    }
+                }
+            }
+            > * {
+                background-color: white;
+
+            }
+        }
+        .pc_Keyword {
+            // @extend .col-md-5 ;
+            background-color: white;
+            position: relative;
+            width: 25%;
+            margin-left: 1px;
+            &>.input_compose {
+                height: 48px;
+                background-color: #fff;
+                .int_rcln_label {
+                    @include label;
+                }
+                .breakline {
+                    > .clearBtnWrap {
+                        padding-top: 55px;
+                    }
+                }
+                .act_wrap_container {
+                    box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+                    outline: 1px solid #ddd;
+                    border: none;
+                    width: 100%;
+                    .close_btn {
+                        position: absolute;
+                        top: 10px;
+                        right: 2px;
+                        z-index: 1;
+                        padding: 8px 8px 4px;
+                        background-color: transparent;
+                        border: none;
+                        font-weight: bold;
+                        outline: none;
+                        z-index: 100;
+                    }
+                    .act_rajx {
+                        padding: 0;
+                        width: 100%;
+                        overflow: auto;
+                        position: static;
+                        border: none;
+                        font-size: 14px;
+                        background: transparent;
+                        box-shadow: none;
+                        .close {
+                            display: none;
+                        }
+                        .m-place,
+                        .noMatchText,
+                        .item {
+                            font-size: 14px;
+                            line-height: 45px;
+                            border-bottom: 1px solid #e3e3e3;
+                        }
+                    }
+                }
+            }
+        }
+        .roompeople_content_pc,
+        .room_list_section{
+            .child_row{
+                .room_list_row{
+                    display: flex;
+                    align-items: center;
+                    .age_select_section {
+                        display: flex;
+                        .children_age_select{
+                            display: flex;
+                            width:65px;
+                            height: 30px;
+                            margin-left: 5px;
+                            >select{
+                                background-color: #fff;
+                                height: 100%;
+                                padding: 0 5px;
+                                border-radius: 0;
+                                border: 1px solid #ccc;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

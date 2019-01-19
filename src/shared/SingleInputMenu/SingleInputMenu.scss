@@ -1,6 +1,29 @@
 $classname: 'SingleInputMenu';
 $blue: #0077b3;
 .#{$classname} {
+    &.flights-m {
+        padding-top: 125px;
+        height: 100%;
+        &.dischange {
+            padding-top: 0;
+        }
+        .SingleInputMenu_header-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            height: 125px;
+            background-color: #fff;
+            z-index: 1;
+        }
+        .SingleInputMenu_dtm-wrap {
+            touch-action: manipulation;
+            height: 100%;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+    }
     .dtm_rcfr {
         position: relative;
         &-row {

@@ -9,19 +9,20 @@ import '../css.scss';
 const CustomComponent = (props) => {
     return (
         <div>
-            <IcRcln
-                name="toolif"
-            />
+            <IcRcln name="toolif" />
         </div>
     );
 };
 
 // 彈出視窗的自訂模組
-const ContentComponent = (props) => {
+const ContentComponent1 = (props) => {
     return (
-        <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Recusandae, esse id vel sed tenetur sit eius molestias deserunt vero laudantium dolores, accusamus, provident perferendis quam. Praesentium fugiat exercitationem libero deserunt.
-        </p>
+        <p>天數航班自己選</p>
+    );
+};
+const ContentComponent2 = (props) => {
+    return (
+        <p>團體湊票享優惠</p>
     );
 };
 const Label3 = (props) => (
@@ -29,8 +30,8 @@ const Label3 = (props) => (
         個人自由行
         <PpRcln
             CustomComponent={<CustomComponent />}
-            ContentComponent={<ContentComponent />}
-            events={['click']}
+            ContentComponent={<ContentComponent1 />}
+            events={['click', 'hover']}
             position={['bottom', 'horizon_center']}
         />
     </div>
@@ -40,8 +41,8 @@ const Label4 = (props) => (
         團體自由行
         <PpRcln
             CustomComponent={<CustomComponent />}
-            ContentComponent={<ContentComponent />}
-            events={['click']}
+            ContentComponent={<ContentComponent2 />}
+            events={['click', 'hover']}
             position={['bottom', 'horizon_center']}
         />
     </div>
@@ -57,27 +58,45 @@ const MyLoadingComponent = (props) => {
     }
 };
 
-const LoadComponent = (src, hrefTarget) => {
+const LoadComponent = (src, hrefTarget, emitRtow, flightRtow) => {
     const Component = Loadable({
         loader: () => src,
         loading: MyLoadingComponent,
     });
-    return <Component hrefTarget={hrefTarget} />;
+    return <Component hrefTarget={hrefTarget} emitRtow={emitRtow} rtow={flightRtow} />;
 };
 
 class SearchPanelAllPc extends PureComponent {
     constructor (props) {
         super(props);
         this.state = {
-            show: 0
+            show: 0,
+            flightRtow: 0
         };
     }
 
+    changeWidth = (val) => {
+        this.setState({
+            flightRtow: val
+        });
+    }
+    dischangeWidth = () => {
+        this.setState({
+            flightRtow: 0
+        });
+    }
     switchFlight = (show, hrefTarget) => {
-        return String(show)[0] === '1' &&
-            <NtbRcln activeTabIndex={0} customClass="search_panel_two" onClick={(i) => this.setState({ show: Number('1' + i) })}>
+        return (
+            <NtbRcln
+                activeTabIndex={0}
+                customClass="search_panel_two"
+                onClick={(i) => {
+                    this.setState({ show: Number('1' + i) });
+                    this.dischangeWidth();
+                }}
+            >
                 <Tab label="國際機票預訂">
-                    {(show === 1 || show === 10) && LoadComponent(import(/* webpackChunkName: "internationalFlight-pc" */ '../../flight/international/pc'), hrefTarget)}
+                    {(show === 1 || show === 10) && LoadComponent(import(/* webpackChunkName: "internationalFlight-pc" */ '../../flight/international/pc'), hrefTarget, this.changeWidth, this.state.flightRtow)}
                 </Tab>
                 <Tab label="大陸境內機票">
                     {show === 11 && LoadComponent(import(/* webpackChunkName: "chineseFlight-pc" */ '../../flight/chinese/pc'), hrefTarget)}
@@ -85,10 +104,11 @@ class SearchPanelAllPc extends PureComponent {
                 <Tab label="台灣境內機票">
                     {show === 12 && LoadComponent(import(/* webpackChunkName: "taiwanFlight-pc" */ '../../flight/taiwan/pc'), hrefTarget)}
                 </Tab>
-            </NtbRcln>;
+            </NtbRcln>
+        );
     }
     switchVacation = (show, hrefTarget) => {
-        return String(show)[0] === '3' &&
+        return (
             <NtbRcln customClass="search_panel_two" onClick={(i) => this.setState({ show: Number('3' + i) })}>
                 <Tab label="國外">
                     <NtbRcln activeTabIndex={0} customClass="search_panel_three" onClick={(j) => this.setState({ show: Number('30' + j) })}>
@@ -103,26 +123,37 @@ class SearchPanelAllPc extends PureComponent {
                 <Tab label="國內">
                     {show === 31 && LoadComponent(import(/* webpackChunkName: "taiwanVacation-pc" */ '../../vacation/taiwan/pc'), hrefTarget)}
                 </Tab>
-            </NtbRcln>;
+            </NtbRcln>
+        );
+    }
+    handleChangeTab = (i) => {
+        const { show } = this.state;
+        if (String(show)[0] === String(i)) { return }
+        this.setState({ show: i });
+        this.dischangeWidth();
     }
 
     render () {
-        const { show } = this.state;
+        const { show, flightRtow } = this.state;
         const { hrefTarget } = this.props;
 
         return (
-            <NtbRcln customClass={`search_panel_one search_panel_all_pc ${(show === 1 || show === 10) ? 'search_panel-inFlight' : ''}`} onClick={(i) => this.setState({ show: i })}>
+            <NtbRcln
+                activeTabIndex={show}
+                onClick={(i) => this.handleChangeTab(i)}
+                customClass={`search_panel_one search_panel_all_pc ${flightRtow === 3 ? 'search_panel-inFlight' : ''}`}
+            >
                 <Tab label="團體">
                     {show === 0 && LoadComponent(import(/* webpackChunkName: "travel-pc" */ '../../travel/pc'), hrefTarget)}
                 </Tab>
                 <Tab label="機票">
-                    {this.switchFlight(show, hrefTarget)}
+                    {String(show)[0] === '1' && this.switchFlight(show, hrefTarget)}
                 </Tab>
                 <Tab label="訂房">
                     {show === 2 && LoadComponent(import(/* webpackChunkName: "hotel-pc" */ '../../hotel/pc'), hrefTarget)}
                 </Tab>
                 <Tab label="自由行">
-                    {this.switchVacation(show, hrefTarget)}
+                    {String(show)[0] === '3' && this.switchVacation(show, hrefTarget)}
                 </Tab>
                 <Tab label="主題旅遊">
                     {show === 4 && LoadComponent(import(/* webpackChunkName: "themeTravel-pc" */ '../../themeTravel/pc'), hrefTarget)}

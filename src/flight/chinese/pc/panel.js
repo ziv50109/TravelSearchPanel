@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import '../../../../magaele/core/core';
 import { flightChinese } from '../../../../source.config';
 import '../css.scss';
 import StRcln from '../../../../magaele/st_rcln';
@@ -8,7 +7,7 @@ import IntRcln from '../../../../magaele/int_rcln';
 import IntGpct from '../../../../magaele/int_gpct';
 import CyRcln from '../../../../magaele/cy_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
-import { ClickOutSide } from '../../../../utils';
+import { ClickOutSide, useLocalStorage } from '../../../../utils';
 import StRnls from '../../../../magaele/st_rnls';
 import PpRcln from '../../../../magaele/pp_rcln';
 import utils from '../../../../utils/';
@@ -19,7 +18,6 @@ const PeopleAndCabin = props => {
     return (
         <IntRcln
             request
-            // value="共1人，不限艙等"
             value={`共${props.peopleNumber}人，${[props.cabin]}`}
             label="人數/艙等"
             icon={<IcRcln name="toolstaff" />}
@@ -27,13 +25,6 @@ const PeopleAndCabin = props => {
         />
     );
 };
-
-// 艙等
-const Cabin = [
-    { text: '經濟艙', value: '0' },
-    { text: '商務艙', value: '1' },
-    { text: '頭等艙', value: '2' }
-];
 
 const CustomComponent = props => {
     return (
@@ -57,15 +48,35 @@ const ContentComponent = props => {
 // 單選月曆
 class PcCalendar extends Component {
     static defaultProps = {
-        doubleMonth: false
+        doubleMonth: true
     };
 
     state = {
-        selectedStartDate: '',
+        selectedStartDate: dayjs().add(3, 'day').format('YYYY-MM-DD'),
         startInputValue: dayjs().add(3, 'day').format('YYYY-MM-DD'),
         onFocus: false
     };
 
+    componentDidMount () {
+        useLocalStorage({
+            panel: 'chineseFlight',
+            methods: 'get',
+        }, (data) => {
+            let newDate;
+            if (!data.sFdate) {
+                newDate = dayjs().add(3, 'days').format('YYYY-MM-DD');
+            } else {
+                newDate = data.sFdate;
+            }
+            this.setState({ selectedStartDate: newDate, startInputValue: newDate });
+        });
+    }
+    openCyRcln = () => {
+        this.setState(prevState => ({
+            ...prevState,
+            onFocus: true
+        }));
+    }
     clickDate = date => {
         if (this.props.selectDate) {
             this.props.selectDate(date);
@@ -85,29 +96,93 @@ class PcCalendar extends Component {
         }));
     };
 
+    onClickOutside = () => {
+        this.checkDate('start');
+        this.setState(prevState => ({
+            ...prevState,
+            onFocus: false,
+        }), this.props.selectDate(this.state.startInputValue));
+    }
+
+    // 日期驗證
+    checkDate (inputType) {
+        const DateValueErrorMessage = '請輸入正確的日期格式(YYYYMMDD) EX: 20180101';
+        const todayAfterThree = dayjs().add(3, 'days').format('YYYY-MM-DD'); // 今天日期三天後
+        const {
+            startInputValue,
+        } = this.state;
+
+        // 若input沒有值
+        if (!startInputValue.length) return;
+
+        let regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
+        // 若日期是3碼或4碼(326 > 當年/03/26, 1105 > 當年/11/05)
+        if (startInputValue.length === 4) regex = /^()(\d{2})(\d{2})/;
+        if (startInputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
+        const result = startInputValue.match(regex);
+        const isValidDate = (d) => d instanceof Date && !isNaN(d);
+
+        // 輸入的字元不合規則
+        if (result === null) {
+            this.setState({ startInputValue: todayAfterThree, selectedStartDate: todayAfterThree });
+            return alert(DateValueErrorMessage);
+        }
+
+        // 月份小於10月，前面加'0'
+        if (result[2].length === 1) result[2] = '0' + result[2];
+        const [all, year, month, day] = result; // all 一定要在 !! 因為他是存放陣第一個雖然沒用到
+        const d = `${year || dayjs().year()}-${month}-${day}`;
+        const date = dayjs(d);
+        const calcStartDate = this.calcStartDate();
+
+        // 日期格式正確但是不存在的日期
+        if (!isValidDate(new Date(d))) {
+            this.setState({ startInputValue: todayAfterThree, selectedStartDate: todayAfterThree });
+            return alert('無效的日期');
+        }
+
+        if (date.isBefore(calcStartDate)) {
+            this.setState({ startInputValue: todayAfterThree, selectedStartDate: todayAfterThree });
+            return alert('日期小於最小可選日期');
+        }
+
+        // 都驗證正確 就更換日期
+        this.setState({ startInputValue: d, selectedStartDate: d });
+    }
+
+    // 判斷目前日期小於最小可選
+    calcStartDate () {
+        const {
+            selectedStartDate,
+            activeInput,
+        } = this.state;
+
+        const today = dayjs();
+        if (activeInput === 'end') {
+            return !selectedStartDate.length ? today.add(3, 'days').format('YYYY-MM-DD') : selectedStartDate;
+        }
+        return today.add(3, 'days').format('YYYY-MM-DD');
+    }
+
+    clearValue = () => {
+        this.setState({ startInputValue: '', selectedStartDate: '' }, this.props.selectDate(''));
+    }
+
     render () {
         const { selectedStartDate, startInputValue, onFocus } = this.state;
 
         const { doubleMonth } = this.props;
-
-        const style = {
-            borderColor: 'red'
-        };
         const today = dayjs();
         return (
             <ClickOutSide
-                className="pcCalendarCont"
-                onClickOutside={() => {
-                    this.setState(prevState => ({
-                        ...prevState,
-                        onFocus: false
-                    }));
-                }}
+                className="pcCalendarCont m-b-sm"
+                onClickOutside={this.onClickOutside}
             >
-                <input
-                    type="text"
-                    placeholder="選擇日期"
-                    value={startInputValue}
+                <IntRcln
+                    request
+                    placeholder="YYYY/MM/DD"
+                    label={'出發日期'}
+                    icon={<IcRcln name="tooldate" />}
                     onFocus={() => {
                         this.setState(prevState => ({
                             ...prevState,
@@ -115,19 +190,22 @@ class PcCalendar extends Component {
                         }));
                     }}
                     onChange={this.inputChange}
-                    readOnly
-                    style={onFocus ? style : null}
+                    onClearValue={this.clearValue}
+                    value={startInputValue.replace(/\-/g, '/')}
                 />
                 {!onFocus ? null : (
-                    <CyRcln
-                        doubleMonth={doubleMonth}
-                        activeStart={today.format('YYYY-MM')}
-                        activeEnd={today.add(1, 'years').format('YYYY-MM')}
-                        startDate={today.add(3, 'days').format('YYYY-MM-DD')}
-                        endDate={today.add(1, 'years').subtract(4, 'days').format('YYYY-MM-DD')}
-                        selectedStartDate={selectedStartDate}
-                        onDateClick={this.clickDate}
-                    />
+                    <div className="content">
+                        <button className="close_btn" onClick={this.onClickOutside}>×</button>
+                        <CyRcln
+                            doubleMonth={doubleMonth}
+                            activeStart={today.format('YYYY-MM')}
+                            activeEnd={today.add(1, 'years').format('YYYY-MM')}
+                            startDate={today.add(3, 'days').format('YYYY-MM-DD')}
+                            endDate={today.add(1, 'years').subtract(4, 'days').format('YYYY-MM-DD')}
+                            selectedStartDate={selectedStartDate}
+                            onDateClick={this.clickDate}
+                        />
+                    </div>
                 )}
             </ClickOutSide>
         );
@@ -137,7 +215,7 @@ class PcCalendar extends Component {
 // 主畫面
 class ChinaBody extends Component {
     static defaultProps = {
-        doubleMonth: false
+        doubleMonth: true
     };
     constructor (props) {
         super(props);
@@ -147,19 +225,23 @@ class ChinaBody extends Component {
             sTairp: 'SHA', // 目的地
             sFcity: 'MFM', // 出發地    _XZM_MFM 取後面
             sTcity: 'SHA', // 目的地
-            sFdate: '20181022', // 出發日期
+            sFdate: '', // 出發日期
             sAdt: 1, // 人
             sChd: 0,
             sClass: 0, // 艙等
             sTktkind: 'CN', // 大陸機票種類
             // end
 
-            max: 10, // 人數最高
+            max: 8, // 人數最高
             min: 1, // 人數最低
             cabinText: '經濟艙', // 艙等
             options: [], // 出發機場，目的機場選單
             isLoaded: false // 是否 AJAX 完畢判斷
         };
+        this.ClsTypeLevel = [
+            { text: '經濟艙', value: 0 },
+            { text: '商務艙', value: 1 },
+        ];
     }
 
     componentDidMount () {
@@ -168,7 +250,17 @@ class ChinaBody extends Component {
 
     // get 選單裡面的資料
     getOptionData = () => {
-        utils.fetchJsToObj(flightChinese.place, this.getData);
+        const sessionData = sessionStorage.getItem(flightChinese.place);
+        if (sessionData && utils.isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            this.getData(jsonData);
+        } else {
+            utils.fetchJsToObj(flightChinese.place, (d) => {
+                let stringifyData = JSON.stringify(d);
+                this.getData(d);
+                sessionStorage.setItem(flightChinese.place, stringifyData);
+            });
+        }
     };
     getData = data => {
         this.handleGetData(data.vCity); // 把傳過來的資料做整理
@@ -212,19 +304,17 @@ class ChinaBody extends Component {
 
     // 出發日期
     selectDate = date => {
-        let newDate = date.replace(/\-/g, '');
         this.setState({
-            sFdate: newDate
+            sFdate: date
         });
     };
 
     // 艙等
     selectCabin = val => {
-        console.log(val);
-
+        val = parseInt(val);
         this.setState({
             sClass: val,
-            cabinText: Cabin[val].text
+            cabinText: this.ClsTypeLevel[val].text
         });
     };
 
@@ -266,7 +356,14 @@ class ChinaBody extends Component {
         this.validate((isVaild, warnText) => {
             // 如果都沒有未填的選項，就 true 然後 window open
             if (isVaild) {
-                let searchVal = `sFcity=${sFcity}&sTcity=${sTcity}&sFdate=${sFdate}&sAdt=${sAdt}&sClass=${sClass}&sTktkind=${sTktkind}&sChd=${sChd}&sTairp=${sTairp}&sFairp=${sFairp}`;
+                useLocalStorage({
+                    panel: 'chineseFlight',
+                    methods: 'post',
+                    data: {
+                        sFdate
+                    }
+                });
+                let searchVal = `sFcity=${sFcity}&sTcity=${sTcity}&sFdate=${sFdate.replace(/\-/g, '')}&sAdt=${sAdt}&sClass=${sClass}&sTktkind=${sTktkind}&sChd=${sChd}&sTairp=${sTairp}&sFairp=${sFairp}`;
                 window.open('https://www.liontravel.com/webtk/webtkcn01.aspx?' + searchVal, this.props.hrefTarget);
             } else {
                 alert('請選擇' + warnText.join('、'));
@@ -294,7 +391,7 @@ class ChinaBody extends Component {
 
         return (
             <React.Fragment>
-                <div className="flight_chinese p-t-xs">
+                <div className="flight_chinese">
                     {isLoaded && options.length > 0 ? ( // AJAX load完，陣列裡有東西才開始 render
                         <React.Fragment>
                             {/* 出發機場 */}
@@ -330,17 +427,9 @@ class ChinaBody extends Component {
                             />
 
                             {/* 出發日期 */}
-                            <div className="st_rcln m-b-sm dpt">
-                                <i className="ic_rcln tooldate" />
-                                <div className="dropdown-place-holder selected breakline withIcon">
-                                    <span className="dropdown-label req breakline">
-                                        出發日期
-                                    </span>
-                                    <PcCalendar
-                                        selectDate={this.selectDate}
-                                    />
-                                </div>
-                            </div>
+                            <PcCalendar
+                                selectDate={this.selectDate}
+                            />
 
                             {/* 人數 / 艙等 */}
                             <StRnls
@@ -354,8 +443,9 @@ class ChinaBody extends Component {
                                 ContentComponent={
                                     <React.Fragment>
                                         <StRcln
-                                            option={Cabin}
-                                            placeholder="經濟艙"
+                                            option={this.ClsTypeLevel}
+                                            ClassName="peopleAndCabin"
+                                            placeholder={this.state.cabinText}
                                             label="艙等"
                                             req
                                             whenCloseCallBack={() =>
@@ -363,6 +453,7 @@ class ChinaBody extends Component {
                                                     '父層whenCloseCallBack'
                                                 )
                                             }
+                                            defaultValue={this.state.sClass}
                                             onChangeCallBack={e =>
                                                 this.selectCabin(e)
                                             }
@@ -399,6 +490,7 @@ class ChinaBody extends Component {
                                     moduleClassName="PpRcln2 m-r-xxl"
                                     events={['click', 'hover']}
                                     position={['bottom', 'horizon_center']}
+                                    width="210px"
                                 />
 
                                 <BtRcnb

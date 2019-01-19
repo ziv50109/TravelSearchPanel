@@ -110,12 +110,12 @@ class Page extends PureComponent {
         } = this.props;
 
         return (
-            <div className="nvb_content">
+            <div className="vacation_personal_mobile nvb_content">
                 <header>
                     <h3 className="txt-center page_title">關鍵字</h3>
                     <div className="search_input">
                         <IntRcln
-                            placeholder="請選擇"
+                            placeholder="請輸入產品名稱、飯店名稱或關鍵字"
                             value={inputText}
                             color="blue"
                             onChange={this.onInputChange}

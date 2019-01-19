@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Label from '../../magaele/int_rctg/components/Label/Label';
-import IcRcln from '../../magaele/ic_rcln';
 import ActRacp from '../../magaele/act_racp';
 
 // 補字選單分區的callBack

@@ -2,21 +2,25 @@
 @import '../../../magaele/core/core/mixins';
 
 .flight_taiwan{
+    ::placeholder { color: #999 !important; }
     .st_rcln {
         .ic_rcln {
             color:#999;
         }
         .dropdown-place-holder{
-            font-weight: bold;
+            border:solid 1px #bbb;
             font-size: 16px;
             color:#0077b3;
             .dropdown-label{
                 font-weight: normal;
                 font-size: 14px;
-                color:#999;
+                color:#222;
             }
 
         }
+    }
+    .ic_rcln {
+        cursor: pointer;
     }
     .icon .ic_rcln {
         font-size: 20px;
@@ -31,11 +35,12 @@
         }
     }
     .int_rcln_label{
-        color:#999;
+        color:#222;
     }
     .int_rcln_input{
         color:#0077b3;
         font-weight: bold;
+        border:none;
         &::-webkit-input-placeholder{
             color:#0077b3;
         }
@@ -53,21 +58,31 @@
                 top: 0;
             }
         }
-
+        .ic_rcln {
+            cursor: pointer;
+        }
     }
     .bor-right{
         .int_rcln_input{
-            border-right: 1px solid #e3e3e3;
+          //  border-right: 1px solid #bbb;
         }
     }
     .aroundInput{
         display: flex;
-
+        border:none;
         .int_rcln{
             &.breakline.icon{
                 padding: 0;
+                border:solid 1px #bbb;
+            }
+            &.breakline{
+                border:solid 1px #bbb;
+                border-left:none;
             }
             .int_rcln_input{
+                font-weight: normal;
+                position: relative;
+                background-color: transparent;
                 padding-top: 25px;
             }
             .int_rcln_label{
@@ -89,12 +104,11 @@
                 display: block;
             }
         }
-
     }
     .footer{
+        margin-top: 13px;
         display: flex;
         justify-content: space-between;
-        margin-top: 18px;
         .footerInfo{
             color:#24a07d;
             line-height: 1.43;
@@ -104,13 +118,14 @@
                 cursor: pointer;
             }
         }
-        button{
-            // min-width: 90px;
-        }
         & + button {
-            margin-top: 80px;
-            @media (min-width: $screen-desktop) {
-                margin-top: 0;
+            margin-top: 0;
+        }
+    }
+    &.mobile {
+        .footer {
+            & + button {
+                margin-top: 30px;
             }
         }
     }
@@ -133,7 +148,9 @@
             border-bottom: 2px solid transparent;
             margin: 0 10px -1px 0;
             text-align: center;
-            padding: 7px 8px;
+            padding: 0 8px 7px;
+            font-size: 14px;
+            line-height: 1;
             &.active{
                 color: #e10500;
                 border-color: #e10500;
@@ -145,12 +162,14 @@
     .pos-bottom{
         bottom:0;
     }
-
 }
-// .calenderPanel{
-//     padding: 41px 12px 11px 11px;
-//     .st_rnls_descendant_content_close{
-//         font-size: 25px;
-//         font-weight: bold;
-//     }
-// }
+
+// mobile 月曆不需要共五天
+.cy_rcln {
+    .confirm_btn {
+        span {
+            display: none;
+        }
+    }
+}
+

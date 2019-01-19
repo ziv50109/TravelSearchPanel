@@ -2,11 +2,16 @@
     display: flex;
     margin-bottom: 10px;
     border:1px solid #ddd;
+    cursor: default;
+    label {
+        cursor: pointer;
+    }
     .int_rcln{
         .int_rcln_input{
             color:#0077b3;
             font-weight: bold;
             border:none;
+            background-color: transparent;
             &:focus{
                 border-color:#ddd;
             }
@@ -32,10 +37,12 @@
         > select {
             padding: 0 6px;
             line-height: 1;
+            background-color: #fff;
         }
         > label {
             display: block;
             color: #aaa;
+            margin: 0;
             font-size: 16px;
             &.request:after {
                 content: '*';

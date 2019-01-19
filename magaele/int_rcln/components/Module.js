@@ -41,9 +41,9 @@ class Module extends Component {
         }
     };
 
-    handleClick = e => {
+    handleClick = (e, input) => {
         if (this.props.onClick) {
-            this.props.onClick(e, e.target.value);
+            this.props.onClick(e, e.target.value, input);
         }
     };
 
@@ -137,7 +137,7 @@ class Module extends Component {
                         onChange={this.handleChange}
                         onBlur={this.handleBlur}
                         onFocus={this.handleFocus}
-                        onClick={this.handleClick}
+                        onClick={(e, input) => this.handleClick(e, this.inputDOM)}
                         onKeyDown={this.handleKeyDown}
                         onKeyUp={this.handleKeyUp}
                         onKeyPress={this.handleKeyPress}
@@ -150,10 +150,13 @@ class Module extends Component {
 
                     {/* ifTurnOnClear 如果是 Turn 就會顯示出來 */}
                     {this.state.ifTurnOnClear && this.props.onClearValue ? (
-                        <span
-                            className="clearBtn"
+                        <div
+                            className="clearBtnWrap"
+                            onClick={this.handleClearValue}
                             onMouseDown={this.handleClearValue}
-                        />
+                        >
+                            <span className="clearBtn" />
+                        </div>
                     ) : null}
                 </React.Fragment>
             );

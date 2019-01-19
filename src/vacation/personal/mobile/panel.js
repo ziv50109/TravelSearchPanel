@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
+import { isJsonString } from '../../../../utils';
 import { vacationPersonal } from '../../../../source.config';
 import IntRcln from '../../../../magaele/int_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
@@ -50,8 +51,8 @@ class Panel extends Component {
             clskd: 0,
             noTrans: 0,
             Keywords: '',
-            FromDate: '',
-            ToDate: '',
+            FromDate: dayjs().add(3, 'days').format('YYYY-MM-DD'),
+            ToDate: dayjs().add(30, 'days').format('YYYY-MM-DD'),
             activeInput: null,
             roomListInput: '共1間，2人',
             destinationInput: '',
@@ -62,13 +63,39 @@ class Panel extends Component {
     }
 
     componentDidMount () {
-        fetch(vacationPersonal.departure)
-            .then(r => r.json())
-            .then(data => {
-                this.setState(() => ({
-                    departureData: data,
-                }));
+        const sessionData = sessionStorage.getItem(vacationPersonal.departure);
+
+        if (sessionData && isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            const departureData = this.formatDepartureData(jsonData);
+            this.setState({
+                departureData
             });
+        } else {
+            fetch(vacationPersonal.departure)
+                .then(r => r.json())
+                .then(data => {
+                    let stringifyData = JSON.stringify(data);
+                    const departureData = this.formatDepartureData(data);
+                    this.setState(() => ({
+                        departureData
+                    }));
+                    sessionStorage.setItem(vacationPersonal.departure, stringifyData);
+                });
+        }
+    }
+
+    formatDepartureData = (d) => {
+        const data = JSON.parse(d);
+        const keys = Object.keys(data);
+        if (keys) {
+            return keys.map(e => (
+                {
+                    text: data[e],
+                    value: e
+                }
+            ));
+        }
     }
 
     showNvbPage (target) {
@@ -176,16 +203,15 @@ class Panel extends Component {
         const showDestinationPage = activeInput === 'destination';
         const showKeyWordPage = activeInput === 'keyword';
         const pageVisible = showCalendarPage || showRoomPage || showDestinationPage || showKeyWordPage;
-        console.log(showDestinationPage);
+        // console.log(showDestinationPage);
         return (
             <div className="vacation_personal_mobile">
                 <div className="input_group">
                     <VacationDaparture
                         data={departureData}
-                        onChange={(e) => {
-                            const val = e.target.value;
+                        onChange={(val) => {
                             this.setState(prevState => ({
-                                'Departure': val,
+                                Departure: val,
                             }));
                         }}
                     />
@@ -290,18 +316,22 @@ class Panel extends Component {
                 <NvbRslb
                     visible={pageVisible}
                     direction="right"
+                    className="confirmBtn_span_d-no"
                 >
                     <NvbGoBack onClick={this.handleClose} />
                     {
                         showCalendarPage && (
                             <CyRcmn
+                                panelName="vacationPersonal"
                                 doubleChoose
                                 selectedStartDate={FromDate}
                                 selectedEndDate={ToDate}
                                 activeInput={activeInput}
                                 endMonth={dayjs().add(12, 'months').format('YYYY-MM')}
-                                startLabelTitle="入住日期"
-                                endLabelTitle="退房日期"
+                                startLabelTitle="最早出發日"
+                                endLabelTitle="最晚出發日"
+                                startTxt="最早"
+                                endTxt="最晚"
                                 ref={e => { this.calendar = e }}
                                 onClickConfirm={this.calendarConfirm}
                                 customDiffTxt={diffDate => {
@@ -315,7 +345,7 @@ class Panel extends Component {
                         showRoomPage && <RoomPageContent onClickConfirm={this.roomPageConfirm} />
                     }
                     <DestinationPage
-                        className={showDestinationPage ? '' : 'd-no'}
+                        className={`vacation_personal_mobile ${showDestinationPage ? '' : 'd-no'}`}
                         inputText={destinationInput}
                         placeholder={'更多目的地，請輸入關鍵字'}
                         onClickConfirm={this.destinationPageConfirm}

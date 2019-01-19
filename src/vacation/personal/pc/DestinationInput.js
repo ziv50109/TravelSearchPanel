@@ -5,16 +5,12 @@ import IntRcln from '../../../../magaele/int_rcln';
 import DtmRcfr from '../../../../magaele/dtm_rcfr';
 import IcRcln from '../../../../magaele/ic_rcln';
 import ActRajx from '../../../../magaele/act_rajx';
-import { ClickOutSide } from '../../../../utils';
+import { ClickOutSide, isJsonString } from '../../../../utils';
 import {
     transformFetchData,
     transformActFetchData,
-    CloseButton, transformArpData, transformRawProductData
+    CloseButton, transformRawProductData
 } from '../common';
-import { resolve } from 'url';
-import { timingSafeEqual } from 'crypto';
-
-const dataMap = {};
 
 class DestinationInput extends PureComponent {
     constructor (props) {
@@ -26,14 +22,15 @@ class DestinationInput extends PureComponent {
             dtmSelected: [],
             showAct: false, // 顯示補字選單
             showDtm: false, // 顯示快速選單
-            actAllData: !dataMap[vacationPersonal.destination] ? null : dataMap[vacationPersonal.destination], // 補字選單全部的資料
+            dtmData: {}, // 快速選單 fetch 回來的資料
+            actAllData: [], // 補字選單全部的資料
             dtmOrderMaps: {
                 Line: ['6', '5', '7', '3', '1', '2', '4'],
             },
             actShowData: [], // 補字選單show的資料
             airportData: [], // 補字選單機場資料區
             anotherData: [], // 補字選單第二資料區
-            airportSource: './json/UNRELEASED_AIRPORT_DATA.json', // 補字選單機場資料來源 (2018/11/21 新增需求，分類增加城市/機場)
+            // airportSource: './json/UNRELEASED_AIRPORT_DATA.json', // 補字選單機場資料來源 (2018/11/21 新增需求，分類增加城市/機場)
             dataResouce: vacationPersonal.destination, // 快速選單跟補字選單的資料來源
             anotherAPI: vacationPersonal.destinationAutoComplete, // 第二資料源 (2018/11/21 新增需求，城市/機場皆無資料則使用此 API)
             noMatchText: '很抱歉，找不到符合的項目，馬上為您搜尋其他資訊',
@@ -56,30 +53,46 @@ class DestinationInput extends PureComponent {
 
     componentDidMount () {
         const {
-            dataResouce,
-            actAllData,
-            actRules
+            dataResouce
         } = this.state;
 
-        if (actAllData !== null) return;
-        fetch(dataResouce)
-            .then(r => r.json())
-            .then(data => {
-                const dataArr = transformActFetchData(data);
-                if (actRules.length) {
-                    dataArr.map((item, index) => {
-                        item.level2 = actRules[0].title;
-                    });
-                }
-                // 把資料cache起來
-                dataMap[dataResouce] = dataArr;
-                this.setState(prevState => ({
-                    actAllData: dataArr,
-                }));
+        const sessionData = sessionStorage.getItem(dataResouce);
+        if (sessionData && isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            console.log('has data: ', JSON.parse(jsonData));
+            this.setState({
+                dtmData: transformFetchData(JSON.parse(jsonData))
             });
+            this.fetchDataToAct(jsonData);
+        } else {
+            fetch(dataResouce).then(r => r.json()).then(d => {
+                let stringifyData = JSON.stringify(d);
+                console.log('no data: ', d);
+                this.setState({
+                    dtmData: transformFetchData(JSON.parse(d))
+                });
+
+                this.fetchDataToAct(d);
+                sessionStorage.setItem(dataResouce, stringifyData);
+            });
+        }
     }
     componentDidUpdate () {
         this.props.onChange(this.state);
+    }
+    fetchDataToAct = (data) => {
+        const {
+            actRules
+        } = this.state;
+        const dataArr = transformActFetchData(data);
+        if (actRules.length) {
+            dataArr.map((item, index) => {
+                item.level2 = (item.level2 === 'only') ? actRules[0].title : item.level2;
+            });
+        }
+        this.setState(prevState => ({
+            actAllData: dataArr,
+        }));
     }
     setData = (obj) => {
         this.setState(prevState => ({ ...prevState, obj }));
@@ -131,7 +144,8 @@ class DestinationInput extends PureComponent {
                     }
                 })
                 .then(data => {
-                    arr = data && this.filterData(transformArpData(data), inputText);
+                    // arr = data && this.filterData(transformArpData(data), inputText);
+                    arr = this.filterData(this.transformData(data), inputText); // rel
 
                     if (arr.length) {
                         arrMixData = [...actShowData, ...arr];
@@ -283,10 +297,10 @@ class DestinationInput extends PureComponent {
                          -> getAirportData + transformData (setState(actShowdData + airportData))
                          -> Render (城市 + 機場總資料)
          */
-        clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-            this.getAirportData(inputText);
-        }, 500);
+        // clearTimeout(this.timer);
+        // this.timer = setTimeout(() => {
+        //     this.getAirportData(inputText);
+        // }, 500);
         this.setState(prevState => ({
             ...prevState,
             inputText,
@@ -315,7 +329,7 @@ class DestinationInput extends PureComponent {
             dtmSelected,
             showAct,
             showDtm,
-            dataResouce,
+            dtmData,
             actShowData,
             noMatchText,
             actRules,
@@ -346,15 +360,17 @@ class DestinationInput extends PureComponent {
                     <div className={dtm_wrap_classes}>
                         <CloseButton onClick={this.closMenu} />
                         <p className="txt_green">找不到選項？請輸入關鍵字查詢</p>
-                        <DtmRcfr
-                            levelKey={dtmLevelKey}
-                            onClickItem={this.onClickDtm}
-                            dataResouce={dataResouce}
-                            transformFetchData={transformFetchData}
-                            replaceRegular={/\([\w\s\)]+/g}
-                            selectedData={dtmSelected}
-                            orderMaps={dtmOrderMaps}
-                        />
+                        {Object.keys(dtmData).length &&
+                            <DtmRcfr
+                                levelKey={dtmLevelKey}
+                                onClickItem={this.onClickDtm}
+                                dataResouce={dtmData}
+                                transformFetchData={transformFetchData}
+                                replaceRegular={/\([\w\s\)]+/g}
+                                selectedData={dtmSelected}
+                                orderMaps={dtmOrderMaps}
+                            />
+                        }
                     </div>
                     <div className={act_wrap_classes}>
                         <CloseButton onClick={this.closMenu} />

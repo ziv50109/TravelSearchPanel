@@ -1,3 +1,7 @@
+.int_rcln .int_rcln_input:not(input):empty::before {
+    color: #222;
+
+}
 %act_new_item {
     font-size: 14px;
     line-height: 45px;
@@ -36,44 +40,182 @@
     pointer-events: none;
 }
 
+%border-style {
+    border: solid 1px #bbb;
+}
+
 .txt_green {
     color: #24a07d;
 }
-
-// 搜尋中
-.searching {
-    margin: 0;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: bold;
+//m版月曆btn不要有span共幾天
+.confirmBtn_span_d-no{
+    .confirm_btn{
+        span{
+            display: none !important;
+        }
+    }
 }
+// 搜尋中
+// .searching {
+//     margin: 0;
+//     padding: 10px;
+//     font-size: 16px;
+//     font-weight: bold;
+// }
 
 // for IE 取消原生select的下拉箭頭
 select::-ms-expand {
     display: none;
 }
 
+//
+.dtm_secTitle_ndec{
+    .sec_all{
+        text-decoration: none;
+        cursor: default;
+    }
+}
+//修飾m版側開中,input的clearBtn 擋住input
+.ipuCBtn_p{
+    .int_rcln_input{
 
+        padding-right: 20px;
+    }
+}
 .vacation_personal_mobile,
 .vacation_personal_pc {
     position: relative;
+    .dtm_rcfr .item{
+        vertical-align: top;
+    }
+    .dtm_rcfr .sec_all{
+        text-decoration: none !important;
+        cursor: default;
+    }
+    .int_rcln * {
+        color:#222;
+        cursor: pointer;
+        font-weight:normal ;
+
+    }
     input,
     select,
     .int_rcln_input {
+
+        border:solid 1px #bbb;
         color: #0077b3;
         font-size: 16px;
-        font-weight: bold;
+        background-color: transparent;
+
     }
     .st_rcln .dropdown-place-holder.selected {
+        border:solid 1px #bbb;
+        font-weight: normal;
         color: #0077b3;
+        padding-left: 5px;
+        .dropdown-label{
+            color:#222;
+        }
+    }
+    .st_rcln .dropdown-place-holder{
+       .dropdown-label{
+            color:#222;
+       }
     }
 
     >.bt_rcnb {
         z-index: 4;
     }
+    .dropdown-label{
+        font-weight: 100;
+    }
+    .cr_rcln{
+        .indicator{
+            border:solid 1px #bbb;
+        }
+    }
 }
 
 .vacation_personal_pc {
+     //目的地的clearBtn調整
+    height: 296px;
+    .input_group{
+        border:none;
+    }
+    >.input_group{
+        .input_compose{
+            .int_rcln{
+                .int_rcln_input{
+                    position: relative;
+                    font-weight:normal ;
+                    @extend %border-style;
+                    border-left:none;
+                }
+            }
+            .clearBtn{
+                right: 5px;
+                bottom: 8px;
+            }
+        }
+        >.cal_icon{
+            border-top:solid 1px #bbb;
+            border-bottom:solid 1px #bbb;
+        }
+    }
+    .vacation_select_group{
+        border:solid 1px #bbb;
+        border-right:none;
+        padding: 8px 0 0;
+        position: relative;
+        .strcln_custom {
+            .dropdown-place-holder.breakline {
+                border: none;
+                height: 40px;
+                line-height: 1.6;
+                padding: 0 6px;
+            }
+            &:after {
+                display: none;
+            }
+        }
+    }
+    //日曆的clearBtn調整
+    .calendar_compose{
+
+        .cal_icon{
+            border-top:solid 1px #bbb;
+            border-bottom:solid 1px #bbb;
+        }
+        .clearBtn{
+            right: 5px;
+            bottom: 8px;
+        }
+        .int_rcln_input{
+            font-weight:normal;
+        }
+        .request{
+            .int_rcln_input{
+                border:solid 1px #bbb;
+                border-left:none;
+            }
+        }
+        .icon{
+            .int_rcln_input{
+                border:solid 1px #bbb;
+                border-right:none;
+            }
+        }
+
+    }
+
+
+    .act_wrap_container{
+        width: 70%;
+        .m-place, .noMatchText, .searching{
+            padding: 7px 20px 0 10px;
+            color: #24a07d;
+        }
+    }
     >.bt_rcnb {
         position: absolute;
         right: 0;
@@ -84,13 +226,64 @@ select::-ms-expand {
             margin-top: 10px;
         }
     }
+
 }
 
 .vacation_personal_mobile {
-    // padding-bottom: 50px;
+
+    .input_group{
+        border:solid 1px #bbb;
+        .int_rcln{
+            .int_rcln_input{
+                font-weight: normal;
+            }
+        }
+        .vacation_select_group{
+            border-right:none;
+            padding: 8px 0 0;
+            position: relative;
+            .strcln_custom {
+                .dropdown-place-holder.breakline {
+                    border: none;
+                    height: 40px;
+                    line-height: 1.6;
+                    padding: 0 6px;
+                }
+                &:after {
+                    display: none;
+                }
+            }
+        }
+    }
     >.bt_rcnb {
+        margin-top: 30px;
         width: 100%;
-        margin-top: 80px;
+        margin-top: 30px;
+    }
+    .int_rcln .int_rcln_input:not(input):empty::before{
+        font-weight:normal;
+        color: #999;
+
+    }
+    .int_rcln_input {
+        position: relative;
+
+        background-color: transparent;
+    }
+    div.vacation_select_group {
+        color:#222;
+        position: relative;
+        label{
+            color:#222;
+        }
+        select {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: transparent;
+            padding-top: 18px;
+            font-weight: normal;
+        }
     }
 }
 
@@ -146,6 +339,7 @@ select::-ms-expand {
     > select {
         @extend %reset_origin_select;
         padding-left: 5em;
+        cursor: pointer;
     }
     &:before {
         content: '間數:';
@@ -174,6 +368,11 @@ select::-ms-expand {
     input {
         font-size: 16px;
     }
+    .dropdown-place-holder.selected{
+        .dropdown-label{
+            line-height: 38px;
+        }
+    }
 }
 
 // 各欄位組合component
@@ -190,13 +389,18 @@ select::-ms-expand {
         z-index: 15;
         .close_btn {
             position: absolute;
-            right: 5px;
-            top: 5px;
+            top: 2px;
+            right: 2px;
             z-index: 1;
+            padding: 8px 8px 4px;
             background-color: transparent;
             border: none;
             font-weight: bold;
             outline: none;
+            svg {
+                width: 16px;
+                height: 16px;
+            }
         }
     }
 }
@@ -205,6 +409,7 @@ select::-ms-expand {
 .act_wrap_container {
     width: 450px;
     overflow-y: auto;
+    min-height: 38px;
     max-height: 535px;
     &::-webkit-scrollbar {
         width: 6px;
@@ -241,6 +446,12 @@ select::-ms-expand {
 .room_list_wrap_container {
     width: 700px;
     padding: 15px;
+    box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+    .int_rcln_input,.room_count_select select,.children_age_select select{
+        color: #222;
+        font-weight: normal;
+
+    }
     > .st_rcln {
         width: 370px;
     }
@@ -248,7 +459,7 @@ select::-ms-expand {
 
 // pc版更多搜尋選項樣式
 .moreSearch {
-    margin-top: 10px;
+    margin-top: 7px;
     >.show_text {
         cursor: pointer;
         margin: 0;
@@ -261,7 +472,7 @@ select::-ms-expand {
         font-size: 12px;
         margin-left: 5px;
         transition: transform 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
-        transform: rotate(0);
+        transform: rotate(180deg) translateY(2px);
     }
     &.active {
         .moreSeach_content {
@@ -269,7 +480,7 @@ select::-ms-expand {
             display: block;
         }
         .control_arrow {
-            transform: rotate(180deg) translateY(2px);
+            transform: rotate(0);
         }
     }
 }
@@ -302,6 +513,7 @@ select::-ms-expand {
             margin-bottom: 0;
         }
         .room_count_title {
+            margin: 0px;
             line-height: 30px;
             margin-right: 15px;
         }
@@ -326,6 +538,12 @@ select::-ms-expand {
         }
         .children_age_select{
             flex: 0 0 70px;
+        }
+    }
+    .wrap_container {
+        padding: 16px 14px 0;
+        .txt_green {
+            margin-bottom: 10px;
         }
     }
 }

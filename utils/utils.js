@@ -54,6 +54,28 @@ function getNowMonth () {
     return new Date(new Date().getFullYear(), new Date().getMonth(), 1, 8).toISOString().slice(0, 7);
 }
 
+function addDate (startDate, plusDay) {
+    const ONE_DAY = 86400000;
+    const stringDate = (n) => (n < 10 ? '0' + n : String(n));
+
+    const startDay = new Date(startDate).getTime();
+    const newDate = new Date(startDay + ONE_DAY * plusDay);
+    const year = stringDate(newDate.getFullYear());
+    const month = stringDate(newDate.getMonth() + 1);
+    const day = stringDate(newDate.getDate());
+    const all = year + month + day;
+    return [all, year, month, day];
+}
+
+function isJsonString (str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
 const utils = {
     fetchJsToObj: fetchJsToObj,
     findHighestZIndex: findHighestZIndex,
@@ -61,7 +83,9 @@ const utils = {
     toQueryString: toQueryString,
     getYearAndMonth: getYearAndMonth,
     getNowMonth: getNowMonth,
+    addDate: addDate,
+    isJsonString: isJsonString
 };
 
-export { fetchJsToObj, findHighestZIndex, getDomPosition, toQueryString, getYearAndMonth, getNowMonth };
+export { fetchJsToObj, findHighestZIndex, getDomPosition, toQueryString, getYearAndMonth, getNowMonth, addDate, isJsonString };
 export { utils as default };

@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { fetchJsToObj, ClickOutSide } from '../../../utils';
+import { ClickOutSide } from '../../../utils';
 import DtmRcfr from '../../../magaele/dtm_rcfr';
 import ActRacp from '../../../magaele/act_racp';
 import IntRcln from '../../../magaele/int_rcln';
@@ -32,11 +32,11 @@ const Label = ({ text, removeData }) => {
     return (
         <p className="dtm_rcfr-selected" onClick={removeData}>
             <span title={text}>{text}</span>
-            <i><svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg></i>
+            <i><svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg></i>
         </p>
     );
 };
-class WrapperDtmRcln extends Component {
+class WrapperDtmRcln extends PureComponent {
     static defaultProps = {
         max: 3,
         minimumStringQueryLength: 2,
@@ -73,42 +73,41 @@ class WrapperDtmRcln extends Component {
 
     constructor (props) {
         super(props);
-        this.searchInput = React.createRef();
         this.state = {
+            fetchData: [],
             keyword: '',
             showDtm: false,
             showAct: false
         };
-        this.fetchData = [];
     }
-    componentDidMount () {
-        this.getData(this.props.fetchPath);
+
+    componentDidUpdate (prevProps, prevState) {
+        prevProps.travelDataSource !== this.props.travelDataSource && this._getDataCallBack(this.props.travelDataSource);
     }
-    // fetch data
-    getData = (source) => {
-        if (source.indexOf('.json') !== -1) { // 若檔案格式為json
-            fetch(source, {
-                method: 'GET',
-            }).then(response => {
-                return response.json();
-            }).then(data => {
-                // fetchObject[source] = data; // 把data存起來,若下次再fetch相同網址直接取用就好,不用再發送http request
-                this._getDataCallBack(data);
-            });
-        } else {
-            fetchJsToObj(this.props.fetchPath, (data) => {
-                this._getDataCallBack(data);
-            });
-        }
-    }
-    // 處理 fetch 回來的 data
+
+    // 處理父層 fetch 回來的 data
     _getDataCallBack = (data) => {
         const { vLine, vLinetravel, vLinewebarea } = data;
         let arr = [];
+        const _level3 = (key1, key2) => {
+            for (let key3 in vLinewebarea[key2]) {
+                if (vLinewebarea[key2].hasOwnProperty(key3)) {
+                    arr.push({
+                        vLine: key1,
+                        vLinetravel: key2,
+                        vLinewebarea: key3,
+                        vLineText: vLine[key1],
+                        vLinetravelText: vLinetravel[key1][key2],
+                        text: `${vLinewebarea[key2][key3]}`,
+                        value: `${key1}-${key2}-${key3}`
+                    });
+                }
+            }
+        };
         for (let key1 in vLine) {
-            if (Object.prototype.hasOwnProperty.call(vLine, key1)) {
+            if (vLine.hasOwnProperty(key1)) {
                 for (let key2 in vLinetravel[key1]) {
-                    if (Object.prototype.hasOwnProperty.call(vLinetravel[key1], key2)) {
+                    if (vLinetravel[key1].hasOwnProperty(key2)) {
                         arr.push({
                             vLine: key1,
                             vLinetravel: key2,
@@ -118,27 +117,16 @@ class WrapperDtmRcln extends Component {
                             text: key2 === '_' ? vLine[key1] : vLinetravel[key1][key2],
                             value: `${key1}-${key2}-_`
                         });
-                        (() => {
-                            for (let key3 in vLinewebarea[key2]) {
-                                if (Object.prototype.hasOwnProperty.call(vLinewebarea[key2], key3)) {
-                                    arr.push({
-                                        vLine: key1,
-                                        vLinetravel: key2,
-                                        vLinewebarea: key3,
-                                        vLineText: vLine[key1],
-                                        vLinetravelText: vLinetravel[key1][key2],
-                                        text: `${vLinewebarea[key2][key3]}`,
-                                        value: `${key1}-${key2}-${key3}`
-                                    });
-                                }
-                            }
-                        })();
+                        _level3(key1, key2);
                     }
                 }
             }
         }
-        this.fetchData = arr.filter(item => item.text.indexOf('不限') === -1);
-        this.forceUpdate();
+
+        let newArr = arr.filter(item => item.text.indexOf('不限') === -1);
+        this.setState({
+            fetchData: newArr
+        });
     }
     // 通知 parent component data 更新
     emitPushData = (data) => {
@@ -146,29 +134,17 @@ class WrapperDtmRcln extends Component {
     }
 
     handleOpenMenu = () => {
-        this.setState({
+        !this.state.showDtm && this.setState({
             showAct: false,
             showDtm: true
         });
     }
     handleCloseMenu = () => {
-        if (this.isMouseDown) return;
         this.setState({
             showAct: false,
             showDtm: false,
             keyword: ''
         });
-    }
-    handleMouseDown = () => {
-        this.isMouseDown = true;
-    }
-    handleMouseUp = () => {
-        this.isMouseDown = false;
-    }
-    // 通知 parent component 移除 data
-    handleEmitRemoveData = (e, data) => {
-        e.stopPropagation();
-        this.emitPushData(data);
     }
 
     render () {
@@ -178,10 +154,11 @@ class WrapperDtmRcln extends Component {
             minimumStringQuery,
             noMatchText,
             sublabel,
-            fetchPath,
-            selectedData
+            selectedData,
+            travelDataSource
         } = this.props;
         const {
+            fetchData,
             keyword,
             showAct,
             showDtm
@@ -195,7 +172,11 @@ class WrapperDtmRcln extends Component {
             } else {
                 text = `${item.text}-${item.vLinetravelText}`;
             }
-            return <Label key={item.value} text={text} removeData={(e) => this.handleEmitRemoveData(e, item)} />;
+            return <Label
+                key={item.value}
+                text={text}
+                removeData={() => this.emitPushData(item)}
+            />;
         });
 
         // DtmRcfr highlight
@@ -210,7 +191,6 @@ class WrapperDtmRcln extends Component {
                         {showText}
                     </div>
                     <IntRcln
-                        ref={this.searchInput}
                         placeholder={placeholder}
                         onFocus={this.handleOpenMenu}
                         value={keyword}
@@ -234,7 +214,7 @@ class WrapperDtmRcln extends Component {
                 </div>
                 <ActRacp
                     InputIsFocus={showAct}
-                    url={this.fetchData}
+                    url={fetchData}
                     minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
                     minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
                     searchKeyWord={keyword} // 傳入篩選的字串
@@ -249,8 +229,8 @@ class WrapperDtmRcln extends Component {
                         } else {
                             this.handleCloseMenu();
                         }
-                    }} // 鍵盤上下鍵改變選取項目
-                    emitSecondData={(d) => {
+                    }}
+                    emitSecondData={(d) => { // 按任意處觸發的function，回傳目前搜尋結果
                         if (keyword.length >= minimumStringQueryLength && d.length > 0) {
                             this.emitPushData(d[0]);
                             this.setState({
@@ -259,7 +239,7 @@ class WrapperDtmRcln extends Component {
                                 showDtm: true
                             });
                         }
-                    }}//若補字未選擇即離開選單,直接選擇補字選單第一項
+                    }}
                     changeKey={actRacpChangeKey}
                     catalogue={catalogueCallBack}
                 />
@@ -269,28 +249,19 @@ class WrapperDtmRcln extends Component {
                         className="dtm_rcfr-close_btn"
                         onClick={this.handleCloseMenu}
                     >
-                        <svg viewBox="0 0 10 10"><use href="#dtm_rcfr-x" /></svg>
+                        <svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg>
                     </span>
-                    <DtmRcfr
-                        levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
-                        orderMaps={{
-                            vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
-                        }}
-                        onClickItem={this.emitPushData}
-                        dataResouce={fetchPath}
-                        selectedData={selected}
-                        transformFetchData={(d) => {
-                            if (typeof d === 'string') {
-                                let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
-                                let jsonVariable = JSON.parse('{' + newVariable + '}');
-                                delete jsonVariable.vLine._;
-                                delete jsonVariable.vLinetravel._;
-                                return jsonVariable;
-                            } else {
-                                return d;
-                            }
-                        }}
-                    />
+                    {
+                        Object.keys(travelDataSource).length && <DtmRcfr
+                            levelKey={['vLine', 'vLinetravel', 'vLinewebarea']}
+                            orderMaps={{
+                                vLine: ['_6', '_5', '_7', '_3', '_1', '_4', '_2', '_9']
+                            }}
+                            onClickItem={this.emitPushData}
+                            selectedData={selected}
+                            dataResouce={travelDataSource}
+                        />
+                    }
                 </div>
             </ClickOutSide>
         );

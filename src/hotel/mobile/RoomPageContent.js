@@ -198,8 +198,27 @@ class RoomPageContent extends PureComponent {
     componentDidMount () {
         this.props.changeSum(this.state);
     }
-    componentDidUpdate () {
-        this.props.changeSum(this.state);
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.Rooms !== this.props.Rooms) {
+            this.updatePanelRooms();
+        }
+        if (prevState !== this.state) {
+            this.props.changeSum(this.state);
+        }
+    }
+
+    updatePanelRooms = () => {
+        const { Rooms } = this.props;
+
+        const RoomsLength = Rooms.length;
+        const AdultQty = Rooms.map(e => e.AdultQty || 0).reduce((a, b) => a + b);
+        const ChildQty = Rooms.map(e => e.ChildQty || 0).reduce((a, b) => a + b);
+        const inputText = `共${RoomsLength}間，${AdultQty}位大人、${ChildQty}位小孩`;
+
+        this.setState({
+            Rooms,
+            inputText
+        });
     }
 
     changeRoomCount = (value) => {
@@ -207,19 +226,24 @@ class RoomPageContent extends PureComponent {
             Rooms,
         } = this.state;
         const count = Number(value);
-
+        const oldRooms = JSON.parse(JSON.stringify(Rooms));
         const dataTemplate = {
-            AdultQty: 1,
+            AdultQty: 2,
             ChildAges: [],
             ChildQty: 0
         };
 
         if (count === Rooms.length) return;
 
-        const dataArray = [];
-
-        for (let i = 0; i < count; i++) {
-            dataArray.push(dataTemplate);
+        let dataArray = JSON.parse(JSON.stringify(oldRooms));
+        if (oldRooms.length < count) {
+            for (let i = 0; i < count - oldRooms.length; i++) {
+                dataArray.push(dataTemplate);
+            }
+        } else {
+            for (let i = 0; i < oldRooms.length - count; i++) {
+                dataArray.pop();
+            }
         }
 
         const inputText = calcShowText(dataArray);

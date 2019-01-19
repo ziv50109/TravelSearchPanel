@@ -10,18 +10,18 @@ $classname: "cy_rcln";
 $betweenbackground-color:rgba(255, 139, 136, .2);
 $border-color: #e3e3e3;
 $red: #e10500;
-$top_gap: 120px; 
+$top_gap: 120px;
 $date_box_width_mobile: 45px;
 $date_box_width_pc: 40px;
 $date_box_height_pc: 40px;
- 
+
 .#{$classname} {
      height: 100%;
      background-color: #fff;
      text-align: center;
      padding-top: $top_gap;
      padding-bottom: 60px;
- 
+
     .calendar_content {
         overflow-y: auto;
         height: 100%;
@@ -31,7 +31,7 @@ $date_box_height_pc: 40px;
         border-top: 1px solid $border-color;
         border-bottom: 1px solid $border-color;
         background-color: #fff;
-        
+
         &:first-child{
             border-top: 10px solid $border-color;
         }
@@ -103,7 +103,7 @@ $date_box_height_pc: 40px;
             background-color: $betweenbackground-color;
             background-image: linear-gradient(to left, #fff 50%, transparent 50%);
         }
-        &.active {
+        &.active, &.active:hover, &.disabled.active:hover {
             .date_box {
                 background-color: #ff615d;
                 color: #fff;
@@ -117,7 +117,7 @@ $date_box_height_pc: 40px;
                 background-color: transparent;
             }
         }
-    } 
+    }
 
     .date_box {
         display: flex;
@@ -247,7 +247,7 @@ $date_box_height_pc: 40px;
         line-height: 40px;
     }
 }
- 
+
 @media (min-width: 980px) {
     .#{$classname} {
         display: inline-flex;

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import IntGpct from '../../../magaele/int_gpct';
-import StRcln from '../../../magaele/st_rcln';
+// import StRcln from '../../../magaele/st_rcln';
 import { isArray } from 'util';
 
 // 從間數人數物件轉字串
@@ -20,36 +20,36 @@ function calcShowText (Rooms) {
 }
 
 // 間數options
-const roomCount = [
-    {
-        text: '共1間',
-        value: 1,
-    },
-    {
-        text: '共2間',
-        value: 2,
-    },
-    {
-        text: '共3間',
-        value: 3,
-    },
-    {
-        text: '共4間',
-        value: 4,
-    },
-    {
-        text: '共5間',
-        value: 5,
-    },
-    {
-        text: '共6間',
-        value: 6,
-    },
-    {
-        text: '共7間',
-        value: 7,
-    }
-];
+// const roomCount = [
+//     {
+//         text: '共1間',
+//         value: 1,
+//     },
+//     {
+//         text: '共2間',
+//         value: 2,
+//     },
+//     {
+//         text: '共3間',
+//         value: 3,
+//     },
+//     {
+//         text: '共4間',
+//         value: 4,
+//     },
+//     {
+//         text: '共5間',
+//         value: 5,
+//     },
+//     {
+//         text: '共6間',
+//         value: 6,
+//     },
+//     {
+//         text: '共7間',
+//         value: 7,
+//     }
+// ];
 
 const ChildrenAgeSelect = ({
     onchange,
@@ -196,40 +196,61 @@ class RoomPageContent extends PureComponent {
     componentDidMount () {
         this.props.changeSum(this.state);
     }
-    componentDidUpdate () {
-        this.props.changeSum(this.state);
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.Rooms !== this.props.Rooms) {
+            this.updatePanelRooms();
+        }
+        if (prevState !== this.state) {
+            this.props.changeSum(this.state);
+        }
     }
 
-    changeRoomCount = (value) => {
+    updatePanelRooms = () => {
+        const { Rooms } = this.props;
+
+        const RoomsLength = Rooms.length;
+        const AdultQty = Rooms.map(e => e.AdultQty || 0).reduce((a, b) => a + b);
+        const ChildQty = Rooms.map(e => e.ChildQty || 0).reduce((a, b) => a + b);
+        const inputText = `共${RoomsLength}間，${AdultQty}位大人、${ChildQty}位小孩`;
+
+        this.setState({
+            Rooms,
+            inputText
+        });
+    }
+
+    changeRoomCount = (e) => {
         const {
             Rooms,
         } = this.state;
+        const value = e.target.value;
         const count = Number(value);
-
+        const oldRooms = JSON.parse(JSON.stringify(Rooms));
         const dataTemplate = {
-            AdultQty: 1,
+            AdultQty: 2,
             ChildAges: [],
             ChildQty: 0
         };
 
         if (count === Rooms.length) return;
 
-        const dataArray = [];
-
-        for (let i = 0; i < count; i++) {
-            dataArray.push(dataTemplate);
+        let dataArray = JSON.parse(JSON.stringify(oldRooms));
+        if (oldRooms.length < count) {
+            for (let i = 0; i < count - oldRooms.length; i++) {
+                dataArray.push(dataTemplate);
+            }
+        } else {
+            for (let i = 0; i < oldRooms.length - count; i++) {
+                dataArray.pop();
+            }
         }
 
         const inputText = calcShowText(dataArray);
-
-        this.setState(prevState => {
-            return {
-                ...prevState,
-                inputText,
-                Rooms: dataArray,
-            };
-        });
-
+        this.setState(prevState => ({
+            ...prevState,
+            inputText,
+            Rooms: dataArray,
+        }));
     }
 
     onClickAdd = (roomCount, target) => {
@@ -349,35 +370,37 @@ class RoomPageContent extends PureComponent {
         } = this.state;
 
         return (
-            <div className="nvb_content">
-                <div className="page_content">
-                    <StRcln
-                        option={roomCount}
-                        placeholder="請選擇"
-                        label="間數:"
-                        defaultValue={Rooms.length}
-                        onChangeCallBack={this.changeRoomCount}
-                        ClassName="m-b-sm"
-                    />
-                    {
-                        Rooms.map((v, i) => (
-                            <RoomLitSection
-                                key={i}
-                                roomCount={i}
-                                AdultQty={v.AdultQty}
-                                ChildAges={v.ChildAges}
-                                maxAdult={maxAdult}
-                                maxChild={maxChild}
-                                onClickAdd={this.onClickAdd} // 點選增加人數
-                                onClickMinus={this.onClickMinus} // 點選減少人數
-                                onInputChange={this.handleChange} // 手動輸入人數
-                                onInputBlur={this.handleBlur}
-                                onChangeChildAge={this.onChangeChildAge} // 小孩年齡change
-                            />
-                        ))
-                    }
-                </div>
-            </div>
+            <React.Fragment>
+                <label className="hotel_roomList">
+                    <select onChange={this.changeRoomCount} defaultValue={Rooms.length}>
+                        <option value="1">共1間</option>
+                        <option value="2">共2間</option>
+                        <option value="3">共3間</option>
+                        <option value="4">共4間</option>
+                        <option value="5">共5間</option>
+                        <option value="6">共6間</option>
+                        <option value="7">共7間</option>
+                    </select>
+                </label>
+                {
+                    Rooms.map((v, i) => (
+                        <RoomLitSection
+                            key={i}
+                            roomCount={i}
+                            AdultQty={v.AdultQty}
+                            ChildAges={v.ChildAges}
+                            maxAdult={maxAdult}
+                            maxChild={maxChild}
+                            onClickAdd={this.onClickAdd} // 點選增加人數
+                            onClickMinus={this.onClickMinus} // 點選減少人數
+                            onInputChange={this.handleChange} // 手動輸入人數
+                            onInputBlur={this.handleBlur}
+                            onChangeChildAge={this.onChangeChildAge} // 小孩年齡change
+                        />
+                    ))
+                }
+                <p style={{ color: '#24a07d' }}>※單次訂購提供相同房型，相同房型不同入住人數依選購的專案售價。</p>
+            </React.Fragment>
         );
     }
 }

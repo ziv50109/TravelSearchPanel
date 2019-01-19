@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
-import { flightInternational } from '../../../../source.config';
 import './pc.scss';
 import Header from './components/header';
 import International from './container/International';
 import today from 'dayjs';
+import { useLocalStorage } from '../../../../utils';
 
 class Panel extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            rtow: 0, // 頁數
-            depdate1: '', // 去程日期
+            depdate1: today().format('YYYY-MM-DD'), // 去程日期
             depdate2: '', // 回程日期
             clstype: 1, // 艙等
             notrans: 'F', // 是否直飛(不轉機)
-            haveseat: 'F', // 只找有機位
+            haveseat: 1, // 只找有機位
             nonprefertrans: '', // 排除轉機國家
             sourcesystem: 1, // 廉價航空
             nonprefertransnight: 'F', // 排除過夜轉機航班
@@ -39,7 +38,6 @@ class Panel extends Component {
             dtnSelectedData: [],
             // 人數、艙等
             totalNum: 1, // 人數總數
-            clstypeText: '經濟艙', // 艙等文字
             // 單月曆 focus
             focus1: false,
             // 雙月曆 focus
@@ -51,66 +49,165 @@ class Panel extends Component {
                 dcCleanBtn2: false
             }
         };
-        this.fetchPath = flightInternational.place;
     }
+
+    componentDidMount () {
+        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
+        useLocalStorage(
+            {
+                panel: 'internationalFlight',
+                methods: 'get'
+            },
+            ({ depdate1, depdate2, dptSelectedData, dtnSelectedData, multiItems, multiItemsDpt, multiItemsDtn, adt, chd, inf, clstype }) => {
+                let nowday = today().format('YYYY-MM-DD');
+                let depDate = depdate1 && depdate1 >= nowday ? depdate1 : nowday;
+                let dtnDate = depdate2 ? (depdate2 >= nowday ? depdate2 : nowday) : '';
+                let multDate = multiItems ? (multiItems >= nowday ? multiItems : nowday) : '';
+                let dptPlace = dptSelectedData ? dptSelectedData : [];
+                let dtnPlace = dtnSelectedData ? dtnSelectedData : [];
+                let multDpt = multiItemsDpt ? multiItemsDpt : '';
+                let multDtn = multiItemsDtn ? multiItemsDtn : '';
+                clone[0].selectedStartDate = multDate;
+                clone[0].startInputValue = multDate;
+                clone[0].dptSelectedData = multDpt;
+                clone[0].dtnSelectedData = multDtn;
+                this.setState(
+                    {
+                        depdate1: depDate,
+                        depdate2: dtnDate,
+                        dptSelectedData: dptPlace,
+                        dtnSelectedData: dtnPlace,
+                        multiItems: clone,
+                        adt,
+                        chd,
+                        inf,
+                        clstype
+                    }
+                );
+            }
+        );
+    }
+
 
     // 上面的 tab 切換
     tripChange = target => {
-        this.setState({
-            rtow: target
-        });
+        this.props.emitRtow && this.props.emitRtow(target);
     };
+
+    // 修改 state 參數
+    setStateVal = val => {
+        this.setState(val);
+    };
+
+    // 轉換日期等等方便
+    transferDate (date) {
+        return Date.parse(date).valueOf();
+    }
+
+    // 判斷 multi 有沒有值
+    ifMultiHaveVal () {
+        const { multiItems } = this.state;
+        for (let i = 0; i < multiItems.length; i++) {
+            if (multiItems[i].startInputValue !== '') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    // 給 addItem 用的，來判斷開始日期
+    judgeStartDate (arr) {
+        const { depdate1 } = this.state;
+        let max;
+        for (let i = arr.length - 1; i >= 0; i--) {
+            if (arr[i].startInputValue !== '') {
+                max = arr[i].startInputValue;
+                break;
+            } else {
+                max = depdate1;
+            }
+        }
+        return max;
+    }
 
     // 多目的地 append item
     addItem = () => {
         const { multiItems } = this.state;
-        let arr = [...multiItems];
-        let newId = Math.floor(Math.random() * 500);
-        let maxDate = '';
-        const max = arr[0].startInputValue;
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i].startInputValue >= max) {
-                maxDate = arr[i].startInputValue;
-            }
-        }
+        let arr = multiItems;
 
         // 超過 4 個時不能再新增了
         if (arr.length >= 5) {
             return false;
-        } else {
-            arr.push({
-                id: newId,
-                activeStart: maxDate.substr(0, 7),
-                startDate: maxDate,
-                selectedStartDate: maxDate,
-                startInputValue: maxDate,
-                onFocus: false,
-
-                dptSelectedData: [],
-                dtnSelectedData: [],
-
-                cleanBtn: false,
-            });
         }
+        arr.push({
 
+            // id: multiItems.length + 1,
+            // startDate: this.judgeStartDate(arr),
+            // activeStart: this.judgeStartDate(arr).substr(0, 7),
+            // selectedStartDate: this.judgeStartDate(arr),
+            // startInputValue: this.judgeStartDate(arr),
+
+            id: arr[arr.length - 1].id + 1,
+            startDate: this.judgeStartDate(arr),
+            activeStart: this.judgeStartDate(arr).substr(0, 7),
+            selectedStartDate: '',
+            startInputValue: '',
+
+            onFocus: false,
+            dptSelectedData: [],
+            dtnSelectedData: [],
+            cleanBtn: false,
+        });
         this.setState({ multiItems: arr });
     };
 
     // 多目的地減少按鈕
-    minusItem = nowId => {
+    minusItem = (nowId, nowIndex) => {
         const { multiItems } = this.state;
         let arr = [...multiItems];
+
         let newArr = arr.filter(item => {
             if (nowId === item.id) {
-                // 假如點擊的 id 跟我目前 state 的陣列裡的 id 相同我就不要
                 return false;
             } else {
                 return true;
             }
         });
 
+        for (let i = 0; i < newArr.length; i++) {
+            if (typeof newArr[i + 1] !== 'undefined') {
+                newArr[i + 1].activeStart = newArr[i].activeStart;
+                newArr[i + 1].startDate = newArr[i].selectedStartDate ? newArr[i].selectedStartDate : newArr[i].startDate;
+            }
+        }
+
         this.setState({ multiItems: newArr });
     };
+
+    // 減少按鈕點下時 陣列重新整理
+    restMulti () {
+        const { multiItems, depdate1 } = this.state;
+        for (let i = 0; i < multiItems.length; i++) {
+            if (typeof multiItems[i - 1] === 'undefined') {
+                if (depdate1 !== '') {
+                    multiItems[i].startDate = depdate1;
+                } else {
+                    multiItems[i].startDate = today().format('YYYY-MM-DD');
+                }
+            } else {
+                if (multiItems[i - 1].startInputValue !== '') {
+                    multiItems[i].startDate = multiItems[i - 1].startInputValue;
+                    multiItems[i].activeStart = multiItems[i - 1].startInputValue.substr(0, 7);
+                } else {
+                    multiItems[i].startDate = multiItems[i - 1].startDate;
+                    multiItems[i].activeStart = multiItems[i - 1].startDate.substr(0, 7);
+                }
+            }
+        }
+
+        this.setState({ multiItems });
+    }
 
     // focus 狀態時 calendar 打開
     onFocusInput = (nowId) => {
@@ -143,33 +240,6 @@ class Panel extends Component {
         this.setState({ multiItems: arr });
     }
 
-    // 多目的地去程日期
-    multipleClickDate = (date, nowId, nowIndex) => {
-        const { multiItems } = this.state;
-        const arr = multiItems;
-
-        arr.forEach(ele => {
-            if (nowId === ele.id) {
-                ele.selectedStartDate = date;
-                ele.startInputValue = date;
-                ele.onFocus = false;
-            }
-        });
-
-        for (let i = nowIndex + 1; i < arr.length; i++) {
-            if (arr[nowIndex].startInputValue.replace(/\-/g, ' ') > arr[i].startInputValue.replace(/\-/g, ' ')) { // 點擊當下的日期如果大於下面
-                arr[i].startInputValue = arr[nowIndex].startInputValue;
-                arr[i].selectedStartDate = arr[nowIndex].startInputValue;
-                arr[i].startDate = arr[nowIndex].startInputValue;
-                arr[i].activeStart = arr[nowIndex].startInputValue.substr(0, 7);
-            } else {
-                arr[i].startDate = arr[0].startInputValue;
-            }
-        }
-
-        this.setState({ multiItems: arr });
-    }
-
     // 多目的地 清除去程
     multiClearValue = (nowId) => {
         const { multiItems } = this.state;
@@ -188,37 +258,87 @@ class Panel extends Component {
     multiBlur = (nowId) => {
         const { multiItems } = this.state;
         let arr = multiItems;
-        arr.forEach(ele => {
-            if (nowId === ele.id) {
-                ele.cleanBtn = false;
-            }
-        });
+        let newDate;
 
+        for (let i = 0; i < arr.length; i++) {
+            if (nowId === arr[i].id) {
+                newDate = this.checkDate(arr[i].startInputValue);
+                let inputDate;
+                if (newDate >= arr[i].selectedStartDate && newDate >= arr[i].startDate) {
+                    inputDate = newDate;
+                } else if (arr[i].selectedStartDate === '') {
+                    inputDate = arr[i].selectedStartDate;
+                } else {
+                    inputDate = '';
+                }
+                arr[i].startInputValue = inputDate;
+                arr[i].selectedStartDate = inputDate;
+                arr[i].cleanBtn = false;
+            }
+            if (typeof arr[i + 1] !== 'undefined') {
+                if (arr[i].selectedStartDate !== '') {
+                    arr[i + 1].startDate = arr[i].selectedStartDate;
+                } else {
+                    arr[i + 1].startDate = arr[i].startDate;
+                }
+            }
+        }
         this.setState({ multiItems: arr });
     }
 
     // 多目的地第一個 item
     clickDate = (date) => {
         const { multiItems } = this.state;
-        const arr = multiItems;
-        arr.forEach((ele) => {
-            if (date.depdate1.replace(/\-/g, '') >= ele.startInputValue.replace(/\-/g, '')) { // 如果第一個item日期大於所有的item就變更
-                ele.startDate = date.depdate1;
-                ele.selectedStartDate = date.depdate1;
-                ele.startInputValue = date.depdate1;
-                ele.activeStart = date.depdate1.substr(0, 7); // 只取年，月 ex: 2018-12
+        const transferDepdate1 = this.transferDate(date.depdate1);
+        multiItems.forEach((ele) => {
+            const multi = this.transferDate(ele.startInputValue);
+            if (!isNaN(multi)) {
+                for (let i = 0; i < multiItems.length; i++) {
+                    if (transferDepdate1 >= multi) {
+                        ele.startInputValue = date.depdate1;
+                        ele.selectedStartDate = date.depdate1;
+                        ele.startDate = date.depdate1;
+                    } else {
+                        multiItems[0].startDate = date.depdate1;
+                    }
+                }
             } else {
-                ele.activeStart = date.depdate1.substr(0, 7);
+                // ele.startInputValue = date.depdate1;
+                // ele.startInputValue = date.depdate1;
+                ele.selectedStartDate = date.depdate1;
                 ele.startDate = date.depdate1;
             }
         });
-        this.setState({ depdate1: date.depdate1, focus1: date.focus1, multiItems: arr });
+
+        this.setState({ depdate1: date.depdate1, focus1: date.focus1, multiItems });
     }
 
-    // 修改 state 參數
-    setStateVal = val => {
-        this.setState(val);
-    };
+    // 多目的地去程日期
+    multipleClickDate = (date, nowId, nowIndex) => {
+        const { multiItems } = this.state;
+        multiItems.forEach(ele => {
+            if (nowId === ele.id) {
+                ele.selectedStartDate = date;
+                ele.startInputValue = date;
+                ele.onFocus = false;
+            }
+        });
+
+        // 目前點到的去程日期，跟其他日期做比較
+        for (let i = nowIndex + 1; i < multiItems.length; i++) {
+            const nowMulti = this.transferDate(multiItems[nowIndex].startInputValue);
+            const otherMulti = this.transferDate(multiItems[i].startInputValue);
+            if (nowMulti >= otherMulti) {
+                multiItems[i].startInputValue = date;
+                multiItems[i].selectedStartDate = date;
+                multiItems[i].startDate = date;
+            } else {
+                multiItems[i].startDate = date;
+            }
+        }
+
+        this.setState({ multiItems });
+    }
 
     // 雙月曆按日期
     dcClickDate = (date) => {
@@ -226,11 +346,13 @@ class Panel extends Component {
             dcActiveInput,
             depdate1,
         } = this.state;
-
         const isStart = (dcActiveInput === 'start');
-        const startDateValue = isStart ? date : depdate1;
-        const endDateValue = isStart ? '' : date;
-
+        let startDateValue = isStart ? date : depdate1;
+        let endDateValue = isStart ? '' : date;
+        if (endDateValue < startDateValue && !isStart) {
+            startDateValue = endDateValue;
+            endDateValue = '';
+        }
         this.setState({
             dcActiveInput: isStart ? 'end' : null,
             depdate1: startDateValue,
@@ -241,6 +363,7 @@ class Panel extends Component {
     // 雙月曆 focus 的時候
     dcInputFocus = (val, key) => {
         const { depdate1, depdate2, clearBtn } = this.state;
+        let isStart = (val === 'start');
         if (key === 'depdate1') {
             if (depdate1 !== '') {
                 clearBtn['dcCleanBtn1'] = true;
@@ -256,8 +379,10 @@ class Panel extends Component {
                 clearBtn['dcCleanBtn2'] = false;
             }
         }
-
-        this.setState({ dcActiveInput: val, clearBtn });
+        this.setState({
+            dcActiveInput: val, clearBtn,
+            startDate: isStart ? today().format('YYYY-MM-DD') : depdate1
+        });
     }
 
     // 單月曆 focus 的時候
@@ -271,9 +396,89 @@ class Panel extends Component {
     }
 
     singleOnBlur = (key) => {
-        const { clearBtn } = this.state;
+        console.log('is blur', key);
+        const { clearBtn, depdate1, dcActiveInput } = this.state;
+        let newDate = this.checkDate();
         clearBtn[key] = false;
-        this.setState({ clearBtn });
+
+        if (dcActiveInput !== 'end') {
+            this.setState({
+                clearBtn,
+                depdate1: newDate ? newDate : (clearBtn[key] ? today().format('YYYY-MM-DD') : '')
+            });
+        } else {
+            this.setState({
+                clearBtn,
+                depdate2: newDate && newDate >= depdate1 ? newDate : '',
+                startDate: depdate1
+            });
+        }
+    }
+
+    // 檢查最小可選日期
+    calcStartDate = (isStart) => {
+        const {
+            depdate1,
+        } = this.state;
+
+        if (!isStart) {
+            return !depdate1.length ? today().format('YYYY-MM-DD') : depdate1;
+        }
+        return today().format('YYYY-MM-DD');
+    }
+    // 檢查日期
+    checkDate = (muitDate) => {
+        const {
+            dcActiveInput,
+            focus1,
+            depdate1,
+            depdate2,
+        } = this.state;
+        const { rtow } = this.props;
+        const isStart = dcActiveInput === 'start' || focus1;
+        const inputValue = isStart ? depdate1 : (muitDate ? muitDate : (rtow === 3 ? '' : depdate2));
+        let endYear = today().add(361, 'days');
+        let regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
+
+        // 若input沒有值
+        if (!inputValue.length) return;
+
+        // 若日期是3碼或4碼(326 > 當年/03/26, 1105 > 當年/11/05)
+        if (inputValue.length === 4) regex = /^()(\d{2})(\d{2})/;
+        if (inputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
+        const result = inputValue.match(regex);
+        const isValidDate = (d) => d instanceof Date && !isNaN(d);
+
+        // 輸入的字元不合規則
+        if (result === null) {
+            return alert('請輸入正確的日期格式(YYYYMMDD) EX: 2018/01/01');
+        }
+
+        // 月份小於10月，前面加'0'
+        if (result[2].length === 1) result[2] = '0' + result[2];
+        const [all, year, month, day] = result;
+        const d = `${year || today().year()}-${month}-${day}`;
+        const date = today(d);
+        const calcStartDate = this.calcStartDate(isStart);
+
+        // 日期格式正確但是不存在的日期
+        if (!isValidDate(new Date(d))) {
+            return alert('無效的日期');
+        }
+
+        if (date.isBefore(calcStartDate)) {
+            return alert('日期小於最小可選日期');
+        }
+
+        // 驗證日期區間
+        if (date > endYear) {
+            let start = today().format('YYYY/MM/DD');
+            let end = endYear.format('YYYY/MM/DD');
+            return alert(`請選擇${start}~${end}之間的日期`);
+        }
+
+        // 都驗證正確 就更換日期
+        return d;
     }
 
     // 出發地、目的地
@@ -295,6 +500,17 @@ class Panel extends Component {
         const obj1 = JSON.parse(JSON.stringify(dptSelectedData));
         const obj2 = JSON.parse(JSON.stringify(dtnSelectedData));
 
+
+        if (obj2.length !== 0) {
+            if (typeof obj2[0].value !== 'undefined') {
+                obj2[0].value = '__';
+            }
+        }
+        if (obj1.length !== 0) {
+            if (typeof obj1[0].value !== 'undefined') {
+                obj1[0].value = '__';
+            }
+        }
         this.setState({ dptSelectedData: obj2, dtnSelectedData: obj1 });
     }
 
@@ -331,12 +547,12 @@ class Panel extends Component {
 
         this.setState({ multiItems: arr });
     }
-
-    // 驗證
+    // 資料驗證 開始
+    // 出發地目的地空值驗證
     ValidData = (callback) => {
-        const { rtow, depdate1, depdate2, multiItems, dptSelectedData, dtnSelectedData } = this.state;
+        let { depdate1, depdate2, multiItems, dptSelectedData, dtnSelectedData } = this.state;
+        let { rtow } = this.props;
         let warnText = [];
-        const depdateArr = [];
         if (rtow === 0) { // 單程
             warnText = [];
             if (dptSelectedData.length === 0) {
@@ -383,26 +599,162 @@ class Panel extends Component {
                     warnText.push('目的地');
                 }
             });
-
-            if (warnText.length === 0) {
-                for (let i = 0; i < multiItems.length; i++) {
-                    depdateArr.push(multiItems[i].startInputValue);
-                }
-            }
         }
-
         // 過濾重複的 警告訊息
         const newWarnText = warnText.filter((ele, i, arr) => {
             return arr.indexOf(ele) === i;
         });
+        // console.log('newWarnText', newWarnText);
 
-        callback(newWarnText.length === 0, newWarnText, depdateArr);
+        if (newWarnText.length === 0) {
+            return true;
+        } else {
+            alert('請選擇' + newWarnText.join('、'));
+            return false;
+        }
     }
 
-    // 參數送出
-    submit = () => {
+    // 把航段物件轉成需要的字串
+    parseSeekObj = (SelectedData, targetCode) => {
+        let data = SelectedData[0];
+        // let result = txt.match(/[A-Z]+(?=\))/g);
+        switch (targetCode) {
+            case 'country':
+                return data.country;
+            case 'city':
+                return data.city;
+            case 'airport':
+                return data.airport ? data.airport : '';
+            default:
+                return data.country;
+        }
+    }
+
+
+    // 國際機票搜尋規則驗證
+    SubmitObjCheck = (dptSelectedData, dtnSelectedData, multiItems, rtow) => {
+        let isPassTest = true;
+        const depCountry = this.parseSeekObj(dptSelectedData, 'country');
+        const depCity = this.parseSeekObj(dptSelectedData, 'city');
+        const arrCountry = this.parseSeekObj(dtnSelectedData, 'country');
+        const arrCity = this.parseSeekObj(dtnSelectedData, 'city');
+        // 香港及澳門是例外城市
+        const excludeCity = /HKG|MFM/;
+        if (rtow !== 3) {
+            if (depCountry === arrCountry && depCountry === 'TW') {
+                if (rtow !== 3) {
+                    isPassTest = false;
+                    alert('很抱歉，目前暫不提供台灣境內線航班查詢');
+                }
+            } else if (depCountry === arrCountry && depCountry === 'CN') {
+                if (!excludeCity.test(depCity) && !excludeCity.test(arrCity)) {
+                    if (rtow !== 3) {
+                        isPassTest = false;
+                        alert('很抱歉，目前暫不提供中國境內線航班查詢');
+                    }
+                }
+            }
+        } else {
+            let seeksArrayCountry = [];
+            let seeksArrayCity = [];
+            let seeksdepCountry;
+            let seeksdepCity;
+            let seeksarrCountry;
+            let seeksarrCity;
+            seeksArrayCountry.push(depCountry, arrCountry);
+            seeksArrayCity.push(depCity, arrCity);
+            for (let i = 0, seeks; seeks = multiItems[i]; i++) {
+                seeksdepCountry = this.parseSeekObj(seeks.dptSelectedData, 'country');
+                seeksdepCity = this.parseSeekObj(seeks.dptSelectedData, 'city');
+                seeksarrCountry = this.parseSeekObj(seeks.dtnSelectedData, 'country');
+                seeksarrCity = this.parseSeekObj(seeks.dtnSelectedData, 'city');
+                seeksArrayCountry.push(seeksdepCountry, seeksarrCountry);
+                seeksArrayCity.push(seeksdepCity, seeksarrCity);
+            }
+            let allChina = seeksArrayCountry.every(function (item, index) {
+                return item === 'CN';
+            });
+            let allTaiwan = seeksArrayCountry.every(function (item, index) {
+                return item === 'TW';
+            });
+            let outsideCity = seeksArrayCity.some(function (item, index) {
+                return item === 'HKG' || item === 'MFM';
+            });
+            if (allChina) {
+                if (!outsideCity) {
+                    isPassTest = false;
+                    alert('很抱歉，目前暫不提供中國境內線航班查詢');
+                } else {
+                    isPassTest = true;
+                }
+            } else if (allTaiwan) {
+                isPassTest = false;
+                alert('很抱歉，目前暫不提供台灣境內線航班查詢');
+            } else {
+                isPassTest = true;
+            }
+        }
+        return isPassTest;
+    }
+
+
+    cityCheck = (dptSelectedData, dtnSelectedData) => {
+        let isPassTest = true;
+        let depCity = this.parseSeekObj(dptSelectedData, 'city');
+        let depAirport = this.parseSeekObj(dptSelectedData, 'airport');
+        let arrCity = this.parseSeekObj(dtnSelectedData, 'city');
+        let arrAirport = this.parseSeekObj(dtnSelectedData, 'airport');
+
+        if (depCity === arrCity) {
+            if (arrAirport !== '' || depAirport !== '') {
+                if (arrAirport === depAirport) {
+                    alert('出發地機場與目的地機場不能相同');
+                    isPassTest = false;
+                } else {
+                    isPassTest = true;
+                }
+            } else {
+                alert('出發地與目的地不能相同');
+                isPassTest = false;
+            }
+
+        }
+        return isPassTest;
+    }
+
+
+    sourceCheck = (sourcesystem, depdate1, depdate2, rtow) => {
+        // let { depdate1, depdate2, sourcesystem } = this.state;
+        let timeLimit = today().add(8, 'days').format('YYYY/MM/DD');
+        let depDate = Date.parse(depdate1.replace(/-/g, '/')).valueOf();
+        let arrDate = Date.parse(depdate2.replace(/-/g, '/')).valueOf();
+        let limitDate = Date.parse(timeLimit).valueOf();
+        if (rtow === 3) { return true }
+        if (Number(sourcesystem) === 2) {
+            if (depDate < limitDate || arrDate < limitDate) {
+                alert('廉價航空僅提供7天後的訂購');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    peopleCheck = (adt, chd, inf, totalNum) => {
+        // let { adt, chd, inf, totalNum } = this.state;
+        let childTotal = chd + inf;
+        if (totalNum > 8) {
+            alert('總人數不得超過8位');
+            return false;
+        } else if (adt < inf || adt * 2 < chd || adt * 2 < childTotal) {
+            alert('1位大人最多帶2位孩童或1位嬰兒，請再次確認人數');
+            return false;
+        }
+        return true;
+    }
+
+    sendData = () => {
+
         const {
-            rtow,
             adt,
             chd,
             inf,
@@ -416,57 +768,178 @@ class Panel extends Component {
             sourcesystem,
             multiItems,
             dptSelectedData,
-            dtnSelectedData
+            dtnSelectedData,
         } = this.state;
+        const { rtow } = this.props;
 
-        // 如果驗證都 okay 就執行 window open
-        this.ValidData((isValid, warnText, depdateArr) => {
-            if (isValid) {
-                let depdateText = '';
-                let placeText = '';
-                if (rtow === 1) {
-                    depdateText += `&depdate2=${depdate2.replace(/\-/g, '/')}`;
-                }
-                if (rtow === 3) {
-                    if (depdateArr.length > 0) { // 多個目的地 去程日期
-                        for (let i = 0; i < depdateArr.length; i++) {
-                            depdateText += `&depdate${(i + 2)}=${depdateArr[i].replace(/\-/g, '/')}`;
-                        }
-                    }
 
-                    for (let i = 0; i < multiItems.length; i++) { // 多個目的地 出發地 目的地
-                        console.log(multiItems[i]);
-                        const itemsdpt = multiItems[i].dptSelectedData[0];
-                        const itemsdtn = multiItems[i].dtnSelectedData[0];
-                        placeText += `&depart${(i + 2)}=${itemsdpt.airport}&depcity${(i + 2)}=${itemsdpt.city}&depcountry${(i + 2)}=${itemsdpt.country}&arrive${(i + 2)}=${itemsdtn.airport}&arrcity${(i + 2)}=${itemsdtn.city}&arrcountry${(i + 2)}=${itemsdtn.country}`;
-                    }
-                }
-                let searchVal = `rtow=${rtow}&clsType=${clstype}&adt=${adt}&chd=${chd}&inf=${inf}&notrans=${notrans}&haveseat=${haveseat}&nonprefertrans=${nonprefertrans}&nonprefertransnight=${nonprefertransnight}&sourcesystem=${sourcesystem}&depart1=${dptSelectedData[0].airport}&depcity1=${dptSelectedData[0].city}&depcountry1=${dptSelectedData[0].country}&arrive1=${dtnSelectedData[0].airport}&arrcity1=${dtnSelectedData[0].city}&arrcountry1=${dtnSelectedData[0].country}&depdate1=${depdate1.replace(/\-/g, '/')}`;
-                searchVal += placeText;
-                searchVal += depdateText;
-                window.open('https://flight.liontravel.com/search?' + searchVal, this.props.hrefTarget);
-            } else {
-                alert('請選擇' + warnText.join('、'));
+        const depart1 = dptSelectedData[0].airport ? dptSelectedData[0].airport : '';
+        const depcity1 = dptSelectedData[0].city;
+        const depcountry1 = dptSelectedData[0].country;
+        // 目的地
+        const arrive1 = dtnSelectedData[0].airport ? dtnSelectedData[0].airport : '';
+        const arrcity1 = dtnSelectedData[0].city;
+        const arrcountry1 = dtnSelectedData[0].country;
+
+        let searchkey = `rtow=${rtow}&clstype=${clstype}&adt=${adt}&chd=${chd}&inf=${inf}&notrans=${notrans}&haveseat=${haveseat}&nonprefertrans=${nonprefertrans}&nonprefertransnight=${nonprefertransnight}&sourcesystem=${sourcesystem}`;
+
+        if (rtow === 0) {
+            let dptText = `&depart1=${depart1}&depcity1=${depcity1}&depcountry1=${depcountry1}`;
+            let dtntext = `&arrive1=${arrive1}&arrcity1=${arrcity1}&arrcountry1=${arrcountry1}`;
+            let dptDate = `&depdate1=${depdate1}`;
+
+            searchkey += (dptText + dtntext + dptDate);
+        }
+
+        if (rtow === 1) {
+            let dptText = `&depart1=${depart1}&depcity1=${depcity1}&depcountry1=${depcountry1}&depart2=${arrive1}&depcity2=${arrcity1}&depcountry2=${arrcountry1}`;
+            let dtntext = `&arrive1=${arrive1}&arrcity1=${arrcity1}&arrcountry1=${arrcountry1}&arrive2=${depart1}&arrcity2=${depcity1}&arrcountry2=${depcountry1}`;
+            let dptDate = `&depdate1=${depdate1}&depdate2=${depdate2}`;
+
+            searchkey += (dptText + dtntext + dptDate);
+        }
+
+        if (rtow === 3) {
+            let dptText = `&depart1=${depart1}&depcity1=${depcity1}&depcountry1=${depcountry1}`;
+            let dtntext = `&arrive1=${arrive1}&arrcity1=${arrcity1}&arrcountry1=${arrcountry1}`;
+            let dptDate = `&depdate1=${depdate1}`;
+            for (let i = 0; i < multiItems.length; i++) {
+                let multdepAirport = multiItems[i]['dptSelectedData'][0]['airport'] ? multiItems[i]['dtnSelectedData'][0]['airport'] : '';
+                let multarrAirport = multiItems[i]['dtnSelectedData'][0]['airport'] ? multiItems[i]['dtnSelectedData'][0]['airport'] : '';
+                dptText += `&depart${i + 2}=${multdepAirport}&depcity${i + 2}=${multiItems[i]['dptSelectedData'][0]['city']}&depcountry${i + 2}=${multiItems[i]['dptSelectedData'][0]['country']}`;
+                dtntext += `&arrive${i + 2}=${multarrAirport}&arrcity${i + 2}=${multiItems[i]['dtnSelectedData'][0]['city']}&arrcountry${i + 2}=${multiItems[i]['dtnSelectedData'][0]['country']}`;
+                dptDate += `&depdate${i + 2}=${multiItems[i]['startInputValue']}`;
             }
+
+            searchkey += (dptText + dtntext + dptDate);
+        }
+
+        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
+        // clone[0].dptSelectedData = [];
+        // clone[0].dtnSelectedData = [];
+        const PostTime = new Date().setHours(0, 0, 0, 0);
+        useLocalStorage({
+            panel: 'internationalFlight',
+            methods: 'post',
+            data: {
+                depdate1,
+                depdate2,
+                dptSelectedData,
+                dtnSelectedData,
+                multiItems: clone[0].selectedStartDate,
+                multiItemsDpt: clone[0].dptSelectedData,
+                multiItemsDtn: clone[0].dtnSelectedData,
+                clstype,
+                adt,
+                chd,
+                inf,
+                PostTime
+            }
+        });
+
+        console.log(searchkey);
+        window.open('https://flight.liontravel.com/search?' + searchkey, this.props.hrefTarget);
+    }
+
+
+    // 參數送出
+    submit = () => {
+        const {
+            adt,
+            chd,
+            inf,
+            depdate1,
+            depdate2,
+            sourcesystem,
+            multiItems,
+            dptSelectedData,
+            dtnSelectedData,
+            totalNum
+        } = this.state;
+        const { rtow } = this.props;
+
+        let isPassCheck;
+
+        // 驗證是否為空值
+        isPassCheck = this.ValidData();
+        if (!isPassCheck) return;
+
+        // 航段驗證
+        isPassCheck = this.cityCheck(dptSelectedData, dtnSelectedData);
+        if (!isPassCheck) return;
+
+        if (rtow === 3) {
+            // 新增的航段檢驗
+            for (let i = 0, seek; seek = multiItems[i]; i++) {
+                isPassCheck = this.cityCheck(seek.dptSelectedData, seek.dtnSelectedData);
+                if (!isPassCheck) return;
+            }
+        }
+
+        // 航段驗證
+        isPassCheck = this.SubmitObjCheck(dptSelectedData, dtnSelectedData, multiItems, rtow);
+        if (!isPassCheck) return;
+
+        // 人數艙等驗證
+        isPassCheck = this.peopleCheck(adt, chd, inf, totalNum);
+        if (!isPassCheck) return;
+
+        // 廉價航空驗證
+        isPassCheck = this.sourceCheck(sourcesystem, depdate1, depdate2, rtow);
+        if (!isPassCheck) return;
+
+        // 送出資料
+        this.sendData();
+
+
+    }
+    // 資料驗證結束
+
+    singleInputChange = (e) => {
+        // console.log('panel e', e);
+        this.setState({
+            depdate1: e
+        });
+    }
+    dcInputChange = (e, target) => {
+        if (target === 'start') {
+            this.setState({ depdate1: e });
+        } else {
+            this.setState({ depdate2: e });
+        }
+    }
+
+    muitInputChange = (e, id) => {
+        // console.log('muit', e, id);
+        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
+        clone.forEach(item => {
+            if (id === item.id) {
+                item.startInputValue = e;
+            }
+        });
+        this.setState({
+            multiItems: clone
         });
     }
 
     render () {
         const {
-            rtow,
             depdate1,
             depdate2,
             focus1,
             dcActiveInput,
             totalNum,
-            clstypeText,
+            adt,
+            chd,
+            inf,
             clstype,
             multiItems,
             clearBtn,
             dptSelectedData,
-            dtnSelectedData
+            dtnSelectedData,
+            haveseat
         } = this.state;
-
+        const { rtow } = this.props;
         return (
             <div className="flight_international_pc">
                 <Header
@@ -491,6 +964,8 @@ class Panel extends Component {
                     Clean1={clearBtn['clean1']}
                     singleInputFocus={this.singleInputFocus}
                     singleOnBlur={this.singleOnBlur}
+                    singleInputChange={this.singleInputChange}
+
                     // 去程日期、來回日期
                     dcStartInputValue={depdate1}
                     dcEndInputValue={depdate2}
@@ -499,9 +974,15 @@ class Panel extends Component {
                     dcActiveInput={dcActiveInput}
                     dcCleanBtn1={clearBtn['dcCleanBtn1']}
                     dcCleanBtn2={clearBtn['dcCleanBtn2']}
+                    startDate={this.state.startDate}
+                    dcInputChange={this.dcInputChange}
+
+                    // 人數、艙等LocalStorage要回來的資料
+                    adtNum={adt}
+                    chdNum={chd}
+                    infNum={inf}
                     // 人數、艙等
                     totalPeople={totalNum}
-                    cabinName={clstypeText}
                     cabinNumber={clstype}
                     selectCabin={this.setStateVal}
                     setPeople={this.setStateVal}
@@ -517,12 +998,10 @@ class Panel extends Component {
                     sourceSystem={this.state.sourcesystem}
                     // 排除過夜轉機航班
                     setnonprefertransnight={this.setStateVal}
-                    // 機票 fetch
-                    fetchPath={this.fetchPath}
                     // 檢查日期
-                    checkDate={this.checkDate}
+                    // checkDate={this.checkDate}
                     // 按下搜尋
-                    sendData={this.submit}
+                    submit={this.submit}
                     // 出發地，目的地
                     placeChange={this.placeChange}
                     dptSelectedData={dptSelectedData}
@@ -539,6 +1018,7 @@ class Panel extends Component {
                     multipleClickDate={this.multipleClickDate}
                     multiClearValue={this.multiClearValue}
                     multiBlur={this.multiBlur}
+                    muitInputChange={this.muitInputChange}
                 />
             </div>
         );

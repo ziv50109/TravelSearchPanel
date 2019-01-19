@@ -39,7 +39,10 @@ const actRacpChangeKey = (data) => {
         item.fromAct = true;
         item.country = item.fullName.split('__')[0].match(/\((.*)\)/)[1];
         item.city = item.fullName.split('__')[1].match(/\((.*)\)/)[1];
-        item.airport = item.fullName.split('__')[2] ? item.fullName.split('__')[2].match(/\((.*)\)/)[1] : item.fullName.split('__')[1].match(/\((.*)\)/)[1];
+        // item.airport = item.fullName.split('__')[2] ? item.fullName.split('__')[2].match(/\((.*)\)/)[1] : item.fullName.split('__')[1].match(/\((.*)\)/)[1];
+        if (item.fullName.split('__')[2]) {
+            item.airport = item.fullName.split('__')[2].match(/\((.*)\)/)[1];
+        }
     });
     return data;
 };
@@ -172,9 +175,10 @@ class SingleInputMenu extends Component {
             // console.log('emit~~');
             let newData = data;
             if (data.value) {
+                let lng = this.state.newCity[data.city].split('-').length;
                 newData = Object.assign({
                     country: this.state.newCity[data.city].split('__')[0].match(/\((.*)\)/)[1],
-                    airport: this.state.newCity[data.city].split('__')[1].match(/\((.*)\)/)[1]
+                    // airport: lng > 2 ? this.state.newCity[data.city].split('-')[2].match(/\((.*)\)/)[1] : this.state.newCity[data.city].split('-')[1].match(/\((.*)\)/)[1]
                 }, data);
             }
             // this.props.onChange && this.props.onChange(newData);
@@ -308,92 +312,97 @@ class SingleInputMenu extends Component {
         return (
             <div className="SingleInputMenu flights flights-m">
                 <svg viewBox="0 0 10 10" display="none"><path id="dtm_rcfr-x" d="M10 8.59L8.59 10 5 6.41 1.41 10 0 8.59 3.59 5 0 1.41 1.41 0 5 3.59 8.59 0 10 1.41 6.41 5z" /></svg>
-
-                <h3 className="txt-center page_title m-t-sm m-b-sm">{label}</h3>
-                <div className="dtm_rcfr-row">
-                    <div className="dtm_rcfr-input-wrap">
-                        <IntRcln
-                            className="int_rcln int-tags-single"
-                            ref={this.searchInput}
-                            placeholder={placeholder}
-                            // onFocus={this.handleOpenMenu}
-                            value={this.formatKeyword(selectedData)}
-                            onChange={this.handleChange}
-                            onKeyDown={this.handleKeyDown}
-                            onClearValue={this.handleEmitRemoveData}
-                        />
+                <header className="SingleInputMenu_header-wrap">
+                    <h3 className="txt-center page_title m-t-sm m-b-sm">{label}</h3>
+                    <div className="dtm_rcfr-row">
+                        <div className="dtm_rcfr-input-wrap">
+                            <IntRcln
+                                className="int_rcln int-tags-single"
+                                ref={this.searchInput}
+                                placeholder={placeholder}
+                                // onFocus={this.handleOpenMenu}
+                                value={this.formatKeyword(selectedData)}
+                                onChange={this.handleChange}
+                                onKeyDown={this.handleKeyDown}
+                                onClearValue={this.handleEmitRemoveData}
+                            />
+                        </div>
+                        <BtRcnb md radius whenClick={() => this.emitPushData(selectedData[0])}>確定</BtRcnb>
                     </div>
-                    <BtRcnb md radius whenClick={() => this.emitPushData(selectedData[0])}>確定</BtRcnb>
-                </div>
-
-
-                <ActRacp
-                    InputIsFocus={showAct}
-                    url={flightInternational.placeAutoComplete}
-                    minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
-                    minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
-                    searchKeyWord={keyword} // 傳入篩選的字串
-                    noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
-                    ClassName={(!showAct && 'd-no')} // 傳入custom class
-                    footer={false} // 是否顯示footer
-                    theme={'future'} // 樣式調整: future(站長平台)
-                    closeActcallback={(data) => {
-                        if (typeof data !== 'undefined') {
-                            // console.log('act~~~~~ showAct: false~~~');
-                            this.handelPushData(data);
-                        }
-                        // setTimeout(this.handleCloseMenu, 10);
-                    }} // 鍵盤上下鍵改變選取項目
-                    changeKey={actRacpChangeKey}
-                    catalogue={catalogueCallBack}
-                />
-                <p className="dtm_rcfr-label">{subLabel}</p>
-                <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : null}`}>
-                    <DtmRcfr
-                        levelKey={['line', '_line', 'city']}
-                        orderMaps={{
-                            line: ['_5A', '_6A', '_7A', '_3A', '_1A', '_2A', '_4A', '_9A']
-                        }}
-                        onClickItem={(data) => {
-                            this.handelPushData(data);
-                            // this.handleCloseMenu();
-                        }}
-                        dataResouce={flightInternational.place}
-                        selectedData={selected}
-                        transformFetchData={(d) => {
-                            if (typeof d === 'string') {
-                                let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
-                                let data = JSON.parse('{' + newVariable + '}');
-                                // 改造第一層資料
-                                renameKey(data.line, (key) => {
-                                    return key + 'A';
-                                });
-                                // 加上第二層資料
-                                data._line = {};
-                                for (let i in data.line) {
-                                    if (Object.prototype.hasOwnProperty.call(data.line, i)) {
-                                        let newKey = i.split('A')[0];
-                                        data._line[i] = { [newKey]: data.line[i] };
+                    <p className="dtm_rcfr-label">{subLabel}</p>
+                </header>
+                <div className="SingleInputMenu_dtm-wrap">
+                    <ActRacp
+                        InputIsFocus={showAct}
+                        url={flightInternational.placeAutoComplete}
+                        minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
+                        minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
+                        searchKeyWord={keyword} // 傳入篩選的字串
+                        noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
+                        ClassName={(!showAct && 'd-no')} // 傳入custom class
+                        footer={false} // 是否顯示footer
+                        theme={'future'} // 樣式調整: future(站長平台)
+                        closeActcallback={(data) => {
+                            if (typeof data !== 'undefined') {
+                                // console.log('act~~~~~ showAct: false~~~');
+                                this.handelPushData(data);
+                            }
+                            // setTimeout(this.handleCloseMenu, 10);
+                        }} // 鍵盤上下鍵改變選取項目
+                        changeKey={actRacpChangeKey}
+                        catalogue={catalogueCallBack}
+                    />
+                    <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : null}`}>
+                        <DtmRcfr
+                            levelKey={['line', '_line', 'city']}
+                            orderMaps={
+                                label === '出發地'
+                                    ? { line: ['_9A', '_5A', '_6A', '_7A', '_3A', '_1A', '_2A'] }
+                                    : { line: ['_5A', '_6A', '_7A', '_3A', '_1A', '_2A', '_4A', '_9A'] }
+                            }
+                            onClickItem={(data) => {
+                                this.handelPushData(data);
+                                // this.handleCloseMenu();
+                            }}
+                            dataResouce={flightInternational.place}
+                            selectedData={selected}
+                            transformFetchData={(d) => {
+                                if (typeof d === 'string') {
+                                    let newVariable = d.replace(/\r?\n|\r/g, '').replace(/(?:var|let|const)\s(\w+)\s=/g, '"$1":').replace(/;/g, ',').replace(/,$/g, '').replace(/'/g, '"');
+                                    let data = JSON.parse('{' + newVariable + '}');
+                                    // 改造第一層資料
+                                    renameKey(data.line, (key) => {
+                                        return key + 'A';
+                                    });
+                                    // 加上第二層資料
+                                    data._line = {};
+                                    for (let i in data.line) {
+                                        if (Object.prototype.hasOwnProperty.call(data.line, i)) {
+                                            let newKey = i.split('A')[0];
+                                            data._line[i] = { [newKey]: data.line[i] };
+                                        }
                                     }
-                                }
 
-                                // 更改第三層資料
-                                for (let i in data.city) {
-                                    if (Object.prototype.hasOwnProperty.call(data.city, i)) {
-                                        for (let j in data.city[i]) {
-                                            if (Object.prototype.hasOwnProperty.call(data.city[i], j)) {
-                                                let matchStr = data.city[i][j].split('__')[1].split('-');
-                                                data.city[i][j] = matchStr.length < 3 ? matchStr[0].replace(/<|>/g, '') : matchStr[0] + '-' + matchStr[1];
+                                    // 更改第三層資料
+                                    for (let i in data.city) {
+                                        if (Object.prototype.hasOwnProperty.call(data.city, i)) {
+                                            for (let j in data.city[i]) {
+                                                if (Object.prototype.hasOwnProperty.call(data.city[i], j)) {
+                                                    let matchStr = data.city[i][j].split('__')[1].split('-');
+                                                    data.city[i][j] = i === '_5' ?
+                                                        matchStr.length < 3 ? matchStr[0] : matchStr[0] + '-' + matchStr[1] :
+                                                        matchStr.length <= 3 ? matchStr[0].replace(/<|>/g, '') : matchStr[0].replace(/<|>/g, '') + '-' + matchStr[1];
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                return data;
-                            }
-                            else { return d }
-                        }}
-                    />
+                                    return data;
+                                }
+                                else { return d }
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
         );

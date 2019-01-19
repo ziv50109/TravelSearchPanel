@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import cx from 'classnames';
+import { isJsonString } from '../../../../utils';
 import { vacationPersonal } from '../../../../source.config';
 import VacationDaparture from '../VacationDaparture'; // 出發地下拉
 import CrRcln from '../../../../magaele/cr_rcln';
@@ -20,6 +21,7 @@ import {
 import onSubmit from '../onSubmit';
 // 動態自由行M版PC版共用css
 import '../css.scss';
+import dayjs from 'dayjs';
 
 class Panel extends Component {
     constructor (props) {
@@ -34,23 +36,50 @@ class Panel extends Component {
             clskd: 0,
             noTrans: 0,
             Keywords: '',
-            FromDate: '',
-            ToDate: '',
+            FromDate: dayjs().add(3, 'days').format('YYYY-MM-DD'),
+            ToDate: dayjs().add(30, 'days').format('YYYY-MM-DD'),
             destinationInput: '',
             departureData: {},
             fthotel: '',
             openMoreSearch: false, // 是否打開更多搜尋選項
+            defaultStartDate: ''
         };
     }
 
     componentDidMount () {
-        fetch(vacationPersonal.departure)
-            .then(r => r.json())
-            .then(data => {
-                this.setState(() => ({
-                    departureData: data,
-                }));
+        const sessionData = sessionStorage.getItem(vacationPersonal.departure);
+
+        if (sessionData && isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            const departureData = this.formatDepartureData(jsonData);
+            this.setState({
+                departureData
             });
+        } else {
+            fetch(vacationPersonal.departure)
+                .then(r => r.json())
+                .then(data => {
+                    let stringifyData = JSON.stringify(data);
+                    const departureData = this.formatDepartureData(data);
+                    this.setState(() => ({
+                        departureData
+                    }));
+                    sessionStorage.setItem(vacationPersonal.departure, stringifyData);
+                });
+        }
+    }
+
+    formatDepartureData = (d) => {
+        const data = JSON.parse(d);
+        const keys = Object.keys(data);
+        if (keys) {
+            return keys.map(e => (
+                {
+                    text: data[e],
+                    value: e
+                }
+            ));
+        }
     }
 
     onSelectChange = (target, val) => {
@@ -128,6 +157,8 @@ class Panel extends Component {
             Airline,
             Days,
             openMoreSearch,
+            FromDate,
+            ToDate
         } = this.state;
 
         const moreSearch_classes = cx('moreSearch', {
@@ -143,10 +174,9 @@ class Panel extends Component {
                 <div className="input_group">
                     <VacationDaparture
                         data={departureData}
-                        onChange={(e) => {
-                            const val = e.target.value;
+                        onChange={(val) => {
                             this.setState(prevState => ({
-                                'Departure': val,
+                                Departure: val,
                             }));
                         }}
                     />
@@ -157,7 +187,11 @@ class Panel extends Component {
                     />
                 </div>
                 <ComposeCalendar
-                    onChange={this.onDateChange}
+                    panelName="vacationPersonal"
+                    defaultStartDate={FromDate}
+                    defaultEndDate={ToDate}
+                    setOtherEnd={30}  // 月曆另外設定可選日期最大上限(單位/日),訂房最大上限14晚;
+                    onChange={(e) => { this.onDateChange(e) }}
                 />
                 <RoomListInput
                     onChange={this.onRoomListChange}

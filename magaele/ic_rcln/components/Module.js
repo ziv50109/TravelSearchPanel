@@ -4,18 +4,29 @@ import cx from 'classnames';
 import '../css.scss';
 
 let Module = (props) => {
+    const {
+        className,
+        name,
+        size,
+        link,
+        circular,
+        border,
+        color,
+        ...other
+    } = props;
+
     const classes = cx(
         'ic_rcln',
-        props.className,
-        props.name,
-        props.size,
-        props.link ? 'link' : null,
-        props.circular ? 'circular' : null,
-        props.border ? 'border' : null,
-        props.color
+        className,
+        name,
+        size,
+        link ? 'link' : null,
+        circular ? 'circular' : null,
+        border ? 'border' : null,
+        color
     );
     return (
-        <i className={classes}></i>
+        <i className={classes} {...other}></i>
     );
 };
 

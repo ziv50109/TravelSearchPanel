@@ -6,6 +6,7 @@
   "scripts": {
     "start": "cross-env ENV=dev webpack-dev-server --open --colors --progress --config webpack.dev.js",
     "build:dev": "cross-env ENV=dev webpack --config webpack.prod.js",
+    "build:demo": "cross-env ENV=demo webpack --config webpack.prod.js",
     "build:rel": "cross-env ENV=rel webpack --config webpack.prod.js",
     "build:prod": "cross-env ENV=prod webpack --config webpack.prod.js",
     "storybook": "cross-env ENV=dev start-storybook -p 9001 -s ./ -c .storybook",
@@ -19,7 +20,7 @@
     "@babel/plugin-proposal-class-properties": "^7.0.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
-    "@babel/plugin-transform-object-assign": "^7.0.0",
+    "@babel/plugin-transform-object-assign": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
@@ -48,17 +49,19 @@
     "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
-    "webpack-merge": "^4.1.2"
+    "webpack-merge": "^4.1.5"
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "classnames": "^2.2.5",
     "global": "^4.3.2",
+    "ip": "^1.1.5",
     "lodash": "^4.17.11",
     "prop-types": "^15.5.10",
-    "react": "^16.5.2",
-    "react-css-modules": "^4.7.3",
-    "react-dom": "^16.5.2",
-    "whatwg-fetch": "^3.0.0"
+    "react": "^16.6.3",
+    "react-css-modules": "^4.7.8",
+    "react-dom": "^16.6.3",
+    "whatwg-fetch": "^3.0.0",
+    "why-did-you-update": "^1.0.6"
   }
 }

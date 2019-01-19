@@ -7,8 +7,7 @@ import IcRcln from '../../../../magaele/ic_rcln';
 import IntRcln from '../../../../magaele/int_rcln';
 import CyRcln from '../../../../magaele/cy_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
-import { ClickOutSide } from '../../../../utils';
-// import '../../../../magaele/core/core';
+import { ClickOutSide, isJsonString, useLocalStorage } from '../../../../utils';
 import '../css.scss';
 import '../../../component/ComposeCalendar.scss';
 
@@ -22,13 +21,13 @@ const Country = [
     { text: '金門', value: 'KNH' }
 ];
 
-
 const level = [
     { text: '1位', value: '1' },
     { text: '2位', value: '2' },
     { text: '3位', value: '3' },
     { text: '4位', value: '4' }
 ];
+
 const childLevel = [
     { text: '0位', value: '0' },
     { text: '1位', value: '1' },
@@ -36,184 +35,280 @@ const childLevel = [
     { text: '3位', value: '3' }
 ];
 
-function arrangeData (data) {
-    console.log('arrangeData');
-    let option = data;
-    let newOption = {};
-    for (let key in option) {
-        if (option['TRIP'] === 1) {
-            if (key !== 'RETURN_DATE') {
-                newOption[key] = option[key];
-            }
-        } else {
-            newOption[key] = option[key];
-        }
-    }
-    checkData(newOption);
-}
+// function arrangeData (data) {
+//     console.log('arrangeData');
+//     let option = data;
+//     let newOption = {};
+//     for (let key in option) {
+//         if (option['TRIP'] === 1) {
+//             if (key !== 'RETURN_DATE') {
+//                 newOption[key] = option[key];
+//             }
+//         } else {
+//             newOption[key] = option[key];
+//         }
+//     }
+//     checkData(newOption);
+// }
 
+// function checkData (data) {
+//     console.log('checkData');
+//     let option = data;
+//     let checkingOK;
+//     console.log('optino', option);
+//     for (let key in option) {
+//         if (!option[key]) {
+//             alert('請輸入完整資料');
+//             checkingOK = false;
+//             break;
+//         } else {
+//             if (key === 'DEPARTURE_DATE') {
+//                 let date = option[key].replace(/\//g, '-');
+//                 option[key] = date;
+//             }
+//             if (key === 'RETURN_DATE') {
+//                 let date = option[key].replace(/\//g, '-');
+//                 option[key] = date;
+//             }
+//             checkingOK = true;
+//         }
+//     }
+//     console.log('checkingOK', checkingOK);
+//     if (checkingOK) {
+//         toQueryString(option);
+//     }
+// }
 
-function checkData (data) {
-    console.log('checkData');
-    let option = data;
-    let checkingOK;
-    console.log('optino', option);
-    for (let key in option) {
-        if (!option[key]) {
-            alert('請輸入完整資料');
-            checkingOK = false;
-            break;
-        } else {
-            if (key === 'DEPARTURE_DATE') {
-                let date = option[key].replace(/\//g, '-');
-                option[key] = date;
-            }
-            if (key === 'RETURN_DATE') {
-                let date = option[key].replace(/\//g, '-');
-                option[key] = date;
-            }
-            checkingOK = true;
-        }
-    }
-    console.log('checkingOK', checkingOK);
-    if (checkingOK) {
-        toQueryString(option);
-    }
-}
-
-function toQueryString (data) {
-    console.log('toQueryString');
-    console.log(data);
-    let option = data;
-    let string = '';
-    let optionLength = Object.keys(option).length;
-    let i = 0;
-    for (let key in option) {
-        if ((Object.prototype.hasOwnProperty.call(option, key))) {
-            i++;
-            if (i >= optionLength) {
-                string += key + '=' + option[key];
-            } else {
-                string += key + '=' + option[key] + '&';
-            }
-        }
-    }
-    window.open('https://twflight.liontravel.com/search?' + string, this.props.hrefTarget);
-    console.log(string);
-}
-
+// function toQueryString (data) {
+//     console.log('toQueryString');
+//     console.log(data);
+//     let option = data;
+//     let string = '';
+//     let optionLength = Object.keys(option).length;
+//     let i = 0;
+//     for (let key in option) {
+//         if ((Object.prototype.hasOwnProperty.call(option, key))) {
+//             i++;
+//             if (i >= optionLength) {
+//                 string += key + '=' + option[key];
+//             } else {
+//                 string += key + '=' + option[key] + '&';
+//             }
+//         }
+//     }
+//     window.open('https://twflight.liontravel.com/search?' + string, this.props.hrefTarget);
+//     console.log(string);
+// }
 
 const DateValueErrorMessage = '請輸入正確的日期格式(YYYYMMDD) EX: 20180101';
 class ComposeCalendar extends PureComponent {
     static defaultProps = {
-        onChange: () => {},
+        onChange: () => {}
     };
     constructor (props) {
         super(props);
         this.state = {
             selectedStartDate: dayjs().format('YYYY-MM-DD'),
-            selectedEndDate: dayjs().format('YYYY-MM-DD'),
+            selectedEndDate: '',
             startInputValue: dayjs().format('YYYY-MM-DD'),
-            endInputValue: dayjs().format('YYYY-MM-DD'),
+            endInputValue: '',
             activeInput: null
         };
     }
 
-
+    componentDidMount () {
+        useLocalStorage(
+            {
+                panel: 'taiwanFlight',
+                methods: 'get'
+            },
+            ({ PC_depDate, PC_dtnDate }) => {
+                console.log(PC_depDate, PC_dtnDate);
+                const depDate = !PC_depDate ? dayjs().format('YYYY-MM-DD') : PC_depDate; // !PC_dep 判斷是否有值
+                const dtnDate = !PC_dtnDate ? '' : PC_dtnDate;
+                this.setState(
+                    {
+                        selectedStartDate: depDate,
+                        startInputValue: depDate,
+                        selectedEndDate: dtnDate,
+                        endInputValue: dtnDate
+                    },
+                    this.onChange
+                );
+            }
+        );
+    }
 
     onChange () {
         this.props.onChange(this.state);
     }
 
-    clearValue = (inputType) => {
+    clearValue = inputType => {
         const isStart = inputType === 'start';
 
         if (isStart) {
-            return this.setState(prevState => ({
-                ...prevState,
-                startInputValue: '',
-                selectedStartDate: ''
-            }), this.onChange);
+            return this.setState(
+                prevState => ({
+                    ...prevState,
+                    startInputValue: '',
+                    selectedStartDate: ''
+                }),
+                this.onChange
+            );
         }
 
-        return this.setState(prevState => ({
-            ...prevState,
-            selectedEndDate: '',
-            endInputValue: '',
-        }), this.onChange);
-    }
+        return this.setState(
+            prevState => ({
+                ...prevState,
+                selectedEndDate: '',
+                endInputValue: ''
+            }),
+            this.onChange
+        );
+    };
 
     closeCalendar = () => {
         this.setState(prevState => ({
             ...prevState,
-            activeInput: null,
+            activeInput: null
         }));
-    }
+    };
 
-    checkDate = (inputType) => {
+    checkDate = inputType => {
+        const todayDate = dayjs().format('YYYY-MM-DD');
         const isStart = inputType === 'start';
         const {
             selectedStartDate,
             selectedEndDate,
             startInputValue,
-            endInputValue,
+            endInputValue
         } = this.state;
         const inputValue = isStart ? startInputValue : endInputValue;
-        const noChange = isStart ? inputValue === selectedStartDate : inputValue === selectedEndDate;
+        const noChange = isStart
+            ? inputValue === selectedStartDate
+            : inputValue === selectedEndDate;
 
         // 若input沒有值
         if (!inputValue.length || noChange) return;
 
-        const regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
+        let regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
+        // 若日期是3碼或4碼(326 > 當年/03/26, 1105 > 當年/11/05)
+        if (startInputValue.length === 4) regex = /^()(\d{2})(\d{2})/;
+        if (startInputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
         const result = inputValue.match(regex);
+        const isValidDate = (d) => d instanceof Date && !isNaN(d);
 
         // 輸入的字元不合規則
         if (result === null) {
+            if (isStart) {
+                this.setState(
+                    {
+                        startInputValue: todayDate,
+                        selectedStartDate: todayDate
+                    },
+                    this.onChange
+                );
+            } else {
+                this.setState(
+                    {
+                        endInputValue: dayjs()
+                            .add(1, 'days')
+                            .format('YYYY-MM-DD'),
+                        selectedEndDate: dayjs()
+                            .add(1, 'days')
+                            .format('YYYY-MM-DD')
+                    },
+                    this.onChange
+                );
+            }
             return alert(DateValueErrorMessage);
         }
 
+        // 月份小於10月，前面加'0'
+        if (result[2].length === 1) result[2] = '0' + result[2];
         const [all, year, month, day] = result;
-        const d = `${year}-${month}-${day}`;
+        const d = `${year || dayjs().year()}-${month}-${day}`;
         const date = dayjs(d);
         const calcStartDate = this.calcStartDate();
 
         // 日期格式正確但是不存在的日期
-        if (!date.isValid()) {
+        if (!isValidDate(new Date(d))) {
+            if (isStart) {
+                this.setState(
+                    {
+                        startInputValue: todayDate,
+                        selectedStartDate: todayDate
+                    },
+                    this.onChange
+                );
+            } else {
+                this.setState(
+                    {
+                        endInputValue: dayjs()
+                            .add(1, 'days')
+                            .format('YYYY-MM-DD'),
+                        selectedEndDate: dayjs()
+                            .add(1, 'days')
+                            .format('YYYY-MM-DD')
+                    },
+                    this.onChange
+                );
+            }
             return alert('無效的日期');
         }
 
         if (date.isBefore(calcStartDate)) {
+            if (isStart) {
+                this.setState(
+                    {
+                        startInputValue: todayDate,
+                        selectedStartDate: todayDate
+                    },
+                    this.onChange
+                );
+            } else {
+                this.setState(
+                    {
+                        endInputValue: dayjs(selectedStartDate)
+                            .add(1, 'days')
+                            .format('YYYY-MM-DD'),
+                        selectedEndDate: dayjs(selectedStartDate)
+                            .add(1, 'days')
+                            .format('YYYY-MM-DD')
+                    },
+                    this.onChange
+                );
+            }
             return alert('日期小於最小可選日期');
         }
 
         // 都驗證正確 就更換日期
         this.clickDate(d);
-    }
+    };
 
-    inputChange = (e) => {
+    inputChange = e => {
         const value = e.target.value;
         const { activeInput } = this.state;
         const target = `${activeInput}InputValue`;
-        this.setState(prevState => ({
-            ...prevState,
-            [target]: value,
-        }), this.onChange);
-    }
+        this.setState(
+            prevState => ({
+                ...prevState,
+                [target]: value
+            }),
+            this.onChange
+        );
+    };
 
-    inputFocus = (target) => {
+    inputFocus = target => {
         this.setState(prevState => ({
             ...prevState,
-            activeInput: target,
+            activeInput: target
         }));
-    }
+    };
 
-    clickDate = (date) => {
-        const {
-            activeInput,
-            selectedStartDate,
-            endInputValue
-        } = this.state;
-        let isStart = (activeInput === 'start');
+    clickDate = date => {
+        const { activeInput, selectedStartDate, endInputValue } = this.state;
+        let isStart = activeInput === 'start';
         let TRIP = this.props.TRIP === 1 ? true : false;
         let startDateValue;
         let endDateValue;
@@ -239,33 +334,36 @@ class ComposeCalendar extends PureComponent {
             }
             nowInput = isStart ? 'end' : null;
         }
-        this.setState(prevState => ({
-            activeInput: nowInput,
-            selectedStartDate: startDateValue,
-            selectedEndDate: endDateValue,
-            startInputValue: startDateValue,
-            endInputValue: endDateValue,
-        }), this.onChange);
-    }
+        this.setState(
+            prevState => ({
+                activeInput: nowInput,
+                selectedStartDate: startDateValue,
+                selectedEndDate: endDateValue,
+                startInputValue: startDateValue,
+                endInputValue: endDateValue
+            }),
+            this.onChange
+        );
+    };
     calcStartDate () {
-        const {
-            selectedStartDate,
-            activeInput,
-        } = this.state;
+        const { selectedStartDate, activeInput } = this.state;
 
         const today = dayjs();
         if (activeInput === 'end') {
-            return !selectedStartDate.length ? today.format('YYYY-MM-DD') : selectedStartDate;
+            return !selectedStartDate.length
+                ? today.format('YYYY-MM-DD')
+                : selectedStartDate;
         }
         return today.format('YYYY-MM-DD');
     }
+
     render () {
         const {
             selectedStartDate,
             selectedEndDate,
             startInputValue,
             endInputValue,
-            activeInput,
+            activeInput
         } = this.state;
         const TRIP = this.props.TRIP;
         const startDate = this.calcStartDate();
@@ -275,67 +373,82 @@ class ComposeCalendar extends PureComponent {
                 <div className="calendar_compose">
                     <div className="input_group aroundInput">
                         <IntRcln
-                            placeholder="YYYYMMDD"
+                            placeholder="YYYY/MM/DD"
                             label={TRIP === 1 ? '出發日期' : '去程日期'}
                             icon={<IcRcln name="tooldate" />}
-                            onFocus={() => { this.inputFocus('start') }}
+                            onFocus={() => {
+                                this.inputFocus('start');
+                            }}
                             onChange={this.inputChange}
-                            onBlur={() => { this.checkDate('start') }}
-                            onClearValue={() => { this.clearValue('start') }}
+                            onBlur={() => {
+                                this.checkDate('start');
+                            }}
+                            onClearValue={() => {
+                                this.clearValue('start');
+                            }}
                             value={startInputValue.replace(/\-/g, '/')}
                             className={TRIP === 1 ? '' : 'bor-right'}
                         />
-                        {
-                            TRIP === 1 ? null : (
-                                <IntRcln
-                                    placeholder="YYYYMMDD"
-                                    label="回程日期"
-                                    breakline
-                                    onChange={this.inputChange}
-                                    onFocus={() => { this.inputFocus('end') }}
-                                    onBlur={() => { this.checkDate('end') }}
-                                    onClearValue={() => { this.clearValue('end') }}
-                                    value={endInputValue.replace(/\-/g, '/')}
-                                />
-                            )
-                        }
-
+                        {TRIP === 1 ? null : (
+                            <IntRcln
+                                placeholder="YYYY/MM/DD"
+                                label="回程日期"
+                                breakline
+                                onChange={this.inputChange}
+                                onFocus={() => {
+                                    this.inputFocus('end');
+                                }}
+                                onBlur={() => {
+                                    this.checkDate('end');
+                                }}
+                                onClearValue={() => {
+                                    this.clearValue('end');
+                                }}
+                                value={endInputValue.replace(/\-/g, '/')}
+                            />
+                        )}
                     </div>
-                    {
-                        activeInput === null ? null : (
-                            <div className="content">
-                                <button className="close_btn" onClick={this.closeCalendar}>×</button>
-                                <CyRcln
-                                    doubleMonth
-                                    doubleChoose={TRIP === 1 ? false : true}
-                                    startDate={startDate}
-                                    activeStart={dayjs().format('YYYY-MM')}
-                                    activeEnd={dayjs().add(1, 'years').format('YYYY-MM')}
-                                    endDate={dayjs().add(1, 'years').format('YYYY-MM-DD')}
-                                    selectedStartDate={selectedStartDate}
-                                    selectedEndDate={TRIP === 1 ? '' : selectedEndDate}
-                                    onDateClick={this.clickDate}
-                                />
-                            </div>
-                        )
-                    }
+                    {activeInput === null ? null : (
+                        <div className="content">
+                            <button
+                                className="close_btn"
+                                onClick={this.closeCalendar}
+                            />
+                            <CyRcln
+                                doubleMonth
+                                doubleChoose={TRIP === 1 ? false : true}
+                                startDate={startDate}
+                                activeStart={dayjs().format('YYYY-MM')}
+                                activeEnd={dayjs()
+                                    .add(1, 'years')
+                                    .format('YYYY-MM')}
+                                endDate={dayjs()
+                                    .add(1, 'years')
+                                    .subtract(5, 'days')
+                                    .format('YYYY-MM-DD')}
+                                selectedStartDate={selectedStartDate}
+                                selectedEndDate={
+                                    TRIP === 1 ? '' : selectedEndDate
+                                }
+                                onDateClick={this.clickDate}
+                            />
+                        </div>
+                    )}
                 </div>
             </ClickOutSide>
         );
     }
 }
 
-
-
 class TaiwanBody extends Component {
     constructor (props) {
         super(props);
         this.state = {
             BOARD_POINT: '', // 出發地
-            OFF_POINT: '', // 目的地
+            OFF_POINT: 'KNH', // 目的地
             TRIP: 1, // 行程
-            DEPARTURE_DATE: dayjs().format('YYYY-MM-DD'), // 出發日期
-            RETURN_DATE: dayjs().format('YYYY-MM-DD'), // 回程日期
+            DEPARTURE_DATE: '', // 出發日期
+            RETURN_DATE: '', // 回程日期
             PASSENGER_ADULTNUM: 1, // default大人人數1位
             PASSENGER_CHILDNUM: 0, // default孩童人數0位
             isLoaded: false,
@@ -343,30 +456,40 @@ class TaiwanBody extends Component {
             depList: Country,
             arrList: Country,
             depPlaceholder: '松山',
-            arrPlaceholder: '馬公'
+            arrPlaceholder: '金門'
         };
     }
 
-    UNSAFE_componentWillMount () {
-        fetch(flightTaiwan.place)
-            .then((response) => {
-                // ok 代表狀態碼在範圍 200-299
-                if (!response.ok) throw new Error(response.statusText);
-                return response.json();
-            })
-            .then((itemList) => { this.handleServerItemsLoad(itemList) })
-            .catch((error) => {
-                // 這裡可以顯示一些訊息
-                // console.error(error)
-            });
+    componentDidMount () {
+        const sessionData = sessionStorage.getItem(flightTaiwan.place);
+        if (sessionData && isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            this.handleServerItemsLoad(jsonData);
+        } else {
+            fetch(flightTaiwan.place)
+                .then(response => {
+                    // ok 代表狀態碼在範圍 200-299
+                    if (!response.ok) throw new Error(response.statusText);
+                    return response.json();
+                })
+                .then(itemList => {
+                    let stringifyData = JSON.stringify(itemList);
+                    this.handleServerItemsLoad(itemList);
+                    sessionStorage.setItem(flightTaiwan.place, stringifyData);
+                })
+                .catch(error => {
+                    // 這裡可以顯示一些訊息
+                    console.error(error);
+                });
+        }
     }
 
-    handleServerItemsLoad = (itemList) => {
+    handleServerItemsLoad = itemList => {
         let placeSets = Object.keys(itemList).map(function (objectKey, index) {
             let value = itemList[objectKey];
             return value;
         });
-        let depPlaces = ((itemList) => {
+        let depPlaces = (itemList => {
             let uniqueKey = [];
             for (let i = 0; i < itemList.length; i++) {
                 uniqueKey[i] = {};
@@ -375,7 +498,10 @@ class TaiwanBody extends Component {
             }
             let result = uniqueKey.filter(function (element, index, arr) {
                 if (index > 0) {
-                    return arr[index - 1].text.toString() !== arr[index].text.toString();
+                    return (
+                        arr[index - 1].text.toString() !==
+                        arr[index].text.toString()
+                    );
                 } else {
                     return arr[index].text;
                 }
@@ -387,11 +513,44 @@ class TaiwanBody extends Component {
             isLoaded: true,
             depList: depPlaces, // 出發地選單
             itemList: placeSets, // 原始資料
-            BOARD_POINT: depPlaces[0].value, // 出發地選擇
-            depPlaceholder: depPlaces[0].text, // 出發地選擇松山
-        });
+            // BOARD_POINT: depPlaces[0].value, // 出發地選擇
+            // depPlaceholder: depPlaces[0].text // 出發地選擇松山
+        }, this.getLocalStorage);
 
-        this.changeOption(depPlaces[0].value); // 模擬出發地input被chnage
+        // this.changeOption(depPlaces[0].value); // 模擬出發地input被chnage
+    };
+
+    // 取到 LocalStorage 值
+    getLocalStorage () {
+        useLocalStorage({
+            panel: 'taiwanFlight',
+            methods: 'get',
+        }, ({
+            PC_trip,
+            PC_depPlace,
+            PC_dtnPlace,
+            PC_adult,
+            PC_child
+        }) => {
+            // 驗證 LocalStorage 是否有值
+            const trip = !PC_trip ? 1 : PC_trip;
+            const depPlace = !PC_depPlace ? 'TSA' : PC_depPlace;
+            const dtnPlace = !PC_dtnPlace ? 'KNH' : PC_dtnPlace;
+            const adult = !PC_adult ? '1' : PC_adult;
+            const child = !PC_child ? '0' : PC_child;
+
+            // 設定 State Default
+            this.setDefaultVal(depPlace, dtnPlace, adult, child, trip);
+        });
+    }
+
+    // 設定預設值
+    setDefaultVal (depPlace, dtnPlace, adult, child, trip) {
+        this.boardPointChange(depPlace);
+        this.offPointChange(dtnPlace);
+        this.passengerChange(adult, 'p');
+        this.passengerChange(child, 'c');
+        this.tripChange(trip);
     }
 
     boardPointChange (selectValue) {
@@ -399,19 +558,20 @@ class TaiwanBody extends Component {
         let nowPlace = depList.filter(function (ele, index, arr) {
             return arr[index].value === selectValue;
         });
+
         this.setState({
             BOARD_POINT: selectValue,
-            depPlaceholder: nowPlace[0].text,
+            depPlaceholder: nowPlace[0].text
         });
         this.changeOption(selectValue);
     }
+
     offPointChange (selectValue) {
         let arrList = this.state.arrList;
         let nowPlace = arrList.filter(function (ele, index, arr) {
             return arr[index].value === selectValue;
         });
-        console.log('offPointChange arrList', arrList);
-        console.log('offPointChange nowPlace', nowPlace);
+
         this.setState({
             OFF_POINT: selectValue,
             arrPlaceholder: nowPlace[0].text
@@ -421,21 +581,20 @@ class TaiwanBody extends Component {
     changeOption (selectValue) {
         let itemList = this.state.itemList;
         if (itemList.length !== 0) {
-            console.log('changeOption');
             let nowValue = selectValue;
-            let secondList = itemList.filter(function (item, index, arr) { // 篩選出發地可到達的目的地選單
+            let secondList = itemList.filter(function (item, index, arr) {
+                // 篩選出發地可到達的目的地選單
                 return arr[index]['<BOARD_POINT_CODE>'] === nowValue;
             });
             let newList = [];
-            for (let i = 0; i < secondList.length; i++) { // 整理符合模組的資料格式
+            for (let i = 0; i < secondList.length; i++) {
+                // 整理符合模組的資料格式
                 newList[i] = {};
                 newList[i]['text'] = secondList[i]['<OFF_POINT_NAME>'];
                 newList[i]['value'] = secondList[i]['<OFF_POINT_CODE>'];
             }
 
             // 如果目的地選擇的項目 與 下次出發地選擇的項目相同 則設定成該項目
-            console.log('下一次目的地選單', newList);
-            console.log('目的地', this.state.OFF_POINT);
             let lastArr = this.state.OFF_POINT;
             let index;
             if (lastArr !== '') {
@@ -449,11 +608,10 @@ class TaiwanBody extends Component {
             } else {
                 index = 0;
             }
-            console.log('index', index);
             this.setState({
                 arrList: newList, // 目的地選單
                 arrPlaceholder: newList[index].text, // 目的地選擇
-                OFF_POINT: newList[index].value, // 目的地選擇
+                OFF_POINT: newList[index].value // 目的地選擇
             });
         }
     }
@@ -472,10 +630,9 @@ class TaiwanBody extends Component {
         }
     }
 
-
     tripChange (target) {
         this.setState({
-            TRIP: target,
+            TRIP: target
         });
     }
     clearVaule (e) {
@@ -490,20 +647,77 @@ class TaiwanBody extends Component {
         });
     }
 
+    // 按下送出，並且去驗證
     handleSubmit () {
-        let info = {
-            'TRIP': this.state.TRIP,
-            'BOARD_POINT': this.state.BOARD_POINT,
-            'OFF_POINT': this.state.OFF_POINT,
-            'DEPARTURE_DATE': this.state.DEPARTURE_DATE,
-            'RETURN_DATE': this.state.RETURN_DATE,
-            'PASSENGER_ADULTNUM': this.state.PASSENGER_ADULTNUM,
-            'PASSENGER_CHILDNUM': this.state.PASSENGER_CHILDNUM
-        };
-        console.log('submit');
-        arrangeData(info);
+        const {
+            TRIP,
+            BOARD_POINT,
+            OFF_POINT,
+            DEPARTURE_DATE,
+            RETURN_DATE,
+            PASSENGER_ADULTNUM,
+            PASSENGER_CHILDNUM
+        } = this.state;
+
+        this.validDate((isValid, warnText) => {
+            if (isValid) {
+                const PC_trip = TRIP;
+                const PC_depPlace = BOARD_POINT; // 出發地
+                const PC_dtnPlace = OFF_POINT; // 目的地
+                const PC_depDate = DEPARTURE_DATE; // 去程日期
+                const PC_dtnDate = RETURN_DATE; // 回程日期
+                const PC_adult = PASSENGER_ADULTNUM; // 大人
+                const PC_child = PASSENGER_CHILDNUM; // 孩童
+
+                useLocalStorage({
+                    panel: 'taiwanFlight',
+                    methods: 'post',
+                    data: {
+                        PC_trip,
+                        PC_depPlace,
+                        PC_dtnPlace,
+                        PC_depDate,
+                        PC_dtnDate,
+                        PC_adult,
+                        PC_child
+                    }
+                });
+                let searchString;
+                if (TRIP === 1) {
+                    searchString = `TRIP=${TRIP}&BOARD_POINT=${BOARD_POINT}&OFF_POINT=${OFF_POINT}&DEPARTURE_DATE=${DEPARTURE_DATE}&PASSENGER_ADULTNUM=${PASSENGER_ADULTNUM}&PASSENGER_CHILDNUM=${PASSENGER_CHILDNUM}`;
+                } else if (TRIP === 2) {
+                    searchString = `TRIP=${TRIP}&BOARD_POINT=${BOARD_POINT}&OFF_POINT=${OFF_POINT}&DEPARTURE_DATE=${DEPARTURE_DATE}&RETURN_DATE=${RETURN_DATE}&PASSENGER_ADULTNUM=${PASSENGER_ADULTNUM}&PASSENGER_CHILDNUM=${PASSENGER_CHILDNUM}`;
+                }
+                window.open(
+                    'https://twflight.liontravel.com/search?' + searchString,
+                    this.props.hrefTarget
+                );
+            } else {
+                alert(`請選擇${warnText.join('、')}`);
+            }
+        });
     }
 
+    // 驗證
+    validDate (callback) {
+        const { TRIP, DEPARTURE_DATE, RETURN_DATE } = this.state;
+        const warnText = [];
+
+        if (TRIP === 1) {
+            if (!DEPARTURE_DATE) {
+                warnText.push('去程日期');
+            }
+        } else if (TRIP === 2) {
+            if (!DEPARTURE_DATE) {
+                warnText.push('去程日期');
+            }
+            if (!RETURN_DATE) {
+                warnText.push('回程日期');
+            }
+        }
+
+        callback(warnText.length === 0, warnText);
+    }
 
     render () {
         const {
@@ -513,15 +727,30 @@ class TaiwanBody extends Component {
             arrList,
             arrPlaceholder,
             PASSENGER_ADULTNUM,
-            PASSENGER_CHILDNUM
+            PASSENGER_CHILDNUM,
+            BOARD_POINT,
+            OFF_POINT
         } = this.state;
-        console.log('render');
         return (
             <div className="flight_taiwan">
                 <div>
                     <ul className="Rtow">
-                        <li className={cx({ 'active': TRIP === 1 })} onClick={() => { this.tripChange(1) }}>單程</li>
-                        <li className={cx({ 'active': TRIP === 2 })} onClick={() => { this.tripChange(2) }}>來回</li>
+                        <li
+                            className={cx({ active: TRIP === 1 })}
+                            onClick={() => {
+                                this.tripChange(1);
+                            }}
+                        >
+                            單程
+                        </li>
+                        <li
+                            className={cx({ active: TRIP === 2 })}
+                            onClick={() => {
+                                this.tripChange(2);
+                            }}
+                        >
+                            來回
+                        </li>
                     </ul>
                 </div>
                 <div className="p-t-sm">
@@ -533,9 +762,11 @@ class TaiwanBody extends Component {
                         icon={<IcRcln name="planeairplane" />}
                         req
                         breakline
-                        onChangeCallBack={(e) => { this.boardPointChange(e) }}
-                        // defaultValue={'TSA'}
-                    ></StRcln>
+                        onChangeCallBack={e => {
+                            this.boardPointChange(e);
+                        }}
+                        defaultValue={BOARD_POINT || 'TSA'}
+                    />
                     <StRcln
                         ClassName="m-b-sm"
                         option={arrList}
@@ -544,13 +775,17 @@ class TaiwanBody extends Component {
                         icon={<IcRcln name="toolmap" />}
                         req
                         breakline
-                        onChangeCallBack={(e) => { this.offPointChange(e) }}
-                        // defaultValue={'MZG'}
-                    ></StRcln>
+                        onChangeCallBack={e => {
+                            this.offPointChange(e);
+                        }}
+                        defaultValue={OFF_POINT || 'KNH'}
+                    />
                     <ComposeCalendar
-                        onChange={(e) => { this.roundDate(e) }}
+                        onChange={e => {
+                            this.roundDate(e);
+                        }}
                         TRIP={TRIP}
-                    ></ComposeCalendar>
+                    />
                     <div className="m-b-sm m-t-sm aroundInput">
                         <StRcln
                             ClassName="m-r-xs w-full"
@@ -560,9 +795,14 @@ class TaiwanBody extends Component {
                             icon={<IcRcln name="toolstaff" />}
                             req
                             breakline
-                            whenMouseDown={() => console.log('父層whenMouseDown')}
-                            onChangeCallBack={(e) => { this.passengerChange(e, 'p') }}>
-                        </StRcln>
+                            whenMouseDown={() =>
+                                console.log('父層whenMouseDown')
+                            }
+                            onChangeCallBack={e => {
+                                this.passengerChange(e, 'p');
+                            }}
+                            defaultValue={`${PASSENGER_ADULTNUM}`}
+                        />
                         <StRcln
                             ClassName="m-l-xs w-full"
                             option={childLevel}
@@ -571,13 +811,34 @@ class TaiwanBody extends Component {
                             icon={<IcRcln name="toolchild" />}
                             req
                             breakline
-                            whenMouseDown={() => console.log('父層whenMouseDown')}
-                            onChangeCallBack={(e) => { this.passengerChange(e, 'c') }}>
-                        </StRcln>
+                            whenMouseDown={() =>
+                                console.log('父層whenMouseDown')
+                            }
+                            onChangeCallBack={e => {
+                                this.passengerChange(e, 'c');
+                            }}
+                            defaultValue={`${PASSENGER_CHILDNUM}`}
+                        />
                     </div>
                     <div className="footer">
-                        <div className="footerInfo"><IcRcln name="toolif" className="p-r-xs" />注意事項：目前僅華信航空提供線上即時訂購。<a href="https://www.liontravel.com/info/twairline/uni.asp">參考其他航空</a></div>
-                        <BtRcnb radius prop="string" className="h-sm m-l-md" lg whenClick={() => { this.handleSubmit() }}>搜尋</BtRcnb>
+                        <div className="footerInfo">
+                            <IcRcln name="toolif" className="p-r-xs" />
+                            <span > 注意事項：目前僅華信航空提供線上即時訂購。</span>
+                            <a href="https://www.liontravel.com/info/twairline/uni.asp">
+                                參考其他航空
+                            </a>
+                        </div>
+                        <BtRcnb
+                            radius
+                            prop="string"
+                            className="h-sm m-l-md"
+                            lg
+                            whenClick={() => {
+                                this.handleSubmit();
+                            }}
+                        >
+                            搜尋
+                        </BtRcnb>
                     </div>
                 </div>
             </div>

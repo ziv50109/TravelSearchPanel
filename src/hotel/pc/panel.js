@@ -10,18 +10,19 @@ import BtRcnb from '../../../magaele/bt_rcnb';
 import RoomPageContent from './RoomPageContent';
 import ActRajx from '../../../magaele/act_rajx';
 import onSubmit from '../onSubmit';
+import useLocalStorage from '../../../utils/useLocalStorage';
+import today from 'dayjs';
 
 import Calendar from '../../component/ComposeCalendar';
-import { ClickOutSide } from '../../../utils';
-
+import { ClickOutSide, isJsonString } from '../../../utils';
+// import '../../vacation/personal/css.scss';
 
 const CloseButton = ({ onClick }) => (
-    <span className="close_btn" onClick={onClick}></span>
+    <span className="closeBtn" onClick={onClick}></span>
 );
 class Panel extends Component {
     constructor (props) {
         super(props);
-        this.searchInput = React.createRef();
         this.state = {
             Destination: {},
             Code: '',
@@ -45,6 +46,7 @@ class Panel extends Component {
             rajxDataUrl: '',
             rajxHead: hotel.destinationAutoComplete,
             dtmDataSrc: hotel.destination,
+            dtmData: {},
             actRules: [
                 {
                     title: '城市',
@@ -74,6 +76,35 @@ class Panel extends Component {
         };
         this.timer = null;
     }
+    componentDidMount () {
+        const { dtmDataSrc } = this.state;
+        const sessionData = sessionStorage.getItem(dtmDataSrc);
+
+        if (!sessionData || !isJsonString(sessionData)) {
+            fetch(dtmDataSrc)
+                .then(r => r.json())
+                .then(d => {
+                    let stringifyData = JSON.stringify(d);
+                    this.setState({
+                        dtmData: d,
+                    });
+                    sessionStorage.setItem(dtmDataSrc, stringifyData);
+                });
+        } else {
+            const jsonData = JSON.parse(sessionData);
+            this.setState({
+                dtmData: jsonData,
+            });
+        }
+
+        useLocalStorage({
+            panel: 'hotel',
+            methods: 'get',
+        }, (data) => {
+            const state = this.validataLocalstorageData(data);
+            this.setState({ ...state });
+        });
+    }
 
     // 目的地
     transformActFetchData = (data) => {
@@ -84,13 +115,13 @@ class Panel extends Component {
         const dataArray = [];
 
         for (let i = 0; i < Destinations.length; i++) {
-            const dataObj = {
+            const hotelDataObj = {
                 txt: Destinations[i].Name,
                 level2: Destinations[i].KindName,
                 level3: Destinations[i].Code,
                 Kind: Destinations[i].Kind
             };
-            dataArray.push(dataObj);
+            dataArray.push(hotelDataObj);
         }
         return dataArray;
     }
@@ -277,6 +308,7 @@ class Panel extends Component {
         }));
     }
     closehRoomOption = () => {
+        // console.log('closeRoomOption');
         this.setState(prevState => ({
             roomOptionState: false
         }));
@@ -301,8 +333,55 @@ class Panel extends Component {
         });
     }
 
+    // 存入localstorage
+    handlePost = () => {
+        const { CheckIn, CheckOut, Rooms } = this.state;
+        const PostTime = new Date().setHours(0, 0, 0, 0);
+        useLocalStorage({
+            panel: 'hotel',
+            methods: 'post',
+            data: {
+                CheckIn,
+                CheckOut,
+                Rooms,
+                PostTime
+            }
+        });
+    };
 
+    validataLocalstorageData = (data) => {
+        console.log('v-data', data);
+        // eslint-disable-next-line no-extra-boolean-cast
+        if (!!data) {
+            const localStorageRecordTime = data.PostTime + 604800000;
+            if (localStorageRecordTime < new Date(today().format('YYYY-MM-DD')).getTime()) {
+                console.log('超過7天予以刪除LocalStorage紀錄。');
+                useLocalStorage({
+                    panel: 'hotel',
+                    methods: 'delete',
+                });
+                let CheckIn = '';
+                let CheckOut = '';
+                return {
+                    CheckIn,
+                    CheckOut
+                };
+            } else {
 
+                let CheckIn = new Date(data.CheckIn).getTime() > new Date(today().format('YYYY-MM-DD')).getTime() ?
+                    data.CheckIn : today().add(1, 'day').format('YYYY-MM-DD');
+                let CheckOut = new Date(data.CheckOut).getTime() > new Date(today().format('YYYY-MM-DD')).getTime() ?
+                    data.CheckOut : today().add(2, 'day').format('YYYY-MM-DD');
+                let Rooms = data.Rooms;
+                return {
+                    CheckIn,
+                    CheckOut,
+                    Rooms
+                };
+            }
+
+        }
+    };
     render () {
         const classes = classNames.bind(styles)('hotelsRectPC');
         const {
@@ -312,9 +391,12 @@ class Panel extends Component {
             inputText,
             showAct,
             showDtm,
-            dtmDataSrc,
+            dtmData,
             actRules,
-            actShowData
+            actShowData,
+            CheckIn,
+            CheckOut,
+            Rooms
         } = this.state;
         const selected = selectedData.map(v => v.value);
         const dtm_wrap_classes = classNames('wrap_container', {
@@ -345,13 +427,15 @@ class Panel extends Component {
                             <div className={dtm_wrap_classes}>
                                 <p style={{ color: '#24a07d' }} className="dtm_rcfr-label">{'找不到選項？請輸入關鍵字查詢'}</p>
                                 <CloseButton onClick={this.closeDestnMenu} />
-                                <DtmRcfr
-                                    levelKey={['inTaiwan', 'vLine', 'vCountry', 'vCity']}
-                                    onClickItem={this.onClickDestnDtmItem}
-                                    dataResouce={dtmDataSrc}
-                                    replaceRegular={/[a-zA-Z\(\)\s]/g}
-                                    selectedData={selected}
-                                />
+                                {Object.keys(dtmData).length &&
+                                    <DtmRcfr
+                                        levelKey={['inTaiwan', 'vLine', 'vCountry', 'vCity']}
+                                        onClickItem={this.onClickDestnDtmItem}
+                                        dataResouce={dtmData}
+                                        replaceRegular={/[a-zA-Z\(\)\s]/g}
+                                        selectedData={selected}
+                                    />
+                                }
                             </div>
                             <div className={act_wrap_classes}>
                                 <CloseButton onClick={this.closeDestnMenu} />
@@ -371,13 +455,18 @@ class Panel extends Component {
                         </div>
                     </ClickOutSide>
                     <div className="booking">
-                        <Calendar titleTxt={'住房期間'}
+                        <Calendar titleTxt="住房期間"
+                            panelName="hotel"
                             totleNights={true}
                             onChange={this.handleBooking}
+                            startTxt="入住"
+                            endTxt="退房"
                             // setEndDate={12}  // 月曆可選日期最大上限(單位/月),不設定則預設是12個月;
                             // setActiveEnd={12}  // 月曆最大上限(單位/月),不設定則預設是12個月;
                             setStartDate={1} // 起始可以選的日期(單位/日);
                             setOtherEnd={14}  // 月曆另外設定可選日期最大上限(單位/日),訂房最大上限14晚;
+                            defaultStartDate={CheckIn}
+                            defaultEndDate={CheckOut}
                         />
                     </div>
                     <ClickOutSide onClickOutside={this.closehRoomOption}>
@@ -393,10 +482,7 @@ class Panel extends Component {
                                 />
                                 <div className={`stCont ${roomOptionState ? 'show' : ''}`}>
                                     <CloseButton onClick={this.closehRoomOption} />
-                                    <div>
-                                        <RoomPageContent changeSum={this.roomPeopleSum} />
-                                        <p style={{ color: '#24a07d' }}>※單次訂購提供相同房型，相同房型不同入住人數依選購的專案售價。</p>
-                                    </div>
+                                    <RoomPageContent Rooms={Rooms} changeSum={this.roomPeopleSum} />
                                 </div>
                             </div>
                         </div>
@@ -413,6 +499,7 @@ class Panel extends Component {
                             lg
                             whenClick={() => {
                                 onSubmit(Object.assign(this.state, { hrefTarget: this.props.hrefTarget }));
+                                this.handlePost();
                             }}
                         >
                             搜尋

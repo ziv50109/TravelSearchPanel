@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import dayjs from 'dayjs';
 import {
     getYearAndMonth,
     getNowMonth,
@@ -66,12 +67,14 @@ class Module extends PureComponent {
         activeInput: 0,
         startLabelTitle: '去程',
         endLabelTitle: '回程',
+        onDateClickCallBack: () => {}, // 選完日期的 call back. return: activeInput, date
         onClickConfirm: () => {},
         customDiffTxt: txt => txt,
         startDate: getToday(), // 最小可選日
         endDate: '', // 最大可選日
         startMonth: getNowMonth(), // 月曆從幾月份開始畫
         endMonth: todayAfterSixMonth(),
+        panelName: '' // 傳入面板名稱
     };
 
     static propTypes = {
@@ -82,10 +85,12 @@ class Module extends PureComponent {
         activeInput: PropTypes.oneOf([0, 1]),
         startLabelTitle: PropTypes.string,
         endLabelTitle: PropTypes.string,
+        onDateClickCallBack: PropTypes.func,
         onClickConfirm: PropTypes.func,
         customDiffTxt: PropTypes.func,
         startMonth: PropTypes.string,
         endMonth: PropTypes.string,
+        panelName: PropTypes.string,
     };
 
     state = {
@@ -96,6 +101,17 @@ class Module extends PureComponent {
         monthRange: this.calcMonthArray(),
     };
 
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.endMonth !== this.props.endMonth) {
+            this.updateMonthRange();
+        }
+    }
+    updateMonthRange = () => {
+        this.setState({
+            monthRange: this.calcMonthArray()
+        });
+    }
+
     calcStartDate () {
         const {
             startDate,
@@ -104,7 +120,6 @@ class Module extends PureComponent {
         } = this.props;
 
         const isStart = (activeInput === 0);
-
         if (isStart) {
             return startDate;
         } else {
@@ -131,11 +146,29 @@ class Module extends PureComponent {
         });
     }
 
-    onDateClick = (date) => {
+    startDateValueRule = (date) => {
         const {
             activeInput,
-            selectedStartDate,
+            selectedStartDate
         } = this.state;
+        const { panelName } = this.props;
+        const isStart = (activeInput === 0);
+
+        switch (panelName) {
+            case 'vacationPersonal':
+                if (isStart) {
+                    return date;
+                } else if (!selectedStartDate) {
+                    return dayjs(date).add(-30, 'day') < dayjs() ? dayjs().format('YYYY-MM-DD') : dayjs(date).add(-30, 'day').format('YYYY-MM-DD');
+                }
+                return selectedStartDate;
+            case '':
+            default:
+                return isStart ? date : selectedStartDate;
+        }
+    }
+    onDateClick = (date) => {
+        const { activeInput } = this.state;
 
         const {
             doubleChoose,
@@ -143,12 +176,11 @@ class Module extends PureComponent {
         } = this.props;
 
         const isStart = (activeInput === 0);
-        const startDateValue = isStart ? date : selectedStartDate;
+        const startDateValue = this.startDateValueRule(date);
         const endDateValue = isStart ? '' : date;
         const start = doubleChoose ?
             (isStart ? startDateValue : startDate) :
             startDate;
-
         this.setState(prevState => ({
             ...prevState,
             startDate: start,
@@ -158,8 +190,50 @@ class Module extends PureComponent {
                 (isStart ? 1 : 0)
                 : 0,
         }));
-        if (this.props.chooseFirstDate) {
-            this.props.chooseFirstDate(startDateValue);
+        this.props.onDateClickCallBack && this.props.onDateClickCallBack(activeInput, date);
+    }
+
+    setStartDay = (start, activeInput) => {
+        const {
+            selectedStartDate
+        } = this.state;
+        const {
+            panelName
+        } = this.props;
+        switch (panelName) {
+            case 'hotel':
+                if (activeInput === 1 && selectedStartDate !== '') {
+                    return dayjs(selectedStartDate).format('YYYY-MM-DD');
+                }
+                return dayjs().add(1, 'days').format('YYYY-MM-DD');
+            case '':
+            default:
+                return start;
+        }
+    }
+
+    setEndDay = () => {
+        const {
+            panelName,
+            endDate
+        } = this.props;
+
+        const {
+            activeInput,
+            selectedStartDate,
+        } = this.state;
+
+        switch (panelName) {
+            case 'hotel':
+                if (activeInput === 1 && selectedStartDate !== '') {
+                    return dayjs(selectedStartDate).add(14, 'days').format('YYYY-MM-DD');
+                }
+                return endDate;
+            case 'vacationPersonal':
+                return dayjs(selectedStartDate).add(30, 'days').format('YYYY-MM-DD');
+            case '':
+            default:
+                return endDate;
         }
     }
 
@@ -167,24 +241,24 @@ class Module extends PureComponent {
         const {
             selectedStartDate,
         } = this.state;
-
         const {
             startDate,
         } = this.props;
 
-        const isStart = (target === 0);
-        const start = isStart ? startDate : selectedStartDate;
+        // const isStart = (target === 0);
+        const start = selectedStartDate || startDate;
 
         this.setState(prevState => ({
             ...prevState,
-            startDate: start,
+            startDate: this.setStartDay(start, target),
             activeInput: target,
         }));
+
+        this.props.switchLabelCallBack && this.props.switchLabelCallBack(target, selectedStartDate);
     }
 
     render () {
         const {
-            endDate,
             startTxt,
             endTxt,
             doubleChoose,
@@ -204,7 +278,7 @@ class Module extends PureComponent {
 
         const props = {
             startDate,
-            endDate,
+            endDate: this.setEndDay(),
             selectedStartDate,
             selectedEndDate,
             startTxt,

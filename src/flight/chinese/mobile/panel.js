@@ -1,39 +1,17 @@
 import React, { Component } from 'react';
-// import '../../../../magaele/core/core';
 import { flightChinese } from '../../../../source.config';
 import '../css.scss';
 import StRcln from '../../../../magaele/st_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
-import IntRcln from '../../../../magaele/int_rcln';
-import IntGpct from '../../../../magaele/int_gpct';
 import CyRcmn from '../../../../magaele/cy_rcmn';
 import NvbRslb from '../../../../magaele/nvb_rslb';
 import BtRcnb from '../../../../magaele/bt_rcnb';
 import { Tab } from '../../../../magaele/ntb_rcln';
-import StRnls from '../../../../magaele/st_rnls';
 import PpRcln from '../../../../magaele/pp_rcln';
 import utils from '../../../../utils/utils';
-
-// 人數艙等
-const PeopleAndCabin = props => {
-    return (
-        <IntRcln
-            request
-            // value="共1人，不限艙等"
-            value={`共${props.peopleNumber}人，${[props.cabin]}`}
-            label="人數/艙等"
-            icon={<IcRcln name="toolstaff" />}
-            readOnly
-        />
-    );
-};
-
-// 艙等
-const Cabin = [
-    { text: '經濟艙', value: '0' },
-    { text: '商務艙', value: '1' },
-    { text: '頭等艙', value: '2' }
-];
+import { useLocalStorage } from '../../../../utils';
+import ChinaNvb from '../component/ChinaNvb';
+import today from 'dayjs';
 
 const CustomComponent = props => {
     return (
@@ -57,24 +35,43 @@ const ContentComponent = props => {
 // 單選月曆
 class MobileCalendar extends Component {
     state = {
-        selectedStartDate: '2018-10-22',
-        showCalendar: false
+        selectedStartDate: today().add(3, 'days').format('YYYY-MM-DD'),
+        showCalendar: false,
     };
+
+    componentDidMount () {
+        useLocalStorage({
+            panel: 'chineseFlight',
+            methods: 'get',
+        }, (data) => {
+            let newDate;
+            if (!data.sFdate) {
+                newDate = today().add(3, 'days').format('YYYY-MM-DD');
+            } else {
+                newDate = data.sFdate;
+            }
+            this.setState({ selectedStartDate: newDate });
+        });
+    }
     calendar = null;
+
     showCalendar = () => {
         this.setState(prevState => ({
             ...prevState,
             showCalendar: true
         }));
     };
-    handleClose = () => {
+
+    handleClose = (e) => {
+        e.stopPropagation();
         this.setState({
             showCalendar: false
         });
     };
-    handleConfirm = () => {
-        const { selectedStartDate } = this.calendar.state;
 
+    handleConfirm = (e) => {
+        const { selectedStartDate } = this.calendar.state;
+        e.stopPropagation();
         if (this.props.selectDate) {
             this.props.selectDate(selectedStartDate);
         }
@@ -84,14 +81,14 @@ class MobileCalendar extends Component {
             showCalendar: false
         }));
     };
+
     render () {
         const { selectedStartDate, showCalendar } = this.state;
 
         return (
             <React.Fragment>
                 <div onClick={this.showCalendar}>
-                    {/* <span>選擇日期: </span> */}
-                    <span>{selectedStartDate}</span>
+                    <span>{selectedStartDate.replace(/\-/g, '/')}</span>
                 </div>
                 <NvbRslb visible={showCalendar} direction="right">
                     <span
@@ -103,7 +100,10 @@ class MobileCalendar extends Component {
                     {showCalendar && (
                         <CyRcmn
                             selectedStartDate={selectedStartDate}
-                            startLabelTitle="入住日"
+                            startDate={today().add(3, 'day').format('YYYY-MM-DD')}
+                            endMonth={today().add(1, 'years').format('YYYY-MM')}
+                            endDate={today().add(1, 'years').subtract(4, 'days').format('YYYY-MM-DD')}
+                            startLabelTitle="去程日期"
                             ref={e => {
                                 this.calendar = e;
                             }}
@@ -128,10 +128,10 @@ class Panel extends Component {
             sTairp: 'SHA', // 目的地
             sFcity: 'MFM', // 出發地    _XZM_MFM 取後面
             sTcity: 'SHA', // 目的地
-            sFdate: '20181022', // 出發日期
+            sFdate: today().add(3, 'days').format('YYYY-MM-DD'), // 出發日期
             sAdt: 1, // 人
             sChd: 0,
-            sClass: 0, // 艙等
+            sClass: 0, // 艙等1
             sTktkind: 'CN', // 大陸機票種類
             // end
 
@@ -149,11 +149,22 @@ class Panel extends Component {
 
     // get 選單裡面的資料
     getOptionData = () => {
-        utils.fetchJsToObj(flightChinese.place, this.getData);
+        const sessionData = sessionStorage.getItem(flightChinese.place);
+        if (sessionData && utils.isJsonString(sessionData)) {
+            const jsonData = JSON.parse(sessionData);
+            this.getData(jsonData);
+        } else {
+            utils.fetchJsToObj(flightChinese.place, (d) => {
+                let stringifyData = JSON.stringify(d);
+                this.getData(d);
+                sessionStorage.setItem(flightChinese.place, stringifyData);
+            });
+        }
     };
     getData = data => {
         this.handleGetData(data.vCity); // 把傳過來的資料做整理
     };
+
     // 把 AJAX 過來的資料做整理
     handleGetData = data => {
         let arr = [];
@@ -193,19 +204,8 @@ class Panel extends Component {
 
     // 出發日期
     selectDate = date => {
-        let newDate = date.replace(/\-/g, '');
         this.setState({
-            sFdate: newDate
-        });
-    };
-
-    // 艙等
-    selectCabin = val => {
-        console.log(val);
-
-        this.setState({
-            sClass: val,
-            cabinText: Cabin[val].text
+            sFdate: date
         });
     };
 
@@ -231,6 +231,11 @@ class Panel extends Component {
         this.setState({ sAdt: number });
     };
 
+    // 人數艙等 確認
+    peopleCabinConfirm = (val) => {
+        this.setState({ sClass: val.chinaClstypeLevel, sAdt: val.peopleNum });
+    }
+
     // 按下搜尋時
     handleSubmit = () => {
         const {
@@ -245,9 +250,16 @@ class Panel extends Component {
             sFairp
         } = this.state;
         this.validate((isVaild, warnText) => {
+            useLocalStorage({
+                panel: 'chineseFlight',
+                methods: 'post',
+                data: {
+                    sFdate
+                }
+            });
             // 如果都沒有未填的選項，就 true 然後 window open
             if (isVaild) {
-                let searchVal = `sFcity=${sFcity}&sTcity=${sTcity}&sFdate=${sFdate}&sAdt=${sAdt}&sClass=${sClass}&sTktkind=${sTktkind}&sChd=${sChd}&sTairp=${sTairp}&sFairp=${sFairp}`;
+                let searchVal = `sFcity=${sFcity}&sTcity=${sTcity}&sFdate=${sFdate.replace(/\-/g, '')}&sAdt=${sAdt}&sClass=${sClass}&sTktkind=${sTktkind}&sChd=${sChd}&sTairp=${sTairp}&sFairp=${sFairp}`;
                 window.open('https://www.liontravel.com/webtk/webtkcn01.aspx?' + searchVal, this.props.hrefTarget);
             } else {
                 alert('請選擇' + warnText.join('、'));
@@ -276,7 +288,7 @@ class Panel extends Component {
         return (
             <React.Fragment>
                 <Tab label="大陸國內機票">
-                    <div className="flight_chinese m-t-sm">
+                    <div className="flight_chinese mobile">
                         {isLoaded && options.length > 0 ? ( // AJAX load完，陣列裡有東西才開始 render
                             <React.Fragment>
                                 {/* 出發機場 */}
@@ -312,7 +324,7 @@ class Panel extends Component {
                                 />
 
                                 {/* 出發日期 */}
-                                <div className="st_rcln m-b-sm dpt">
+                                <div className="st_rcln m-b-sm dpt" onClick={() => this.mCalender.showCalendar()}>
                                     <i className="ic_rcln tooldate" />
                                     <div className="dropdown-place-holder selected breakline withIcon">
                                         <span className="dropdown-label req breakline">
@@ -320,58 +332,19 @@ class Panel extends Component {
                                         </span>
                                         {/* <OneChoose selectDate={this.selectDate} /> */}
                                         <MobileCalendar
+                                            ref={e => { this.mCalender = e }}
                                             selectDate={this.selectDate}
                                         />
                                     </div>
                                 </div>
 
                                 {/* 人數 / 艙等 */}
-                                <StRnls
-                                    moduleClassName="peopleAndCabin"
-                                    CustomComponent={
-                                        <PeopleAndCabin
-                                            cabin={this.state.cabinText}
-                                            peopleNumber={this.state.sAdt}
-                                        />
-                                    }
-                                    ContentComponent={
-                                        <React.Fragment>
-                                            <StRcln
-                                                option={Cabin}
-                                                placeholder="經濟艙"
-                                                label="艙等"
-                                                req
-                                                whenCloseCallBack={() =>
-                                                    console.log(
-                                                        '父層whenCloseCallBack'
-                                                    )
-                                                }
-                                                onChangeCallBack={e =>
-                                                    this.selectCabin(e)
-                                                }
-                                            />
-                                            <div className="peopleContent">
-                                                <p>人數</p>
-                                                <IntGpct
-                                                    max={this.state.max}
-                                                    min={this.state.min}
-                                                    count={this.state.sAdt}
-                                                    btnClassMinus="ic_rcln toolcancelb"
-                                                    btnClassAdd="ic_rcln tooladdb"
-                                                    onClickAdd={this.onClickAdd} // 按下增加
-                                                    onClickMinus={
-                                                        this.onClickMinus
-                                                    }
-                                                />
-                                            </div>
-                                        </React.Fragment>
-                                    }
-                                    whenOpen={e =>
-                                        console.log('Demo Panel Open')
-                                    }
-                                    whenClose={e =>
-                                        console.log('Demo Panel Close')
-                                    }
+                                <ChinaNvb
+                                    customClass={'peopleAndCabin'}
+                                    title={'人數 / 艙等'}
+                                    clstypeLevel={this.state.sClass} // 艙等
+                                    peopleNum={this.state.sAdt}
+                                    confirm={this.peopleCabinConfirm}
                                 />
 
                                 {/* footer 泡泡框 、 搜尋 */}
@@ -382,6 +355,7 @@ class Panel extends Component {
                                         moduleClassName="PpRcln2 m-r-xxl"
                                         events={['click', 'hover']}
                                         position={['bottom', 'horizon_center']}
+                                        width="210px"
                                     />
 
                                     <BtRcnb

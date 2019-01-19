@@ -55,7 +55,7 @@ class Module extends Component {
     //     }
     // }
     componentDidUpdate (prevProps, prevState) {
-        if (prevProps.option !== this.props.option) this._fetchOptions();
+        if (prevProps.option !== this.props.option || prevProps.defaultValue !== this.props.defaultValue) this._fetchOptions();
         if (prevState.selectValue !== this.state.selectValue) this.props.onChangeCallBack && this.props.onChangeCallBack(this.state.selectValue);
         if (prevState.open === false && this.state.open === true) this.props.whenOpenCallBack && this.props.whenOpenCallBack();
         if (prevState.open === true && this.state.open === false) this.props.whenCloseCallBack && this.props.whenCloseCallBack();

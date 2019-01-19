@@ -1,0 +1,41 @@
+@import '../../../magaele/core/core.scss'; // reset
+@import '../../../magaele/core/core/utility'; // grid and something ...
+
+$className: 'tw_vacation_product';
+
+$w_area: (100% / 3);
+
+// 置中
+@mixin center {
+    display: flex;
+    align-items: center;
+    @content;
+}
+
+%labelStyle {
+    @include center;
+    &__middleIcon {
+        outline: 1px solid red;
+    }
+}
+
+.#{$className} {
+    display: flex;
+    > * {
+        outline: 1px solid red;
+    }
+    .left {
+        width: $w_area;
+    }
+    .middle {
+        width: $w_area;
+    }
+    .right {
+        width: $w_area;
+    }
+    
+    // 共用的 label 樣式
+    .labelStyle {
+        @extend %labelStyle;
+    }
+}

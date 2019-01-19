@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { isJsonString } from '../../../utils';
 import { hotel } from '../../../source.config';
 import styles from './css.scss';
 import IntRcln from '../../../magaele/int_rcln';
@@ -10,11 +11,13 @@ import BtRcnb from '../../../magaele/bt_rcnb';
 import RoomPageContent from './RoomPageContent';
 import ActRajx from '../../../magaele/act_rajx';
 import onSubmit from '../onSubmit';
-
+import useLocalStorage from '../../../utils/useLocalStorage';
 import Label from '../../../magaele/int_rctg/components/Label/Label.js';
 import CyRcmn from '../../../magaele/cy_rcmn';
 import NvbRslb from '../../../magaele/nvb_rslb';
 import dayjs from 'dayjs';
+// import '../../vacation/personal/css.scss';
+import { getYearAndMonth } from '../../../utils';
 
 const NvbGoBack = ({
     onClick,
@@ -35,6 +38,7 @@ class Panel extends Component {
             Rooms: [],
             CheckIn: '',
             CheckOut: '',
+            endMonth: dayjs().add(12, 'months').format('YYYY-MM'),
             Filter: {
                 Allotment: '0'
             },
@@ -47,11 +51,11 @@ class Panel extends Component {
             showAct: false,
             hasValue: false,
             actAllData: null,
-            otherEndDay: null,
             actShowData: [], // 補字選單show的資料
             rajxDataUrl: '',
             rajxHead: hotel.destinationAutoComplete,
             dtmDataSrc: hotel.destination,
+            dtmData: {},
             actRules: [
                 {
                     title: '城市',
@@ -80,6 +84,34 @@ class Panel extends Component {
             ]
         };
     }
+    componentDidMount () {
+        const { dtmDataSrc } = this.state;
+        const sessionData = sessionStorage.getItem(dtmDataSrc);
+
+        if (!sessionData || !isJsonString(sessionData)) {
+            fetch(dtmDataSrc)
+                .then(r => r.json())
+                .then(d => {
+                    let stringifyData = JSON.stringify(d);
+                    this.setState({
+                        dtmData: d,
+                    });
+                    sessionStorage.setItem(dtmDataSrc, stringifyData);
+                });
+        } else {
+            const jsonData = JSON.parse(sessionData);
+            this.setState({
+                dtmData: jsonData,
+            });
+        }
+        useLocalStorage({
+            panel: 'hotel',
+            methods: 'get',
+        }, (data) => {
+            const state = this.validataLocalstorageData(data);
+            this.setState({ ...state });
+        });
+    }
 
     // 開M版panel
     showNvbPage (target) {
@@ -103,13 +135,13 @@ class Panel extends Component {
         const dataArray = [];
 
         for (let i = 0; i < Destinations.length; i++) {
-            const dataObj = {
+            const hotelDataObj = {
                 txt: Destinations[i].Name,
                 level2: Destinations[i].KindName,
                 level3: Destinations[i].Code,
                 Kind: Destinations[i].Kind
             };
-            dataArray.push(dataObj);
+            dataArray.push(hotelDataObj);
         }
         return dataArray;
     }
@@ -278,7 +310,7 @@ class Panel extends Component {
     showCalendar (target) {
         this.setState(prevState => ({
             ...prevState,
-            activeInput: target,
+            activeInput: target
         }));
     }
     handleConfirmRoom = () => {
@@ -292,6 +324,7 @@ class Panel extends Component {
             selectedEndDate,
         } = this.calendar.state;
         this.diffDate(selectedStartDate, selectedEndDate);
+
         this.setState(prevState => ({
             ...prevState,
             CheckIn: selectedStartDate,
@@ -308,18 +341,7 @@ class Panel extends Component {
             totleNights: dayDiff
         });
     }
-    handleOtherEndDay = (date) => {
-        if (date) {
-            return dayjs(date).add(14, 'days').format('YYYY-MM-DD');
-        } else {
-            return dayjs().add(12, 'months').format('YYYY-MM');
-        }
-    }
-    handleDateChoose = (date) => {
-        this.setState({
-            otherEndDay: this.handleOtherEndDay(date)
-        });
-    }
+
 
     // 間數人數
     roomPeopleSum = (pageState) => {
@@ -342,10 +364,66 @@ class Panel extends Component {
         });
     }
 
+    // 存入localstorage
+    handlePost = () => {
+        const { CheckIn, CheckOut, Rooms } = this.state;
+        const PostTime = new Date().setHours(0, 0, 0, 0);
+        useLocalStorage({
+            panel: 'hotel',
+            methods: 'post',
+            data: {
+                CheckIn,
+                CheckOut,
+                Rooms,
+                PostTime
+            }
+        });
+    };
+
+    validataLocalstorageData = (data) => {
+        console.log('v-data', data);
+        // eslint-disable-next-line no-extra-boolean-cast
+        if (!!data) {
+            this.setState({
+                CheckIn: data.CheckIn,
+                CheckOut: data.CheckOut
+            });
+            this.diffDate(data.CheckIn, data.CheckOut);
+            const localStorageRecordTime = data.PostTime + 604800000;
+            if (localStorageRecordTime < new Date(dayjs().format('YYYY-MM-DD')).getTime()) {
+                console.log('超過7天予以刪除LocalStorage紀錄。');
+                useLocalStorage({
+                    panel: 'hotel',
+                    methods: 'delete',
+                });
+                let CheckIn = '';
+                let CheckOut = '';
+                return {
+                    CheckIn,
+                    CheckOut
+                };
+            } else {
+                let CheckIn = new Date(data.CheckIn).getTime() > new Date(dayjs().format('YYYY-MM-DD')).getTime() ?
+                    data.CheckIn : dayjs().add(1, 'day').format('YYYY-MM-DD');
+                let CheckOut = new Date(data.CheckOut).getTime() > new Date(dayjs().format('YYYY-MM-DD')).getTime() ?
+                    data.CheckOut : dayjs().add(2, 'day').format('YYYY-MM-DD');
+                let Rooms = data.Rooms;
+                return {
+                    CheckIn,
+                    CheckOut,
+                    Rooms
+                };
+            }
+
+        }
+    };
+
     render () {
         const {
             CheckIn,
             CheckOut,
+            endMonth,
+            Rooms,
             activeInput,
             roomListInput,
             totleNights,
@@ -353,10 +431,9 @@ class Panel extends Component {
             inputText,
             showAct,
             showDtm,
-            dtmDataSrc,
+            dtmData,
             actRules,
-            actShowData,
-            otherEndDay
+            actShowData
         } = this.state;
         const classes = classNames.bind(styles)('hotelsRectM');
         const showCalendarPage = activeInput === 0 || activeInput === 1;
@@ -370,6 +447,22 @@ class Panel extends Component {
         const act_wrap_classes = classNames('act_wrap_container', {
             'd-no': !showAct,
         });
+
+        const activeEndDate = (activeInput, d) => {
+            const afterStartDateNum = dayjs(d).add(14, 'days').month();
+            const endMonthNum = dayjs(endMonth).month();
+
+            let newEndMonth = dayjs().add(12, 'months').format('YYYY-MM');
+            if (afterStartDateNum > endMonthNum) {
+                newEndMonth = dayjs(d).add(14, 'days').format('YYYY-MM');
+            }
+
+            console.log(d, newEndMonth);
+            this.setState({
+                endMonth: newEndMonth
+            });
+        };
+
         return (
             <div className={classes}>
                 <div className={`${classes}_hotelCont`}>
@@ -440,6 +533,7 @@ class Panel extends Component {
                             lg
                             whenClick={() => {
                                 onSubmit(Object.assign(this.state, { hrefTarget: this.props.hrefTarget }));
+                                this.handlePost();
                             }}
                         >
                             搜尋
@@ -454,7 +548,7 @@ class Panel extends Component {
                         <NvbGoBack onClick={this.closeDestnMenu} />
                         <div className="nvb_content">
                             <header>
-                                <h3 className="txt-center m-t-sm m-b-md">目的地</h3>
+                                <h3 className="txt-center m-b-sm fz-lg">目的地</h3>
                                 <div className="search_input">
                                     <IntRcln
                                         placeholder="目的地、地標、區域、飯店名稱"
@@ -466,17 +560,19 @@ class Panel extends Component {
                                     />
                                     <BtRcnb radius whenClick={this.closeDestnMenu} >確定</BtRcnb>
                                 </div>
+                                <p className="dtm_rcfr-label">{'找不到選項？請輸入關鍵字查詢'}</p>
                             </header>
-                            <div className="destinationOpation">
+                            <div className="destinationOpation m-t-n-sm">
                                 <div className={dtm_wrap_classes}>
-                                    <p style={{ color: '#24a07d' }} className="dtm_rcfr-label">{'找不到選項？請輸入關鍵字查詢'}</p>
-                                    <DtmRcfr
-                                        levelKey={['inTaiwan', 'vLine', 'vCountry', 'vCity']}
-                                        onClickItem={this.onClickDestnDtmItem}
-                                        dataResouce={dtmDataSrc}
-                                        replaceRegular={/[a-zA-Z\(\)\s]/g}
-                                        selectedData={selected}
-                                    />
+                                    {Object.keys(dtmData).length &&
+                                        <DtmRcfr
+                                            levelKey={['inTaiwan', 'vLine', 'vCountry', 'vCity']}
+                                            onClickItem={this.onClickDestnDtmItem}
+                                            dataResouce={dtmData}
+                                            replaceRegular={/[a-zA-Z\(\)\s]/g}
+                                            selectedData={selected}
+                                        />
+                                    }
                                 </div>
                                 <div className={act_wrap_classes}>
                                     <ActRajx
@@ -509,14 +605,22 @@ class Panel extends Component {
                                     selectedStartDate={CheckIn}
                                     selectedEndDate={CheckOut}
                                     activeInput={activeInput}
-                                    endMonth={dayjs().add(12, 'months').format('YYYY-MM')}
+                                    endDate={dayjs().add(12, 'months').format('YYYY-MM-DD')}     // 灰灰
+                                    endMonth={endMonth}                                         // 極限
                                     startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
-                                    endDate={otherEndDay}
-                                    chooseFirstDate={this.handleDateChoose}
                                     startLabelTitle="入住日期"
                                     endLabelTitle="退房日期"
+                                    startTxt="入住"
+                                    endTxt="退房"
+                                    panelName="hotel"
                                     ref={e => { this.calendar = e }}
+                                    // switchLabelCallBack={(activeInput, d) => activeEndDate(activeInput, d)}     // 月曆的頁籤切換
+                                    onDateClickCallBack={(activeInput, d) => activeEndDate(activeInput, d)}     // 月曆的日期點選
                                     onClickConfirm={this.handleConfirmBookingDate}
+                                    customDiffTxt={diffDate => {
+                                        const showTxt = diffDate;
+                                        return '共' + showTxt + '晚';
+                                    }}
                                 />
                             )
                         }
@@ -537,7 +641,7 @@ class Panel extends Component {
                                 </div>
                             </header>
                             <div className="hotelsRectM-roomList">
-                                <RoomPageContent changeSum={this.roomPeopleSum} />
+                                <RoomPageContent Rooms={Rooms} changeSum={this.roomPeopleSum} />
                                 <p className="psTxt">※單次訂購提供相同房型，相同房型不同入住人數依選購的專案售價。</p>
                             </div>
                         </div>

@@ -39,7 +39,9 @@ function onSubmit (panelState) {
     if (!CheckIn.length) {
         return alert('請選擇住房期間、請輸入必填欄位喔！');
     }
-
+    if (CheckIn === CheckOut) {
+        return alert('住房期間起迄不可是同一天');
+    }
     if (!CheckOut.length) {
         return alert('請輸入必填欄位喔！');
     }

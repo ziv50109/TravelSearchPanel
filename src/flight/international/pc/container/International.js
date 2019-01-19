@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { flightInternational } from '../../../../../source.config';
 import CyRcln from '../../../../../magaele/cy_rcln';
-import { ClickOutSide } from '../../../../../utils'; // ClickOutSide 一定要大括弧
+import { ClickOutSide, isJsonString, fetchJsToObj } from '../../../../../utils'; // ClickOutSide 一定要大括弧
 import StRnls from '../../../../../magaele/st_rnls';
 import IntRcln from '../../../../../magaele/int_rcln';
 import IcRcln from '../../../../../magaele/ic_rcln';
@@ -15,12 +15,12 @@ import BtRcnb from '../../../../../magaele/bt_rcnb';
 import SingleInputMenuF from '../../../../shared/SingleInputMenu/SingleInputMenuF';
 import today from 'dayjs';
 
-
 // 補字選單國家 changeKey
 const actRacpChangeKeyCountry = data => {
     data.forEach(item => {
         item.txt = item.fullName;
-        delete item.fullName;
+        item.country = item.fullName.split('__')[0].match(/\((.*)\)/)[1];
+        // delete item.fullName;
     });
     return data;
 };
@@ -35,7 +35,7 @@ const catalogueCallBackCountry = [
 ];
 
 // 排除輾轉國家
-class FilterTransfer extends Component {
+class FilterTransfer extends PureComponent {
     state = {
         // 排除轉機
         inputText: '', // 綁 input 裡面的值
@@ -59,7 +59,7 @@ class FilterTransfer extends Component {
 
     receive = i => {
         if (this.props.setNonprefertrans) {
-            this.props.setNonprefertrans({ nonprefertrans: i.txt });
+            this.props.setNonprefertrans({ nonprefertrans: i.country });
         }
         this.setState({
             obj: i,
@@ -123,13 +123,15 @@ class FilterTransfer extends Component {
                 <Label
                     size="lg"
                     label={'排除轉機國家'}
+                    onClick={() => this.transferInput.focus()}
                     subComponent={
                         <React.Fragment>
                             <div className="int_rcln int-tags-single noBorder">
                                 <input
+                                    ref={e => { this.transferInput = e }}
                                     type="text"
                                     value={inputText}
-                                    placeholder="請選擇"
+                                    placeholder="請輸入國家"
                                     onChange={this.onChange}
                                     onFocus={this.onFocus}
                                     onBlur={this.onBlur}
@@ -175,7 +177,7 @@ class FilterTransfer extends Component {
 }
 
 // 人數增加，減少
-class PeopleNumAdd extends Component {
+class PeopleNumAdd extends PureComponent {
     constructor (props) {
         super(props);
         this.maxSum = 8;
@@ -192,15 +194,49 @@ class PeopleNumAdd extends Component {
             },
             childObj: {
                 min: 0,
-                max: 8,
+                max: 5,
                 count: 0
             },
             babyObj: {
                 min: 0,
-                max: 1,
+                max: 3,
                 count: 0
             }
         };
+    }
+
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps !== this.props) {
+            this.updatedPeopleNum();
+        }
+    }
+
+    updatedPeopleNum = () => {
+        const {
+            adultObj,
+            childObj,
+            babyObj
+        } = this.state;
+        const {
+            adtNum,
+            chdNum,
+            infNum
+        } = this.props;
+
+        this.setState({
+            adultObj: {
+                ...adultObj,
+                count: adtNum
+            },
+            childObj: {
+                ...childObj,
+                count: chdNum
+            },
+            babyObj: {
+                ...babyObj,
+                count: infNum
+            }
+        });
     }
 
     renderState (adultCount, childCount, babyCount) {
@@ -211,17 +247,6 @@ class PeopleNumAdd extends Component {
             babyObj: { min: babyMin, max: babyMax }
         } = this.state;
 
-        if (
-            total > this.maxSum ||
-            adultCount > adultMax ||
-            adultCount < adultMin ||
-            childCount > childMax ||
-            childCount < childMin ||
-            babyCount > babyMax ||
-            babyCount < babyMin
-        ) {
-            return;
-        }
 
         // 傳回總人數
         if (this.props.setTotalPeople) {
@@ -233,49 +258,43 @@ class PeopleNumAdd extends Component {
             this.props.setPeople({
                 adt: adultCount,
                 chd: childCount,
-                inf: adultCount < babyMax ? adultCount : babyCount
+                inf: babyCount
             });
         }
-
         this.setState({
             adultObj: {
                 min: 1,
-                max: this.maxSum - childCount - babyCount,
+                max: 8,
                 count: adultCount
             },
             childObj: {
                 min: 0,
-                max: this.maxSum - adultCount - babyCount,
+                max: 5,
                 count: childCount
             },
             babyObj: {
                 min: 0,
-                max:
-                    childCount + adultCount * 2 <= this.maxSum ||
-                        adultCount < babyMax
-                        ? adultCount
-                        : this.maxSum - adultCount - childCount,
-                count: adultCount < babyMax ? adultCount : babyCount
+                max: 3,
+                count: babyCount
             }
         });
     }
 
     onClickAdd = target => {
         let {
-            adultObj: { count: adultCount },
-            childObj: { count: childCount },
-            babyObj: { count: babyCount }
+            adultObj: { count: adultCount, max: adultMax },
+            childObj: { count: childCount, max: childMax },
+            babyObj: { count: babyCount, max: babyMax }
         } = this.state;
-
         switch (target) {
             case 'adultObj':
-                adultCount += 1;
+                adultCount = adultCount >= adultMax ? adultMax : adultCount += 1;
                 break;
             case 'childObj':
-                childCount += 1;
+                childCount = childCount >= childMax ? childMax : childCount += 1;
                 break;
             case 'babyObj':
-                babyCount += 1;
+                babyCount = babyCount >= babyMax ? babyMax : babyCount += 1;
                 break;
             default:
                 break;
@@ -286,27 +305,25 @@ class PeopleNumAdd extends Component {
 
     onClickMinus = target => {
         let {
-            adultObj: { count: adultCount },
-            childObj: { count: childCount },
-            babyObj: { count: babyCount }
+            adultObj: { count: adultCount, min: adultMin },
+            childObj: { count: childCount, min: childMin },
+            babyObj: { count: babyCount, min: babyMin }
         } = this.state;
-
         switch (target) {
             case 'adultObj':
-                adultCount -= 1;
+                adultCount = adultCount <= adultMin ? adultMin : adultCount -= 1;
                 if (this.props.setAdt) {
                     this.props.setAdt(adultCount);
                 }
                 break;
             case 'childObj':
-                childCount -= 1;
-                console.log(childCount);
+                childCount = childCount <= childMin ? childMin : childCount -= 1;
                 if (this.props.setChd) {
                     this.props.setChd(childCount);
                 }
                 break;
             case 'babyObj':
-                babyCount -= 1;
+                babyCount = babyCount <= babyMin ? babyMin : babyCount -= 1;
                 break;
             default:
                 break;
@@ -325,7 +342,7 @@ class PeopleNumAdd extends Component {
                         xin
                         max={this.state.adultObj.max}
                         min={this.state.adultObj.min}
-                        count={this.state.adultObj.count}
+                        count={this.state.adultObj.count > this.state.adultObj.max ? this.state.adultObj.max : this.state.adultObj.count}
                         btnClassMinus="ic_rcln toolcancelb"
                         btnClassAdd="ic_rcln tooladdb"
                         onClickAdd={() => {
@@ -377,439 +394,729 @@ class PeopleNumAdd extends Component {
     }
 }
 
-const International = props => {
-    const ClsTypeLevel = [
-        { text: '不限', value: 0 },
-        { text: '經濟艙', value: 1 },
-        { text: '豪華經濟艙', value: 2 },
-        { text: '商務艙', value: 3 },
-        { text: '頭等艙', value: 4 }
-    ];
+const ClsTypeLevel = [
+    { text: '不限', value: 0 },
+    { text: '經濟艙', value: 1 },
+    { text: '豪華經濟艙', value: 2 },
+    { text: '商務艙', value: 3 },
+    { text: '頭等艙', value: 4 }
+];
 
-    const cheapFlightOptions = [
-        { text: '不限', value: 1 },
-        { text: '只要廉價航空', value: 2 },
-        { text: '排除廉價航空', value: 3 }
-    ];
+const cheapFlightOptions = [
+    { text: '不限', value: 1 },
+    { text: '只要廉價航空', value: 2 },
+    { text: '排除廉價航空', value: 3 }
+];
 
-    let appendItemClass = 'AppendContainer';
-    props.rtow === 3 ? appendItemClass += ' show' : appendItemClass += ' hide';
+const renameKey = (obj, fn) => {
+    let keys = Object.keys(obj);
 
-    return (
-        <div>
-            <div className={props.rtow === 3 ? 'ThreeRtowStyle' : null}>
+    for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        let newKey = keys[i];
+        let val = obj[key];
+        let str = fn(newKey, val);
+        if (typeof str === 'string' && str !== '') {
+            newKey = str;
+            delete obj[key];
+        }
+        obj[newKey] = val;
+    }
+    return;
+};
+
+class International extends PureComponent {
+// const International = props => {
+    constructor (props) {
+        super(props);
+        this.state = {
+            rcfrDataResouce: {},
+            newCity: {},
+            activeInput: null,
+            haveseat: true,
+            isSwitch: false,
+            cabinNumber: this.props.cabinNumber || 0,
+            clstypeText: '經濟艙', // 艙等文字,
+            total: 1
+        };
+    }
+    componentDidMount () {
+        const sessionData = sessionStorage.getItem(flightInternational.place);
+
+        if (sessionData && isJsonString(sessionData)) {
+            this._formatDtmRcfrData(sessionData);
+            this._getDataCallBack(sessionData);
+        } else {
+            fetchJsToObj(flightInternational.place, (d) => {
+                let stringifyData = JSON.stringify(d);
+                this._formatDtmRcfrData(stringifyData);
+                this._getDataCallBack(stringifyData);
+                sessionStorage.setItem(flightInternational.place, stringifyData);
+            });
+        }
+    }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps !== this.props) {
+            this.updateCabinNumber();
+            this.updateTotalNum();
+        }
+    }
+    updateCabinNumber = () => {
+        const { cabinNumber } = this.props;
+        let clstypeText = '';
+        ClsTypeLevel.forEach((obj, i) => {
+            if (obj.value === this.state.cabinNumber) {
+                clstypeText = obj.text;
+            }
+        });
+
+        this.setState({ cabinNumber, clstypeText });
+    }
+    updateTotalNum = () => {
+        const {
+            adtNum,
+            chdNum,
+            infNum
+        } = this.props;
+        const total = adtNum + chdNum + infNum;
+        this.setState({ total });
+    }
+
+    // 快速選單吃的資料
+    _formatDtmRcfrData = (d) => {
+        let data = JSON.parse(d);
+        // 改造第一層資料
+        renameKey(data.line, (key) => {
+            return key + 'A';
+        });
+        // 加上第二層資料
+        data._line = {};
+        for (let i in data.line) {
+            if (Object.prototype.hasOwnProperty.call(data.line, i)) {
+                let newKey = i.split('A')[0];
+                data._line[i] = { [newKey]: data.line[i] };
+            }
+        }
+        // 更改第三層資料
+        for (let i in data.city) {
+            if (Object.prototype.hasOwnProperty.call(data.city, i)) {
+                for (let j in data.city[i]) {
+                    if (Object.prototype.hasOwnProperty.call(data.city[i], j)) {
+                        let matchStr = data.city[i][j].split('__')[1].split('-');
+                        data.city[i][j] = i === '_5' ?
+                            matchStr.length < 3 ? matchStr[0] : matchStr[0] + '-' + matchStr[1] :
+                            matchStr.length <= 3 ? matchStr[0].replace(/<|>/g, '') : matchStr[0].replace(/<|>/g, '') + '-' + matchStr[1];
+                    }
+                }
+            }
+        }
+        this.setState({ rcfrDataResouce: data });
+    }
+    // 處理 fetch 回來的 data 成為 newCity
+    _getDataCallBack = (d) => {
+        let data = JSON.parse(d);
+        // 重構 city 資料
+        let arr = [];
+        for (let key in data.city) {
+            if (Object.keys(data.city)) {
+                arr.push(data.city[key]);
+            }
+        }
+        this.setState({ newCity: Object.assign({}, ...arr) });
+    }
+    // 去程日期input change
+    singleInputChange = (e) => {
+        // console.log('ddd', e.target.value);
+        this.props.singleInputChange && this.props.singleInputChange(e.target.value);
+    }
+
+    dcInputChange = (e, target) => {
+        this.props.dcInputChange && this.props.dcInputChange(e.target.value, target);
+    }
+
+    muitInputChange = (e, index) => {
+        this.props.muitInputChange && this.props.muitInputChange(e.target.value, index);
+    }
+    handleSwitch = () => {
+        this.setState({ isSwitch: true }, () => {
+            this.setState({ isSwitch: false });
+        });
+    }
+
+    render () {
+        console.log(this.props.dptSelectedData);
+        const { rcfrDataResouce, newCity, isSwitch } = this.state;
+        let appendItemClass = 'AppendContainer';
+        this.props.rtow === 3
+            ? (appendItemClass += ' show')
+            : (appendItemClass += ' hide');
+
+        let moreOptionsStyle = this.props.rtow === 3 ? ' MoreOptionThreeRtow' : '';
+
+
+        return (
+            <div>
                 <div
-                    className={props.rtow === 3 ? 'ItemStyle' : 'ZeroOneRtowStyle'}
+                    className={
+                        this.props.rtow === 3 ? 'ThreeRtowStyle' : 'OneTwoRtowStyle'
+                    }
                 >
-                    {/* 出發地、目的地 單程、來回 */}
-                    <div className="single-change">
-                        <SingleInputMenuF
-                            className="SingleInputMenu"
-                            isRequired
-                            size="lg"
-                            label={'出發地'}
-                            iconName={'toolmap'}
-                            fetchPath={props.fetchPath}
-                            selectedData={props.dptSelectedData}
-                            placeholder="請輸入國家/城市/機場"
-                            minimumStringQueryLength={2}
-                            minimumStringQuery="請輸入至少兩個文字"
-                            noMatchText="很抱歉，找不到符合的項目"
-                            subLabel="找不到選項？請輸入關鍵字查詢"
-                            onChange={(val) => props.placeChange(val, 'dptSelectedData')}
-                        />
-                        <div className="changeBtn" onClick={props.switch}></div>
-                        <SingleInputMenuF
-                            className="SingleInputMenu"
-                            isRequired
-                            size="lg"
-                            label={'目的地'}
-                            iconName={'toolmap'}
-                            fetchPath={props.fetchPath}
-                            selectedData={props.dtnSelectedData}
-                            placeholder="請輸入國家/城市/機場"
-                            minimumStringQueryLength={2}
-                            minimumStringQuery="請輸入至少兩個文字"
-                            noMatchText="很抱歉，找不到符合的項目"
-                            subLabel="找不到選項？請輸入關鍵字查詢"
-                            onChange={(val) => props.placeChange(val, 'dtnSelectedData')}
-                        />
-                    </div>
-
-
-                    {props.rtow === 0 || props.rtow === 3 ? ( // 假如點到 0、3　頁時顯示單選月曆
-                        // 去程 單程
-                        <ClickOutSide onClickOutside={props.onClickOutside}>
-                            <Label
+                    <div
+                        className={
+                            this.props.rtow === 3 ? 'ItemStyle' : 'ZeroOneRtowStyle'
+                        }
+                    >
+                        {/* 出發地、目的地 單程、來回 */}
+                        <div className="single-change">
+                            <SingleInputMenuF
+                                isSwitch={isSwitch}
+                                className="SingleInputMenu"
                                 isRequired
                                 size="lg"
-                                label={'去程日期'}
-                                iconName={'tooldate'}
-                                subComponent={
-                                    <div className="inputStyle">
-                                        <input
-                                            type="text"
-                                            placeholder="YYYY/MM/DD"
-                                            value={props.startInputValue.replace(/\-/g, '/')}
-                                            onFocus={() =>
-                                                props.singleInputFocus({
-                                                    focus1: true
-                                                })
-                                            }
-                                            onBlur={() => {
-                                                props.singleOnBlur('clean1');
-                                            }}
-                                            readOnly
-                                        />
-                                        {props.Clean1 &&
-                                            <span className="clearBtn" onMouseDown={() => props.clearValue({ depdate1: '' })} />
-                                        }
-                                    </div>
+                                label={'出發地'}
+                                iconName={'toolmap'}
+                                rcfrDataResouce={rcfrDataResouce}
+                                newCity={newCity}
+                                racpDataResouce={flightInternational.placeAutoComplete}
+                                selectedData={this.props.dptSelectedData}
+                                placeholder="城市/國家/機場"
+                                minimumStringQueryLength={2}
+                                minimumStringQuery="請輸入至少兩個文字"
+                                noMatchText="很抱歉，找不到符合的項目"
+                                subLabel="找不到選項？請輸入關鍵字查詢"
+                                onChange={val =>
+                                    this.props.placeChange(val, 'dptSelectedData')
                                 }
                             />
-
-                            {props.onFocus && (
-                                <div className="calendarStyle">
-                                    <div className="calendarStyleIn">
-                                        <CyRcln
-                                            doubleMonth={true}
-                                            activeStart={today().format('YYYY-MM')}
-                                            activeEnd={today().add(1, 'years').format('YYYY-MM')}
-                                            startDate={today().format('YYYY-MM-DD')}
-                                            endDate={today().add(1, 'years').format('YYYY-MM-DD')}
-                                            selectedStartDate={
-                                                props.startInputValue
-                                            }
-                                            onDateClick={val =>
-                                                props.clickDate({
-                                                    depdate1: val,
-                                                    goDateFocus: false
-                                                })
-                                            }
-                                        />
-                                        <div
-                                            className="close_btn"
-                                            onClick={props.onClickOutside}
-                                        >×</div>
-                                    </div>
-                                </div>
-
-                            )}
-                        </ClickOutSide>
-                    ) : (
-                    // 去程來回 來回
-                        <ClickOutSide
-                            onClickOutside={() => props.dcInputFocus(null)}
-                        >
-                            <div className="doubleCanlendarStyle">
-                                <Label
-                                    isRequired
-                                    size="lg"
-                                    label={'去程日期'}
-                                    iconName={'tooldate'}
-                                    subComponent={
-                                        <div className="inputStyle">
-                                            <input
-                                                type="text"
-                                                placeholder="開始日期"
-                                                value={props.dcStartInputValue.replace(/\-/g, '/')}
-                                                onFocus={() =>
-                                                    props.dcInputFocus('start', 'depdate1')
-                                                }
-                                                onChange={() => { }}
-                                                onBlur={() => props.singleOnBlur('dcCleanBtn1')}
-                                            />
-                                            {props.dcCleanBtn1 &&
-                                            <span className="clearBtn" onMouseDown={() => props.clearValue({ depdate1: '' })} />
-                                            }
-                                        </div>
-                                    }
-                                />
-                                <Label
-                                    isRequired
-                                    size="lg"
-                                    label={'回程日期'}
-                                    subComponent={
-                                        <div className="inputStyle">
-                                            <input
-                                                type="text"
-                                                placeholder="結束日期"
-                                                value={props.dcEndInputValue.replace(/\-/g, '/')}
-                                                onFocus={() =>
-                                                    props.dcInputFocus('end', 'depdate2')
-                                                }
-                                                onBlur={() => props.singleOnBlur('dcCleanBtn2')}
-                                                onChange={() => { }}
-                                            />
-                                            {props.dcCleanBtn2 &&
-                                            <span className="clearBtn" onMouseDown={() => props.clearValue({ depdate2: '' })} />
-                                            }
-                                        </div>
-                                    }
-                                />
-                            </div>
-                            {!props.dcActiveInput ? null : (
-                                <div className="calendarStyle">
-                                    <div className="calendarStyleIn">
-
-                                        <CyRcln
-                                            doubleMonth={true}
-                                            doubleChoose
-                                            activeStart={today().format('YYYY-MM')}
-                                            activeEnd={today().add(1, 'years').format('YYYY-MM')}
-                                            startDate={today().format('YYYY-MM-DD')}
-                                            endDate={today().add(1, 'years').format('YYYY-MM-DD')}
-                                            selectedStartDate={props.dcStartInputValue}
-                                            selectedEndDate={props.dcEndInputValue}
-                                            onDateClick={(date) => props.dcClickDate(date)}
-                                        />
-                                        <div
-                                            className="close_btn"
-                                            onClick={() => props.dcInputFocus(null)}
-                                        >×</div>
-                                    </div>
-                                </div>
-
-                            )}
-                        </ClickOutSide>
-                    )}
-                </div>
-
-                {/* 人數、艙等 */}
-                <StRnls
-                    CustomComponent={
-                        <IntRcln
-                            request
-                            value={`共${props.totalPeople}人，${[props.cabinName]}`}
-                            label="人數/艙等"
-                            icon={<IcRcln name="toolmember" />}
-                        />
-                    }
-                    ContentComponent={
-                        <div className="flight_international peopleCabinStyle">
-                            <StRcln
-                                option={ClsTypeLevel}
-                                placeholder="請選擇"
-                                label="艙等："
-                                onChangeCallBack={val =>
-                                    props.selectCabin({
-                                        clstypeText: ClsTypeLevel[val].text,
-                                        clstype: val
-                                    })
+                            <div className="changeBtn"
+                                onClick={() => {
+                                    this.handleSwitch();
+                                    this.props.switch();
+                                }}
+                            />
+                            <SingleInputMenuF
+                                isSwitch={isSwitch}
+                                className="SingleInputMenu"
+                                isRequired
+                                size="lg"
+                                label={'目的地'}
+                                iconName={'toolmap'}
+                                rcfrDataResouce={rcfrDataResouce}
+                                newCity={newCity}
+                                racpDataResouce={flightInternational.placeAutoComplete}
+                                selectedData={this.props.dtnSelectedData}
+                                placeholder="城市/國家/機場"
+                                minimumStringQueryLength={2}
+                                minimumStringQuery="請輸入至少兩個文字"
+                                noMatchText="很抱歉，找不到符合的項目"
+                                subLabel="找不到選項？請輸入關鍵字查詢"
+                                onChange={val => {
+                                    // console.log('aaaaaaaaaa', val);
+                                    this.props.placeChange(val, 'dtnSelectedData');
                                 }
-                                defaultValue={props.cabinNumber}
+                                }
                             />
-                            <PeopleNumAdd
-                                setPeople={props.setPeople}
-                                setTotalPeople={props.setTotalPeople}
-                            />
-                            <div className="con-tooltip">
-                                大人：以出發日為準，年滿12歲(含)以上。
-                                <br />
-                                孩童：全程搭乘日為準，年滿2歲(含)以上，未滿12歲。
-                                <br />
-                                嬰兒：全程搭乘日為準，未滿2歲(不列入幾人成行的人數計算)。
-                                <br />
-                            </div>
                         </div>
-                    }
-                    moduleClassName="StRnls1 peopleCabinStyle"
-                    appendToBody
-                    // width="448px"
-                    innerComponentClass={['outClass']}
-                />
-            </div>
 
-
-            {/* append Items */}
-            <div className={appendItemClass}>
-                {props.multiItems.map((item, i) => (
-                    <div key={i} className="AppendItemStyle">
-                        <div className="ItemStyle">
-                            {/* 出發地、目的地  多目的地 */}
-                            <div className="single-change">
-                                <SingleInputMenuF
-                                    className="SingleInputMenu"
-                                    isRequired
-                                    size="lg"
-                                    label={'出發地'}
-                                    iconName={'toolmap'}
-                                    fetchPath={props.fetchPath}
-                                    selectedData={item.dptSelectedData}
-                                    placeholder="請輸入國家/城市/機場"
-                                    minimumStringQueryLength={2}
-                                    minimumStringQuery="請輸入至少兩個文字"
-                                    noMatchText="很抱歉，找不到符合的項目"
-                                    subLabel="找不到選項？請輸入關鍵字查詢"
-                                    onChange={(val) => props.multiPlaceChange(val, item.id, 'dptSelectedData')}
-                                />
-                                <div className="changeBtn" onClick={() => props.multiSwitch(item.id)}></div>
-                                <SingleInputMenuF
-                                    className="SingleInputMenu"
-                                    isRequired
-                                    size="lg"
-                                    label={'目的地'}
-                                    iconName={'toolmap'}
-                                    fetchPath={props.fetchPath}
-                                    selectedData={item.dtnSelectedData}
-                                    placeholder="請輸入國家/城市/機場"
-                                    minimumStringQueryLength={2}
-                                    minimumStringQuery="請輸入至少兩個文字"
-                                    noMatchText="很抱歉，找不到符合的項目"
-                                    subLabel="找不到選項？請輸入關鍵字查詢"
-                                    onChange={(val) => props.multiPlaceChange(val, item.id, 'dtnSelectedData')}
-                                />
-                            </div>
-
-
-                            {/* 去程日期 多目的地 */}
-                            <ClickOutSide
-                                onClickOutside={() => props.closeCalendar(item.id)
-                                }
-                            >
+                        {this.props.rtow === 0 || this.props.rtow === 3 ? ( // 假如點到 0, 3 頁時顯示單選月曆
+                            // 去程 單程
+                            <ClickOutSide onClickOutside={this.props.onClickOutside}>
                                 <Label
                                     isRequired
                                     size="lg"
                                     label={'去程日期'}
                                     iconName={'tooldate'}
+                                    onClick={() => this.cinput1.focus()}
                                     subComponent={
                                         <div className="inputStyle">
                                             <input
+                                                ref={ref => { this.cinput1 = ref }}
                                                 type="text"
                                                 placeholder="YYYY/MM/DD"
-                                                value={item.startInputValue.replace(/\-/g, '/')}
+                                                value={this.props.startInputValue.replace(
+                                                    /\-/g,
+                                                    '/'
+                                                )}
                                                 onFocus={() =>
-                                                    props.onFocusInput(item.id)
+                                                    this.props.singleInputFocus({
+                                                        focus1: true
+                                                    })
                                                 }
-                                                onBlur={() => props.multiBlur(item.id)}
-                                                onChange={() => { }}
+                                                onBlur={() => {
+                                                    this.props.singleOnBlur('clean1');
+                                                }}
+                                                // readOnly
+                                                onChange={value => this.singleInputChange(value)}
                                             />
-                                            {item.cleanBtn &&
-                                                <span className="clearBtn" onMouseDown={() => props.multiClearValue(item.id)} />
-                                            }
+                                            {this.props.Clean1 && (
+                                                <div className="clearBtnWrap">
+                                                    <span
+                                                        className="clearBtn"
+                                                        onMouseDown={() =>
+                                                            this.props.clearValue({
+                                                                depdate1: ''
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     }
                                 />
-                                {item.onFocus && (
+
+                                {this.props.onFocus && (
                                     <div className="calendarStyle">
                                         <div className="calendarStyleIn">
-
                                             <CyRcln
                                                 doubleMonth={true}
-                                                activeStart={item.activeStart}
-                                                startDate={item.startDate}
-                                                endDate={today().add(1, 'years').format('YYYY-MM-DD')}
+                                                activeStart={today().format(
+                                                    'YYYY-MM'
+                                                )}
+                                                activeEnd={today()
+                                                    .add(1, 'years')
+                                                    .format('YYYY-MM')}
+                                                startDate={today().format(
+                                                    'YYYY-MM-DD'
+                                                )}
+                                                endDate={today()
+                                                    .add(361, 'days')
+                                                    .format('YYYY-MM-DD')}
                                                 selectedStartDate={
-                                                    item.selectedStartDate
+                                                    this.props.startInputValue
                                                 }
-                                                onDateClick={e =>
-                                                    props.multipleClickDate(
-                                                        e,
-                                                        item.id,
-                                                        i
-                                                    )
+                                                onDateClick={val =>
+                                                    this.props.clickDate({
+                                                        depdate1: val,
+                                                        goDateFocus: false
+                                                    })
                                                 }
                                             />
                                             <div
                                                 className="close_btn"
-                                                onClick={() => props.closeCalendar(item.id)}
-                                            >×</div>
+                                                onClick={this.props.onClickOutside}
+                                            >
+                                                ×
+                                            </div>
                                         </div>
                                     </div>
-
                                 )}
                             </ClickOutSide>
-                        </div>
-
-                        {/* 減少 多目的地 */}
-                        {i !== 0 && (
-                            <BtRcnb
-                                prop="string"
-                                className="minus-items mulitMinus"
-                                whenClick={() =>
-                                    props.minusItem(item.id)
-                                }
+                        ) : (
+                            // 去程來回 來回
+                            <ClickOutSide
+                                onClickOutside={() => this.props.dcInputFocus(null)}
                             >
-                                <IcRcln name="toolcancelb" size="x15" />
-                            </BtRcnb>
+                                <div className="doubleCanlendarStyle">
+                                    <Label
+                                        isRequired
+                                        size="lg"
+                                        label={'去程日期'}
+                                        iconName={'tooldate'}
+                                        onClick={() => this.cinput2.focus()}
+                                        subComponent={
+                                            <div className="inputStyle">
+                                                <input
+                                                    ref={ref => { this.cinput2 = ref }}
+                                                    type="text"
+                                                    placeholder="YYYY/MM/DD"
+                                                    value={this.props.dcStartInputValue.replace(
+                                                        /\-/g,
+                                                        '/'
+                                                    )}
+                                                    onFocus={() =>
+                                                        this.props.dcInputFocus(
+                                                            'start',
+                                                            'depdate1'
+                                                        )
+                                                    }
+                                                    onChange={(e) => this.dcInputChange(e, 'start')}
+                                                    onBlur={() =>
+                                                        this.props.singleOnBlur(
+                                                            'dcCleanBtn1'
+                                                        )
+                                                    }
+                                                />
+                                                {this.props.dcCleanBtn1 && (
+                                                    <div className="clearBtnWrap">
+                                                        <span
+                                                            className="clearBtn"
+                                                            onMouseDown={() =>
+                                                                this.props.clearValue({
+                                                                    depdate1: ''
+                                                                })
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        }
+                                    />
+                                    <Label
+                                        isRequired
+                                        size="lg"
+                                        label={'回程日期'}
+                                        onClick={() => this.cinput3.focus()}
+                                        subComponent={
+                                            <div className="inputStyle">
+                                                <input
+                                                    ref={ref => { this.cinput3 = ref }}
+                                                    type="text"
+                                                    placeholder="YYYY/MM/DD"
+                                                    value={this.props.dcEndInputValue.replace(
+                                                        /\-/g,
+                                                        '/'
+                                                    )}
+                                                    onFocus={() =>
+                                                        this.props.dcInputFocus(
+                                                            'end',
+                                                            'depdate2'
+                                                        )
+                                                    }
+                                                    onBlur={() =>
+                                                        this.props.singleOnBlur(
+                                                            'dcCleanBtn2'
+                                                        )
+                                                    }
+                                                    onChange={(e) => this.dcInputChange(e, 'end')}
+                                                />
+                                                {this.props.dcCleanBtn2 && (
+                                                    <div className="clearBtnWrap">
+                                                        <span
+                                                            className="clearBtn"
+                                                            onMouseDown={() =>
+                                                                this.props.clearValue({
+                                                                    depdate2: ''
+                                                                })
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        }
+                                    />
+                                </div>
+                                {!this.props.dcActiveInput ? null : (
+                                    <div className="calendarStyle">
+                                        <div className="calendarStyleIn">
+                                            <CyRcln
+                                                doubleMonth={true}
+                                                doubleChoose
+                                                activeStart={today().format('YYYY-MM')}
+                                                activeEnd={today().add(1, 'years').format('YYYY-MM')}
+                                                startDate={this.props.startDate ? this.props.startDate : today().format('YYYY-MM-DD')}
+                                                endDate={today().add(361, 'days').format('YYYY-MM-DD')}
+                                                selectedStartDate={
+                                                    this.props.dcStartInputValue
+                                                }
+                                                selectedEndDate={
+                                                    this.props.dcEndInputValue
+                                                }
+                                                onDateClick={date =>
+                                                    this.props.dcClickDate(date)
+                                                }
+                                            />
+                                            <div
+                                                className="close_btn"
+                                                onClick={() =>
+                                                    this.props.dcInputFocus(null)
+                                                }
+                                            >
+                                                ×
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </ClickOutSide>
                         )}
-
                     </div>
-                ))}
 
-                {/* 增加 多目的地 */}
-                {props.multiItems.length !== 5 && (
-                    <BtRcnb
-                        prop="string"
-                        className="add-items mulitAdd"
-                        whenClick={props.addItem}
-                    >
-                        <IcRcln name="tooladdb" size="x15" />
-                    </BtRcnb>
-                )}
-            </div>
-
-            {/* 直飛、找機位 */}
-            <CrRcln
-                type="checkbox"
-                textContent="直飛(含中停)"
-                whenChange={e => props.setNoTrans({ notrans: e ? 'T' : 'F' })}
-            />
-            <CrRcln
-                className="checkBoxMagin"
-                type="checkbox"
-                textContent="只找有機位"
-                whenChange={e => props.setHaveSeat({ haveseat: e ? 1 : 2 })}
-            />
-
-            {/* 更多搜尋選項 */}
-            <ClpRcdp
-                titleText="更多搜尋選項"
-                ContentComponent={
-                    <React.Fragment>
-                        <div className="searchMoreTop">
-                            <FilterTransfer
-                                setNonprefertrans={props.setNonprefertrans}
-                                clearNonprefertrans={props.clearNonprefertrans}
+                    {/* 人數、艙等 */}
+                    <StRnls
+                        CustomComponent={
+                            <IntRcln
+                                request
+                                value={`共${this.state.total}人，${this.state.clstypeText}`}
+                                label="人數/艙等"
+                                icon={<IcRcln name="toolmember" />}
                             />
-                            <StRcln
-                                option={cheapFlightOptions}
-                                placeholder="請選擇"
-                                label="廉價航空"
-                                breakline
-                                onChangeCallBack={e =>
-                                    props.setSourceSystem({ sourcesystem: e })
-                                }
-                                defaultValue={props.sourceSystem}
-                            />
+                        }
+                        ContentComponent={
+                            <div className="flight_international peopleCabinStyle">
+                                <StRcln
+                                    option={ClsTypeLevel}
+                                    label="艙等："
+                                    onChangeCallBack={val => {
+                                        this.setState({
+                                            cabinNumber: val
+                                        }, () => {
+                                            this.props.selectCabin({
+                                                clstype: this.state.cabinNumber
+                                            });
+                                        });
+                                    }}
+                                    defaultValue={this.state.cabinNumber}
+                                />
+                                <PeopleNumAdd
+                                    adtNum={this.props.adtNum}
+                                    chdNum={this.props.chdNum}
+                                    infNum={this.props.infNum}
+                                    setPeople={this.props.setPeople}
+                                    setTotalPeople={this.props.setTotalPeople}
+                                />
+                                <div className="con-tooltip">
+                                    大人：以出發日為準，年滿12歲(含)以上。
+                                    <br />
+                                    孩童：全程搭乘日為準，年滿2歲(含)以上，未滿12歲。
+                                    <br />
+                                    嬰兒：全程搭乘日為準，未滿2歲(不列入幾人成行的人數計算)。
+                                    <br />
+                                </div>
+                            </div>
+                        }
+                        moduleClassName="StRnls1 peopleCabinStyle"
+                        appendToBody
+                        // width="448px"
+                        innerComponentClass={['outClass']}
+                    />
+                </div>
+
+                {/* append Items */}
+                <div className={appendItemClass}>
+                    {this.props.multiItems.map((item, i) => (
+                        <div key={i} className="AppendItemStyle">
+                            <div className="ItemStyle">
+                                {/* 出發地、目的地  多目的地 */}
+                                <div className="single-change">
+                                    <SingleInputMenuF
+                                        isSwitch={isSwitch}
+                                        className="SingleInputMenu"
+                                        isRequired
+                                        size="lg"
+                                        label={'出發地'}
+                                        iconName={'toolmap'}
+                                        rcfrDataResouce={rcfrDataResouce}
+                                        newCity={newCity}
+                                        racpDataResouce={flightInternational.placeAutoComplete}
+                                        selectedData={item.dptSelectedData}
+                                        placeholder="城市/國家/機場"
+                                        minimumStringQueryLength={2}
+                                        minimumStringQuery="請輸入至少兩個文字"
+                                        noMatchText="很抱歉，找不到符合的項目"
+                                        subLabel="找不到選項？請輸入關鍵字查詢"
+                                        onChange={val =>
+                                            this.props.multiPlaceChange(
+                                                val,
+                                                item.id,
+                                                'dptSelectedData'
+                                            )
+                                        }
+                                    />
+                                    <div
+                                        className="changeBtn"
+                                        onClick={() => {
+                                            this.handleSwitch();
+                                            this.props.multiSwitch(item.id);
+                                        }}
+                                    />
+                                    <SingleInputMenuF
+                                        isSwitch={isSwitch}
+                                        className="SingleInputMenu"
+                                        isRequired
+                                        size="lg"
+                                        label={'目的地'}
+                                        iconName={'toolmap'}
+                                        rcfrDataResouce={rcfrDataResouce}
+                                        newCity={newCity}
+                                        racpDataResouce={flightInternational.placeAutoComplete}
+                                        selectedData={item.dtnSelectedData}
+                                        placeholder="城市/國家/機場"
+                                        minimumStringQueryLength={2}
+                                        minimumStringQuery="請輸入至少兩個文字"
+                                        noMatchText="很抱歉，找不到符合的項目"
+                                        subLabel="找不到選項？請輸入關鍵字查詢"
+                                        onChange={val =>
+                                            this.props.multiPlaceChange(
+                                                val,
+                                                item.id,
+                                                'dtnSelectedData'
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* 去程日期 多目的地 */}
+                                <ClickOutSide
+                                    onClickOutside={() =>
+                                        this.props.closeCalendar(item.id)
+                                    }
+                                >
+                                    <Label
+                                        isRequired
+                                        size="lg"
+                                        label={'去程日期'}
+                                        iconName={'tooldate'}
+                                        onClick={() => this[`cinput4${i}`].focus()}
+                                        subComponent={
+                                            <div className="inputStyle">
+                                                <input
+                                                    ref={ref => { this[`cinput4${i}`] = ref }}
+                                                    type="text"
+                                                    placeholder="YYYY/MM/DD"
+                                                    value={item.startInputValue.replace(
+                                                        /\-/g,
+                                                        '/'
+                                                    )}
+                                                    onFocus={() =>
+                                                        this.props.onFocusInput(item.id)
+                                                    }
+                                                    onBlur={() =>
+                                                        this.props.multiBlur(item.id)
+                                                    }
+                                                    onChange={(e) => this.muitInputChange(e, item.id)}
+                                                />
+                                                {item.cleanBtn && (
+                                                    <div className="clearBtnWrap">
+                                                        <span
+                                                            className="clearBtn"
+                                                            onMouseDown={() =>
+                                                                this.props.multiClearValue(
+                                                                    item.id
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        }
+                                    />
+                                    {item.onFocus && (
+                                        <div className="calendarStyle">
+                                            <div className="calendarStyleIn">
+                                                <CyRcln
+                                                    doubleMonth={true}
+                                                    activeStart={item.activeStart}
+                                                    activeEnd={today().add(1, 'years').format('YYYY-MM')}
+                                                    startDate={item.startDate}
+                                                    endDate={today()
+                                                        .add(361, 'days')
+                                                        .format('YYYY-MM-DD')}
+                                                    selectedStartDate={
+                                                        item.selectedStartDate
+                                                    }
+                                                    onDateClick={e =>
+                                                        this.props.multipleClickDate(
+                                                            e,
+                                                            item.id,
+                                                            i
+                                                        )
+                                                    }
+                                                />
+                                                <div
+                                                    className="close_btn"
+                                                    onClick={() =>
+                                                        this.props.closeCalendar(item.id)
+                                                    }
+                                                >
+                                                    ×
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </ClickOutSide>
+                            </div>
+
+                            {/* 減少 多目的地 */}
+                            {i !== 0 && (
+                                <BtRcnb
+                                    prop="string"
+                                    className="minus-items mulitMinus"
+                                    whenClick={() => this.props.minusItem(item.id, i)}
+                                >
+                                    <IcRcln name="toolcancelb" size="x15" />
+                                </BtRcnb>
+                            )}
                         </div>
-                        <CrRcln
-                            className="checkBoxMagin"
-                            type="checkbox"
-                            textContent="排除過夜轉機航班"
-                            whenChange={e =>
-                                props.setnonprefertransnight({
-                                    nonprefertransnight: e ? 'T' : 'F'
-                                })
-                            }
-                        />
-                    </React.Fragment>
-                }
-                moduleClassName="openMoreOptions"
-                isRightLeft={{
-                    destination: 'right',
-                    name: 'toolnext'
-                }}
-            />
-            <BtRcnb
-                prop="string"
-                className="lg submitBtn"
-                whenClick={props.sendData}
-            >
-                搜尋
-            </BtRcnb>
-        </div>
-    );
-};
+                    ))}
+
+                    {/* 增加 多目的地 */}
+                    {this.props.multiItems.length !== 5 && (
+                        <BtRcnb
+                            prop="string"
+                            className="add-items mulitAdd"
+                            whenClick={this.props.addItem}
+                        >
+                            <IcRcln name="tooladdb" size="x15" />
+                        </BtRcnb>
+                    )}
+                </div>
+
+                {/* 直飛、找機位 */}
+                <CrRcln
+                    type="checkbox"
+                    textContent="直飛(含中停)"
+                    whenChange={e => this.props.setNoTrans({ notrans: e ? 'T' : 'F' })}
+                />
+                <CrRcln
+                    className="checkBoxMagin"
+                    type="checkbox"
+                    textContent="只想找有機位的結果"
+                    whenChange={e => this.props.setHaveSeat({ haveseat: e ? 1 : 2 })}
+                    defaultChecked
+                />
+
+                {/* 更多搜尋選項 */}
+                <ClpRcdp
+                    titleText="更多搜尋選項"
+                    ContentComponent={
+                        <React.Fragment>
+                            <div className="searchMoreTop">
+                                <FilterTransfer
+                                    setNonprefertrans={this.props.setNonprefertrans}
+                                    clearNonprefertrans={this.props.clearNonprefertrans}
+                                />
+                                {this.props.rtow === 3 ? null : (
+                                    <StRcln
+                                        option={cheapFlightOptions}
+                                        placeholder="請選擇"
+                                        label="廉價航空"
+                                        breakline
+                                        onChangeCallBack={e =>
+                                            this.props.setSourceSystem({
+                                                sourcesystem: e
+                                            })
+                                        }
+                                        defaultValue={this.props.sourceSystem}
+                                    />
+                                )}
+                            </div>
+                            <CrRcln
+                                className="checkBoxMagin"
+                                type="checkbox"
+                                textContent="排除過夜轉機航班"
+                                whenChange={e =>
+                                    this.props.setnonprefertransnight({
+                                        nonprefertransnight: e ? 'T' : 'F'
+                                    })
+                                }
+                            />
+                        </React.Fragment>
+                    }
+                    moduleClassName={'openMoreOptions' + moreOptionsStyle}
+                    isRightLeft={{
+                        destination: 'right',
+                        name: 'toolnext'
+                    }}
+                />
+                <BtRcnb
+                    prop="string"
+                    className="lg submitBtn"
+                    whenClick={this.props.submit}
+                >
+                    搜尋
+                </BtRcnb>
+            </div>
+        );
+    }
+}
 
 export default International;

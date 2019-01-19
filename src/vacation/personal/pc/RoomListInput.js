@@ -201,7 +201,7 @@ class RoomListInput extends PureComponent {
 
         return (
             <ClickOutSide onClickOutside={this.closMenu}>
-                <div className="input_compose">
+                <div className="input_compose roomListInput">
                     <IntRcln
                         placeholder="共N間，N人"
                         label="間數/人數"

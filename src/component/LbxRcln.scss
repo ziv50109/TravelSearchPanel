@@ -1,0 +1,35 @@
+$classname: 'LbxRcln';
+
+.#{$classname} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(#000, 0.6);
+    &_content {
+        position: relative;
+        width: 94%;
+        max-width: 330px;
+        min-height: 35px;
+        border-radius: 3px;
+        background-color: #fff;
+    }
+    &_close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        line-height: 1;
+        padding: 10px;
+        cursor: pointer;
+        svg {
+            width: 13px;
+            height: 13px;
+            fill: #444;
+        }
+    }
+}

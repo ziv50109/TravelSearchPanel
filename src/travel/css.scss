@@ -20,7 +20,10 @@ $blue: #0077b3;
             }
         }
     }
-    > *:not(:last-child) {  margin-bottom: 10px; }
+    > *:not(:last-child) {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
     input {
         height: auto;
         font-weight: bold;
@@ -33,6 +36,7 @@ $blue: #0077b3;
         position: relative;
         .int-col {
             flex: 1;
+            padding: 8px 6px 8px 5px;
         }
         .int-tags {
             margin: 0;
@@ -47,8 +51,7 @@ $blue: #0077b3;
         }
     }
     // [出發地、旅遊天數] select 樣式調整
-    .dropdown-place-holder {
-        border: none !important;
+    .strcln_custom {
         height: auto;
         line-height: 1;
         padding: 0;
@@ -57,6 +60,12 @@ $blue: #0077b3;
         &.selected {
             color: $blue;
         }
+        &.action .dropdown-place-holder {
+            border-color: #bbb;
+        }
+        .dropdown-label {
+            font-weight: normal;
+        }
     }
     // [出發區間、產品名/關鍵字] input close button 垂直置中
     .clearBtn {
@@ -64,6 +73,12 @@ $blue: #0077b3;
         bottom: 0;
         right: 0;
         margin: auto;
+    }
+    .clearBtnWrap {
+        right: 1px;
+        &:after {
+            right: 0;
+        }
     }
     // [出發區間、產品名/關鍵字] input 樣式調整
     .int_rcln {
@@ -78,13 +93,15 @@ $blue: #0077b3;
             }
         }
     }
+
     // [只找保證出團、只找可報名團體] checkbox 樣式調整
     .chkbox-group {
-        padding-top:10px;
+        padding-top: 10px;
+        margin: 0;
     }
     .cr_rcln {
         input:focus + .indicator {
-            border-color: #ddd;
+            border-color: #bbb;
         }
     }
     // [popovers] icon 樣式調整
@@ -107,9 +124,16 @@ $blue: #0077b3;
             margin-top: 10px;
         }
         p, span { display: inline-block; }
+        &.lbx_wrap {
+            padding: 30px 10px 10px;
+        }
     }
     // [產品名/關鍵字] 樣式調整
     .int_rctg {
+        label {
+            text-overflow: clip;
+            cursor: pointer;
+        }
         .int_rcln_input {
             line-height: 1;
             padding: 0;
@@ -117,26 +141,62 @@ $blue: #0077b3;
     }
     // [搜尋] button 樣式調整
     .bt_rcnb {
-        margin-top: 80px;
+        margin-top: 30px;
     }
 
     // [目的地] 快速選單
+    &-nvb {
+        .dtm-btn {
+            min-width: 50px;
+        }
+    }
+    // [目的地] m 版 label
+    .m-dtm_wrap {
+        position: relative;
+        .int_rctg {
+            position: absolute;
+            border: none;
+        }
+        .int-tag {
+            max-width: calc((100% - 10px) / 3);
+            &:last-of-type {
+                margin: 0;
+            }
+            span {
+                text-align: right;
+                right: 0;
+                width: 28px;
+                padding-right: 10px;
+                background-color: #eaeaea;
+                z-index: 1;
+            }
+        }
+    }
     & .dtm_rcfr,
     &-nvb .dtm_rcfr {
         position: relative;
         width: auto;
+        .int_rctg {
+            position: absolute;
+        }
         &-row {
             display: flex;
             align-items: center;
             margin: 0 15px;
             .int_rcln_input {
+                max-width: calc(100% - 20px);
+                font-weight: bold;
+                color: #0077b3;
                 border: none;
+                background-color: transparent;
             }
             .bt_rcnb {
                 margin-left: 10px;
             }
         }
         &-input-wrap {
+            white-space: nowrap;
+            position: relative;
             display: flex;
             align-items: center;
             width: 100%;
@@ -155,7 +215,7 @@ $blue: #0077b3;
             }
         }
         &-label {
-            margin: 8px 0 10px 25px;
+            margin: 8px 0 10px 16px;
             font-size: 14px;
             color: #24a07d;
         }
@@ -171,40 +231,41 @@ $blue: #0077b3;
                 height: 16px;
             }
         }
-        // 選取的 select 區塊
-        &-selected-wrap {
-            white-space: nowrap;
-        }
         // 選取的 select item
         &-selected {
             display: inline-flex;
             align-items: center;
             justify-content: space-between;
-            width: 72/360*100vw;
+            width: 82/375*100vw;
             line-height: 1;
-            margin: 0 4px 0 0;
+            margin: 0 5px 0 0;
             padding-left: 4px;
             font-size: 16px;
             font-weight: bold;
             color: $blue;
             background-color: #eaeaea;
             cursor: pointer;
-            min-width: calc(100%/3);
             &:last-of-type {
                 margin: 0;
             }
             span {
-                width: 80px;
+                width: 100%;
                 overflow: hidden;
-                text-overflow: ellipsis;
                 white-space: nowrap;
             }
             i {
+                position: relative;
+                top: -1px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 width: 20px;
                 height: 20px;
+                line-height: 1;
+                font-size: 12px;
+                font-style: normal;
+                font-weight: normal;
+                color: #999;
             }
             svg {
                 width: 6px;
@@ -220,6 +281,7 @@ $blue: #0077b3;
             }
         }
         .cr_rcln > span {
+
             font-weight: bold;
             font-size: 16px;
             line-height: 16px;
@@ -232,7 +294,6 @@ $blue: #0077b3;
     // [目的地] 補字選單
     & .act_racp,
     &-nvb .act_racp {
-        box-shadow: none !important;
         outline: none;
         left: 0;
         min-width: 100%;
@@ -253,6 +314,51 @@ $blue: #0077b3;
             max-width: 100%;
         }
     }
+    .m-calendar_compose {
+        .int_rctg {
+            align-items: end;
+        }
+        .input_group {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            .int_rcln {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 52%;
+                z-index: 1;
+                &:last-of-type {
+                    left: auto;
+                    right: 0;
+                    width: 48%;
+                    .int_rcln_input {
+                        padding: 24px 0 0 10px !important;
+                    }
+                }
+            }
+            .cal_icon {
+                text-align: center;
+                position: absolute;
+                left: 18px;
+                right: 0;
+                bottom: 7px;
+                display: block;
+            }
+            .int_rcln_input {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                padding: 24px 0 0 31px !important;
+                background-color: transparent;
+            }
+        }
+    }
+
 
     // pc 版樣式
     &.pc {
@@ -263,13 +369,16 @@ $blue: #0077b3;
         }
         // [搜尋] button 樣式調整
         .bt_rcnb {
-            margin-top: auto;
+            position: static;
+            width: auto;
+            margin: auto 0 0;
         }
         // [目的地] 快速選單
         .dtm_rcfr,
         &-nvb .dtm_rcfr {
             height: auto;
             &-row {
+                position: relative;
                 margin: 0;
             }
             &-wrap {
@@ -283,26 +392,53 @@ $blue: #0077b3;
                 border: 1px solid rgba(153, 153, 153, 0.7);
                 z-index: 11;
             }
+            &-label {
+                margin: 8px 0 10px 0;
+            }
             &-close_btn {
                 display: block;
             }
             // 選取的 select item
             &-selected {
-                width: 108px;
+                width: auto;
+                span {
+                    width: 82px;
+                }
+                i {
+                    top: 0;
+                }
             }
         }
         // [出發區間] 樣式調整
         .calendar_compose {
+            .input_group {
+                margin: 0;
+            }
+            .int_rcln_label {
+                cursor: pointer;
+            }
             .input_group .int_rcln {
                 height: 50px !important;
                 .int_rcln_input {
                     line-height: 1;
                     padding-bottom: 0;
                     padding-top: 24px !important;
+                    background-color: transparent;
                 }
+            }
+            .ic_rcln {
+                cursor: pointer;
             }
             .nights {
                 display: none;
+            }
+            .clearBtn {
+                top: auto;
+                bottom: 6px;
+                right: 6px;
+            }
+            .cal_icon {
+                padding-top: 22px;
             }
         }
     }
@@ -325,6 +461,92 @@ $blue: #0077b3;
         }
     }
 
+    &-cyRcmnWrap {
+        height: 100vh;
+        .today {
+            // background-color: #eee;
+            &:after {
+                // content: '今天';
+                // line-height: 1;
+                // font-size: 12px;
+            }
+        }
+        .active {
+            .today:after {
+                display: none;
+            }
+        }
+        .confirm_btn {
+            span {
+                display: none;
+            }
+        }
+    }
+    &-m_destination {
+        height: 100%;
+        padding-top: 125px;
+    }
+    &-m_header-wrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        height: 125px;
+        background-color: #fff;
+        z-index: 1;
+    }
+    &-m_dtm-wrap {
+        touch-action: manipulation;
+        height: 100%;
+        overflow-y: auto;
+        background-color: #fff;
+        .act_racp {
+            box-shadow: none !important;
+            &-future {
+                .m-place .close,
+                .noMatchText .close {
+                    display: none !important;
+                }
+                .noMatchText {
+                    padding: 0;
+                }
+            }
+        }
+        .dtm_rcfr-wrap{
+            .all_wrap{
+                .cr_rcln{
+
+                    .indicator{
+                        border:solid 1px #bbb;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    .st_rcln .dropdown-place-holder, .int_rctg, .input_group {
+        border: 1px solid #bbb;
+    }
+    .st_rcln .dropdown-label, .int_rctg .int-col .int-label, .int_rcln > .int_rcln_label {
+        color: #222;
+    }
+    ::placeholder {
+        font-weight: normal;
+        // color: #999;
+    }
+    .cr_rcln{
+        .indicator{
+            border:solid 1px #bbb;
+        }
+    }
+    .int-tags > .int-tag, .st_rcln .dropdown-place-holder.selected, .dtm_rcfr-selected, .input_group .int_rcln .int_rcln_input, .int_rcln_input, &-nvb .dtm_rcfr-row .int_rcln_input, &-nvb .dtm_rcfr-selected, .dtm_rcfr-row .int_rcln_input {
+        font-weight: normal;
+        // color: #0077b3;
+    }
+
     @media screen and (min-width: $screen-tablet) {
         // style on tablet device
     }
@@ -334,4 +556,5 @@ $blue: #0077b3;
     @media screen and (min-width: $screen-lg-desktop) {
         // style on desktop device
     }
+
 }

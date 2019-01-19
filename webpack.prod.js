@@ -18,6 +18,17 @@ const UglifyJsSetting = new UglifyJsPlugin({
     }
 });
 
+const env = process.env.ENV;
+const soucrePath = {
+    // 本地測試環境
+    'dev': '',
+    // demo機環境
+    'demo': '/Content/F2E/plugins/searchpanel/',
+    // 測試機環境
+    'rel': 'https://uwww.liontravel.com/_shared/plugins/searchpanel/',
+    // 正式機環境
+    'prod': 'https://www.liontravel.com/_shared/plugins/searchpanel/'
+};
 
 module.exports = Merge.smartStrategy({
     entry: 'replace'
@@ -28,7 +39,7 @@ module.exports = Merge.smartStrategy({
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(__dirname, './dist'),
+        publicPath: soucrePath[env]
     },
     plugins: [
         UglifyJsSetting,

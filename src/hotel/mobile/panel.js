@@ -123,6 +123,7 @@ class Panel extends Component {
     closeNvbPage = () => {
         this.setState({
             activeInput: null,
+            endMonth: dayjs().add(12, 'months').format('YYYY-MM')
         });
     }
 

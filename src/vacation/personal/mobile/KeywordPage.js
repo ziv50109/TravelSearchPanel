@@ -6,20 +6,38 @@ import BtRcnb from '../../../../magaele/bt_rcnb';
 import ActRajx from '../../../../magaele/act_rajx';
 
 class Page extends PureComponent {
-    state = {
-        inputText: '',
-        actRules: [{
-            title: 'only',
-        }],
-        searchTimeGap: 500, // 在0.5秒內的輸入都不會發fetch
-        fetchData: [],
-        isSearch: false,
-        selectedData: {
-            fthotel: '',
-        },
-    };
-    // 任務隊列
-    taskQueue = null;
+    constructor (props) {
+        super(props);
+        this.state = {
+            inputText: '',
+            actRules: [{
+                title: 'only',
+            }],
+            searchTimeGap: 500, // 在0.5秒內的輸入都不會發fetch
+            fetchData: [],
+            isSearch: false,
+            selectedData: {
+                fthotel: '',
+            },
+        };
+        // 任務隊列
+        this.taskQueue = null;
+    }
+
+    componentDidMount () {
+        this.updateKeywords(this.props.Keywords);
+    }
+    updateKeywords = (inputText) => {
+        if (!inputText) return;
+        const searchTimeGap = this.state.searchTimeGap;
+        // 若已經有任務了 就取消
+        if (typeof this.taskQueue === 'function') this.taskQueue.cancel();
+        const throttled = throttle(this.callKeyWordAPI, searchTimeGap, { 'leading': false });
+        this.taskQueue = throttled;
+        this.setState(prevState => ({
+            inputText,
+        }), throttled);
+    }
 
     callKeyWordAPI () {
         const {

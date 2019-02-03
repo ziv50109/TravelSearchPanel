@@ -26,7 +26,18 @@ class KeywordPlaceM extends PureComponent {
     };
 
     componentDidMount () {
-        this.setState({ zIndex: this.getHighestZIndex() });
+        this.getHighestZIndex();
+        this.handlePropsKeyword();
+    }
+
+    handlePropsKeyword () {
+        const obj = {
+            target: {
+                value: this.props.Keywords
+            }
+        };
+        this.props.Keywords && this.onInputChange(obj);
+        this.setState({ showAct: false, inputText1: this.props.Keywords });
     }
 
     calendar = null;
@@ -42,8 +53,9 @@ class KeywordPlaceM extends PureComponent {
                 highestZIndex = currentZIndex;
             }
         }
-        return highestZIndex + 1;
+        this.setState({ zIndex: highestZIndex + 1 });
     }
+
     // 任務隊列
     taskQueue = null;
 
@@ -52,13 +64,13 @@ class KeywordPlaceM extends PureComponent {
         const { inputText } = this.state;
 
         const splitDest = Destination.split('_');
-        const DestinationSearch =
-            splitDest.length > 1 ? [splitDest[0], splitDest[1]].join('_') : '';
+        // const DestinationSearch =
+        //     splitDest.length > 1 ? [splitDest[0], splitDest[1]].join('_') : '';
 
         // call API
         fetch(vacationPersonal.keyword, {
             method: 'POST',
-            body: `Destination=${DestinationSearch}&sKeyWord=${inputText}`,
+            body: `Destination=${Destination}&sKeyWord=${inputText}`,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             }
@@ -116,7 +128,6 @@ class KeywordPlaceM extends PureComponent {
 
     onClickAct = data => {
         const { txt: inputText } = data;
-
         this.setState(prevState => ({
             inputText,
             selectedData: data
@@ -129,6 +140,7 @@ class KeywordPlaceM extends PureComponent {
 
     onClickConfirm = () => {
         this.setState({ inputText1: this.state.inputText });
+        console.log(this.state);
         this.props.onClickConfirm && this.props.onClickConfirm(this.state);
         this.showCalendar();
     }
@@ -195,17 +207,20 @@ class KeywordPlaceM extends PureComponent {
                                 {isSearch ? (
                                     <p className="searching">資料搜尋中...</p>
                                 ) : (
-                                    <ActRajx
-                                        titleClass="d-no"
-                                        data={fetchData}
-                                        matchWord={inputText}
-                                        getItemClickValue={this.onClickAct}
-                                        noMatchText="很抱歉，找不到符合的項目"
-                                        minimumStringQuery="請至少輸入兩個字"
-                                        minimumStringQueryLength={2}
-                                        footer={false}
-                                        rules={actRules}
-                                    />
+                                    this.props.Destination === '' ?
+                                        (<p className="searching">請先輸入上方目的地條件</p>)
+                                        :
+                                        <ActRajx
+                                            titleClass="d-no"
+                                            data={fetchData}
+                                            matchWord={inputText}
+                                            getItemClickValue={this.onClickAct}
+                                            noMatchText="很抱歉，找不到符合的項目"
+                                            minimumStringQuery="請至少輸入兩個字"
+                                            minimumStringQueryLength={2}
+                                            footer={false}
+                                            rules={actRules}
+                                        />
                                 )}
                             </div>
                         </div>

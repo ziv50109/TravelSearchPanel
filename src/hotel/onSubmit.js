@@ -36,6 +36,14 @@ function onSubmit (panelState) {
     Destination.Kind = Kind;
     Destination.Txt = Txt;
 
+    const hasDestination = Code.length && String(Kind).length && Txt.length;
+
+    if (!(hasDestination || CheckIn.length)) {
+        return alert('請輸入 / 選擇目的地、請選擇住房期間、請輸入必填欄位喔！');
+    }
+    if (!hasDestination) {
+        return alert('請輸入 / 選擇目的地');
+    }
     if (!CheckIn.length) {
         return alert('請選擇住房期間、請輸入必填欄位喔！');
     }
@@ -48,6 +56,15 @@ function onSubmit (panelState) {
 
     if (!(Destination.length || Txt.length)) {
         return alert('目的地或關鍵字擇一必填');
+    }
+
+    if (Number(Destination.Kind) === 90) {
+        const url = `//uhotel.liontravel.com/search/gethotelurl?Code=${Destination.Code}&Kind=90`;
+
+        fetch(url).then(r => r.json()).then(d => {
+            window.open(d.HotelUrl, hrefTarget);
+        });
+        return;
     }
 
     const Dates = {

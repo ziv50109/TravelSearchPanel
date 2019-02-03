@@ -98,11 +98,12 @@ class SearchPanelAllPc extends PureComponent {
                 <Tab label="國際機票預訂">
                     {(show === 1 || show === 10) && LoadComponent(import(/* webpackChunkName: "internationalFlight-pc" */ '../../flight/international/pc'), hrefTarget, this.changeWidth, this.state.flightRtow)}
                 </Tab>
-                <Tab label="大陸境內機票">
-                    {show === 11 && LoadComponent(import(/* webpackChunkName: "chineseFlight-pc" */ '../../flight/chinese/pc'), hrefTarget)}
-                </Tab>
+                {/* <Tab label="大陸境內機票">
+                    {webpackChunkName: "chineseFlight-pc"}
+                    {show === 11 && LoadComponent(import('../../flight/chinese/pc'), hrefTarget)}
+                </Tab> */}
                 <Tab label="台灣境內機票">
-                    {show === 12 && LoadComponent(import(/* webpackChunkName: "taiwanFlight-pc" */ '../../flight/taiwan/pc'), hrefTarget)}
+                    {show === 11 && LoadComponent(import(/* webpackChunkName: "taiwanFlight-pc" */ '../../flight/taiwan/pc'), hrefTarget)}
                 </Tab>
             </NtbRcln>
         );
@@ -141,7 +142,7 @@ class SearchPanelAllPc extends PureComponent {
             <NtbRcln
                 activeTabIndex={show}
                 onClick={(i) => this.handleChangeTab(i)}
-                customClass={`search_panel_one search_panel_all_pc ${flightRtow === 3 ? 'search_panel-inFlight' : ''}`}
+                customClass={`search_panel_one search_panel_all_pc ${(flightRtow === 3 || String(show)[0] === '3') ? 'search_panel-inFlight' : ''}`}
             >
                 <Tab label="團體">
                     {show === 0 && LoadComponent(import(/* webpackChunkName: "travel-pc" */ '../../travel/pc'), hrefTarget)}
@@ -158,8 +159,14 @@ class SearchPanelAllPc extends PureComponent {
                 <Tab label="主題旅遊">
                     {show === 4 && LoadComponent(import(/* webpackChunkName: "themeTravel-pc" */ '../../themeTravel/pc'), hrefTarget)}
                 </Tab>
+                <Tab label="郵輪">
+                    {show === 5 && LoadComponent(import(/* webpackChunkName: "cruise-pc" */ '../../cruise/pc'), hrefTarget)}
+                </Tab>
+                <Tab label="高鐵旅行">
+                    {show === 6 && LoadComponent(import(/* webpackChunkName: "highSpeedRail-pc" */ '../../highSpeedRail/pc'), hrefTarget)}
+                </Tab>
                 <Tab label={<span><span className="search_panel-block">票券</span>當地遊</span>}>
-                    {show === 5 && LoadComponent(import(/* webpackChunkName: "activity-pc" */ '../../activity/pc'), hrefTarget)}
+                    {show === 7 && LoadComponent(import(/* webpackChunkName: "activity-pc" */ '../../activity/pc'), hrefTarget)}
                 </Tab>
             </NtbRcln>
         );

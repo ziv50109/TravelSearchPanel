@@ -56,7 +56,6 @@ class Module extends Component {
     // }
     componentDidUpdate (prevProps, prevState) {
         if (prevProps.option !== this.props.option || prevProps.defaultValue !== this.props.defaultValue) this._fetchOptions();
-        if (prevState.selectValue !== this.state.selectValue) this.props.onChangeCallBack && this.props.onChangeCallBack(this.state.selectValue);
         if (prevState.open === false && this.state.open === true) this.props.whenOpenCallBack && this.props.whenOpenCallBack();
         if (prevState.open === true && this.state.open === false) this.props.whenCloseCallBack && this.props.whenCloseCallBack();
     }
@@ -121,6 +120,8 @@ class Module extends Component {
             searchKey: this.props.option[e.target.selectedIndex].text,
             placeholder: this.props.option[e.target.selectedIndex].text,
             selected: true
+        }, () => {
+            this.props.onChangeCallBack && this.props.onChangeCallBack(this.state.selectValue);
         });
     }
     onItemSearch (e) {
@@ -223,6 +224,8 @@ class Module extends Component {
                                                     selectValue: item.value,
                                                     selected: true,
                                                     searchKey: item.text
+                                                }, () => {
+                                                    this.props.onChangeCallBack && this.props.onChangeCallBack(this.state.selectValue);
                                                 });
                                             }}
                                         >

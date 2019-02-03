@@ -17,7 +17,6 @@ import CyRcmn from '../../../magaele/cy_rcmn';
 import NvbRslb from '../../../magaele/nvb_rslb';
 import dayjs from 'dayjs';
 // import '../../vacation/personal/css.scss';
-import { getYearAndMonth } from '../../../utils';
 
 const NvbGoBack = ({
     onClick,
@@ -405,14 +404,22 @@ class Panel extends Component {
                 };
             } else {
                 let CheckIn = new Date(data.CheckIn).getTime() > new Date(dayjs().format('YYYY-MM-DD')).getTime() ?
-                    data.CheckIn : dayjs().add(1, 'day').format('YYYY-MM-DD');
+                    data.CheckIn : '';
                 let CheckOut = new Date(data.CheckOut).getTime() > new Date(dayjs().format('YYYY-MM-DD')).getTime() ?
-                    data.CheckOut : dayjs().add(2, 'day').format('YYYY-MM-DD');
-                let Rooms = data.Rooms;
+                    data.CheckOut : '';
+                if (!CheckIn) {
+                    CheckOut = '';
+                }
+                const Rooms = data.Rooms;
+                const AdultQty = Rooms.map(e => e.AdultQty || 0).reduce((a, b) => a + b);
+                const ChildQty = Rooms.map(e => e.ChildQty || 0).reduce((a, b) => a + b);
+                const roomListInput = `共${Rooms.length}間，${AdultQty}位大人、${ChildQty}位小孩`;
+
                 return {
                     CheckIn,
                     CheckOut,
-                    Rooms
+                    Rooms,
+                    roomListInput
                 };
             }
 
@@ -453,12 +460,11 @@ class Panel extends Component {
             const afterStartDateNum = dayjs(d).add(14, 'days').month();
             const endMonthNum = dayjs(endMonth).month();
 
-            let newEndMonth = dayjs().add(12, 'months').format('YYYY-MM');
-            if (afterStartDateNum > endMonthNum) {
-                newEndMonth = dayjs(d).add(14, 'days').format('YYYY-MM');
+            let newEndMonth = dayjs(d).add(14, 'days').format('YYYY-MM');
+            if (afterStartDateNum < endMonthNum) {
+                newEndMonth = dayjs().add(12, 'months').format('YYYY-MM');
             }
 
-            console.log(d, newEndMonth);
             this.setState({
                 endMonth: newEndMonth
             });
@@ -546,51 +552,53 @@ class Panel extends Component {
                         visible={shwoDestinationsPage}
                         direction="right"
                     >
-                        <NvbGoBack onClick={this.closeDestnMenu} />
-                        <div className="nvb_content">
-                            <header>
-                                <h3 className="txt-center m-b-sm fz-lg">目的地</h3>
-                                <div className="search_input">
-                                    <IntRcln
-                                        placeholder="目的地、地標、區域、飯店名稱"
-                                        value={this.state.Txt}
-                                        onChange={this.onDestnInputChange}
-                                        onClearValue={this.clearDestnValue}
-                                        onKeyDown={this.handleDestnKeyDown}
-                                        onClick={this.openDestnMenu}
-                                    />
-                                    <BtRcnb radius whenClick={this.closeDestnMenu} >確定</BtRcnb>
-                                </div>
-                                <p className="dtm_rcfr-label">{'找不到選項？請輸入關鍵字查詢'}</p>
-                            </header>
-                            <div className="destinationOpation m-t-n-sm">
-                                <div className={dtm_wrap_classes}>
-                                    {Object.keys(dtmData).length &&
-                                        <DtmRcfr
-                                            levelKey={['inTaiwan', 'vLine', 'vCountry', 'vCity']}
-                                            onClickItem={this.onClickDestnDtmItem}
-                                            dataResouce={dtmData}
-                                            replaceRegular={/[a-zA-Z\(\)\s]/g}
-                                            selectedData={selected}
+                        {shwoDestinationsPage && <>
+                            <NvbGoBack onClick={this.closeDestnMenu} />
+                            <div className="nvb_content">
+                                <header>
+                                    <h3 className="txt-center m-b-sm fz-lg">目的地</h3>
+                                    <div className="search_input">
+                                        <IntRcln
+                                            placeholder="目的地、地標、區域、飯店名稱"
+                                            value={this.state.Txt}
+                                            onChange={this.onDestnInputChange}
+                                            onClearValue={this.clearDestnValue}
+                                            onKeyDown={this.handleDestnKeyDown}
+                                            onClick={this.openDestnMenu}
                                         />
-                                    }
-                                </div>
-                                <div className={act_wrap_classes}>
-                                    <ActRajx
-                                        titleClass={showAct ? '' : 'd-no'}
-                                        isFocus={showAct}
-                                        data={actShowData}
-                                        matchWord={inputText}
-                                        getItemClickValue={this.onClickDestnAct}
-                                        minimumStringQuery={'請至少輸入兩個字'}
-                                        noMatchText="很抱歉，找不到符合的項目"
-                                        minimumStringQueryLength={2}
-                                        footer={false}
-                                        rules={actRules}
-                                    />
+                                        <BtRcnb radius whenClick={this.closeDestnMenu} >確定</BtRcnb>
+                                    </div>
+                                    <p className="dtm_rcfr-label">{'找不到選項？請輸入關鍵字查詢'}</p>
+                                </header>
+                                <div className="destinationOpation m-t-n-sm">
+                                    <div className={dtm_wrap_classes}>
+                                        {Object.keys(dtmData).length &&
+                                            <DtmRcfr
+                                                levelKey={['inTaiwan', 'vLine', 'vCountry', 'vCity']}
+                                                onClickItem={this.onClickDestnDtmItem}
+                                                dataResouce={dtmData}
+                                                replaceRegular={/[a-zA-Z\(\)\s]/g}
+                                                selectedData={selected}
+                                            />
+                                        }
+                                    </div>
+                                    <div className={act_wrap_classes}>
+                                        <ActRajx
+                                            titleClass={showAct ? '' : 'd-no'}
+                                            isFocus={showAct}
+                                            data={actShowData}
+                                            matchWord={inputText}
+                                            getItemClickValue={this.onClickDestnAct}
+                                            minimumStringQuery={'請至少輸入兩個字'}
+                                            noMatchText="很抱歉，找不到符合的項目"
+                                            minimumStringQueryLength={2}
+                                            footer={false}
+                                            rules={actRules}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </>}
                     </NvbRslb>
 
                     <NvbRslb
@@ -599,53 +607,53 @@ class Panel extends Component {
                         className="hotelsRectM-calendar"
                     >
                         <NvbGoBack onClick={this.closeNvbPage} />
-                        {
-                            showCalendarPage && (
-                                <CyRcmn
-                                    doubleChoose
-                                    selectedStartDate={CheckIn}
-                                    selectedEndDate={CheckOut}
-                                    activeInput={activeInput}
-                                    endDate={dayjs().add(12, 'months').format('YYYY-MM-DD')}     // 灰灰
-                                    endMonth={endMonth}                                         // 極限
-                                    startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
-                                    startLabelTitle="入住日期"
-                                    endLabelTitle="退房日期"
-                                    startTxt="入住"
-                                    endTxt="退房"
-                                    panelName="hotel"
-                                    ref={e => { this.calendar = e }}
-                                    // switchLabelCallBack={(activeInput, d) => activeEndDate(activeInput, d)}     // 月曆的頁籤切換
-                                    onDateClickCallBack={(activeInput, d) => activeEndDate(activeInput, d)}     // 月曆的日期點選
-                                    onClickConfirm={this.handleConfirmBookingDate}
-                                    customDiffTxt={diffDate => {
-                                        const showTxt = diffDate;
-                                        return '共' + showTxt + '晚';
-                                    }}
-                                />
-                            )
+                        {showCalendarPage &&
+                            <CyRcmn
+                                doubleChoose
+                                selectedStartDate={CheckIn}
+                                selectedEndDate={CheckOut}
+                                activeInput={activeInput}
+                                endDate={dayjs().add(12, 'months').format('YYYY-MM-DD')}     // 灰灰
+                                endMonth={endMonth}                                         // 極限
+                                startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
+                                startLabelTitle="入住日期"
+                                endLabelTitle="退房日期"
+                                startTxt="入住"
+                                endTxt="退房"
+                                panelName="hotel"
+                                ref={e => { this.calendar = e }}
+                                // switchLabelCallBack={(activeInput, d) => activeEndDate(activeInput, d)}     // 月曆的頁籤切換
+                                onDateClickCallBack={(activeInput, d) => activeEndDate(activeInput, d)}     // 月曆的日期點選
+                                onClickConfirm={this.handleConfirmBookingDate}
+                                customDiffTxt={diffDate => {
+                                    const showTxt = diffDate;
+                                    return '共' + showTxt + '晚';
+                                }}
+                            />
                         }
                     </NvbRslb>
 
                     <NvbRslb className="hotelsRectM-roomPage" visible={showRoomPage} direction="right">
                         <NvbGoBack onClick={this.closeNvbPage} />
-                        <div className="nvb_content">
-                            <header className="hotelsRectM-header">
-                                <h3 className="txt-center m-b-md">間數/人數</h3>
-                                <div className="search_input">
-                                    <IntRcln
-                                        placeholder="共1間，2位大人、0位小孩"
-                                        value={roomListInput}
-                                        readOnly
-                                    />
-                                    <BtRcnb radius whenClick={this.handleConfirmRoom} >確定</BtRcnb>
+                        {showRoomPage &&
+                            <div className="nvb_content">
+                                <header className="hotelsRectM-header">
+                                    <h3 className="txt-center m-b-md">間數/人數</h3>
+                                    <div className="search_input">
+                                        <IntRcln
+                                            placeholder="共1間，2位大人、0位小孩"
+                                            value={roomListInput}
+                                            readOnly
+                                        />
+                                        <BtRcnb radius whenClick={this.handleConfirmRoom} >確定</BtRcnb>
+                                    </div>
+                                </header>
+                                <div className="hotelsRectM-roomList">
+                                    <RoomPageContent Rooms={Rooms} changeSum={this.roomPeopleSum} />
+                                    <p className="psTxt">※單次訂購提供相同房型，相同房型不同入住人數依選購的專案售價。</p>
                                 </div>
-                            </header>
-                            <div className="hotelsRectM-roomList">
-                                <RoomPageContent Rooms={Rooms} changeSum={this.roomPeopleSum} />
-                                <p className="psTxt">※單次訂購提供相同房型，相同房型不同入住人數依選購的專案售價。</p>
                             </div>
-                        </div>
+                        }
                     </NvbRslb>
                 </div>
             </div>

@@ -7,7 +7,7 @@ import StRcln from '../../../../../magaele/st_rcln';
 import CrRcln from '../../../../../magaele/cr_rcln';
 import ClpRcdp from '../../../../../magaele/clp_rcdp';
 import BtRcnb from '../../../../../magaele/bt_rcnb';
-import today from 'dayjs';
+import dayjs from 'dayjs';
 import PlaceChange from '../components/doublePlaceM';
 import SingleCalendar from '../components/singleCalendar';
 import DoubleCalendar from '../components/doubleCalendar';
@@ -23,7 +23,7 @@ class International extends Component {
         super(props);
         this.state = {
             // 月曆
-            selectedStartDate: today().format('YYYY-MM-DD'), // 去程
+            selectedStartDate: dayjs().format('YYYY-MM-DD'), // 去程
             selectedEndDate: '',   // 回程
             showCalendar: false,
             activeInput: null,
@@ -37,7 +37,7 @@ class International extends Component {
             multiItems: [
                 {
                     id: 1,
-                    startDate: today().format('YYYY-MM-DD'),
+                    startDate: dayjs().format('YYYY-MM-DD'),
                     selectedStartDate: '',
                     showCalendar: false,
 
@@ -76,45 +76,71 @@ class International extends Component {
     componentDidMount () {
         // const { multiItems } = this.state;
         // this.props.setDepDateItems('multiItems', multiItems);
-        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
         useLocalStorage(
             {
                 panel: 'internationalFlight',
                 methods: 'get'
             },
-            ({ depdate1, depdate2, departure, destination, mobmultiItems, mobmultiItemsDpt, mobmultiItemsDtn, multDptTxt, multDtnTxt, dptSelectDate, dtnSelectDate }) => {
-                let nowday = today().format('YYYY-MM-DD');
-                let depDate = depdate1 && depdate1 >= nowday ? depdate1 : nowday;
-                let dtnDate = depdate2 ? (depdate2 >= nowday ? depdate2 : nowday) : '';
-                let multDate = mobmultiItems ? (mobmultiItems >= nowday ? mobmultiItems : nowday) : '';
-                let dptPlace = departure ? departure : [];
-                let dtnPlace = destination ? destination : [];
-                let multDpt = mobmultiItemsDpt ? mobmultiItemsDpt : [];
-                let multDtn = mobmultiItemsDtn ? mobmultiItemsDtn : [];
-                clone[0].selectDate1 = multDpt;
-                clone[0].selectDate2 = multDtn;
-                clone[0].dptSelectDate = multDptTxt;
-                clone[0].dtnSelectDate = multDtnTxt;
-                clone[0].selectedStartDate = multDate;
-                this.setState(
-                    {
-                        selectedStartDate: depDate,
-                        selectedEndDate: dtnDate,
-                        selectDate1: dptPlace,
-                        selectDate2: dtnPlace,
-                        dptSelectDate: dptSelectDate ? dptSelectDate : [],
-                        dtnSelectDate: dtnSelectDate ? dtnSelectDate : [],
-                        multiItems: clone,
-                    }
-                );
-                this.props.setPlace('dptSelectDate', dptSelectDate);
-                this.props.setPlace('dtnSelectDate', dtnSelectDate);
-                this.props.setPlace('departure', dptPlace);
-                this.props.setPlace('destination', dtnPlace);
-                this.props.setDepDateItems('multiItems', clone);
-
+            (data) => {
+                this.validataLocalstorageData(data);
             }
         );
+    }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps !== this.props) {
+            this.updateHaveseat();
+        }
+    }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
+        const { depdate1, depdate2, departure, destination, mobmultiItems, mobmultiItemsDpt, mobmultiItemsDtn, multDptTxt, multDtnTxt, dptSelectDate, dtnSelectDate } = data;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'internationalFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        let nowday = dayjs();
+        let depDate = depdate1 && nowday.isAfter(dayjs(depdate1)) ? nowday.format('YYYY-MM-DD') : depdate1;
+        let dtnDate = depdate2 && nowday.isAfter(dayjs(depdate2)) ? nowday.format('YYYY-MM-DD') : depdate2;
+        // 如果起日過期，迄日要清空
+        if (nowday.isAfter(dayjs(depdate1).add(1, 'day'))) dtnDate = '';
+        let multDate = mobmultiItems ? (nowday.isAfter(dayjs(mobmultiItems)) ? nowday.format('YYYY-MM-DD') : mobmultiItems) : '';
+        let dptPlace = departure ? departure : [];
+        let dtnPlace = destination ? destination : [];
+        let multDpt = mobmultiItemsDpt ? mobmultiItemsDpt : [];
+        let multDtn = mobmultiItemsDtn ? mobmultiItemsDtn : [];
+        clone[0].selectDate1 = multDpt;
+        clone[0].selectDate2 = multDtn;
+        clone[0].dptSelectDate = multDptTxt;
+        clone[0].dtnSelectDate = multDtnTxt;
+        clone[0].selectedStartDate = multDate;
+        this.setState(
+            {
+                selectedStartDate: depDate,
+                selectedEndDate: dtnDate,
+                selectDate1: dptPlace,
+                selectDate2: dtnPlace,
+                dptSelectDate: dptSelectDate ? dptSelectDate : [],
+                dtnSelectDate: dtnSelectDate ? dtnSelectDate : [],
+                multiItems: clone,
+            }
+        );
+        this.props.setPlace('dptSelectDate', dptSelectDate);
+        this.props.setPlace('dtnSelectDate', dtnSelectDate);
+        this.props.setPlace('departure', dptPlace);
+        this.props.setPlace('destination', dtnPlace);
+        this.props.setDepDateItems('multiItems', clone);
+    };
+    updateHaveseat = () => {
+        const { haveseat } = this.props;
+        const newHaveseat = haveseat === (1 || 'F') ? true : false;
+        this.setState({
+            haveseat: newHaveseat
+        });
     }
 
     // 雙月曆
@@ -224,7 +250,7 @@ class International extends Component {
                 if (selectedStartDate !== '') {
                     multiItems[i].startDate = selectedStartDate;
                 } else {
-                    multiItems[i].startDate = today().format('YYYY-MM-DD');
+                    multiItems[i].startDate = dayjs().format('YYYY-MM-DD');
                 }
             } else {
                 if (multiItems[i - 1].startInputValue !== '') {
@@ -619,7 +645,7 @@ class International extends Component {
                         type="checkbox"
                         textContent="只想找有機位的結果"
                         whenChange={e => this.props.setHaveSeat('haveseat', e ? 1 : 2)}
-                        defaultChecked
+                        checked={this.state.haveseat}
                     />
                 </div>
 

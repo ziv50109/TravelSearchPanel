@@ -10,6 +10,14 @@ import {
     transformActFetchData, transformRawProductData
 } from '../common';
 
+const Label = ({ text, removeData }) => {
+    return (
+        <p className="dtm_rcfr-selected" onClick={removeData}>
+            <span title={text}>{text}</span>
+            <i><svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg></i>
+        </p>
+    );
+};
 class Page extends PureComponent {
     constructor (props) {
         super();
@@ -35,10 +43,8 @@ class Page extends PureComponent {
                 Line: ['6', '5', '7', '3', '1', '2', '4'],
             },
             anotherAPI: vacationPersonal.destinationAutoComplete, // 第二資料源 (2018/11/21 新增需求，城市/機場皆無資料則使用此 API)
-
-
-
         };
+        this.maxLabel = 3;
     }
 
     componentDidMount () {
@@ -66,6 +72,21 @@ class Page extends PureComponent {
                 sessionStorage.setItem(dataResouce, stringifyData);
             });
         }
+        this.updateDtmData();
+    }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.DestinationSelected !== this.props.DestinationSelected) {
+            this.updateDtmData();
+        }
+    }
+    updateDtmData = () => {
+        const { DestinationSelected } = this.props;
+        if (!DestinationSelected.length) return;
+        this.setState({
+            // inputText: DestinationSelected[0].text,
+            selectedData: DestinationSelected,
+            dtmSelected: DestinationSelected.map(e => e.value)
+        });
     }
     // componentDidMount () {
     //     console.log('ididmount');
@@ -218,11 +239,20 @@ class Page extends PureComponent {
         return arr;
     }
     onClickDtm = (data) => {
-        const inputText = data.text;
+        const { selectedData } = this.state;
+        const prevDtmSelected = selectedData.map(e => e.value);
+        // 資料已存在就刪除
+        if (selectedData.filter(e => e.value === data.value).length) {
+            this.onClearInputValue(data);
+            return;
+        }
+        // 最多選 3 個
+        if (prevDtmSelected.length + 1 > this.maxLabel) return;
+
         this.setState(prevState => ({
-            inputText,
-            selectedData: [data],
-            dtmSelected: [data.value],
+            inputText: '',
+            selectedData: [...prevState.selectedData, data],
+            dtmSelected: [...prevDtmSelected, data.value],
         }));
     }
 
@@ -239,21 +269,30 @@ class Page extends PureComponent {
     // }
 
     onClickDestnAct = (data, str) => {
+        const { selectedData } = this.state;
         const {
             txt: Txt,
         } = data;
+        const prevDtmSelected = selectedData.map(e => e.value);
+        // 資料已存在就刪除
+        if (selectedData.filter(e => e.value === data.value).length) {
+            this.onClearInputValue(data);
+            return;
+        }
+        // 最多選 3 個
+        if (prevDtmSelected.length + 1 > this.maxLabel) return;
         if (str === 'choosed') {
             this.setState(prevState => ({
                 Txt,
-                inputText: Txt,
-                dtmSelected: [],
-                selectedData: [data],
-                hasValue: false,
-            }));
+                inputText: '',
+                selectedData: [...prevState.selectedData, data],
+                dtmSelected: [...prevDtmSelected, data.value]
+            }), () => {
+                this.setState({ showAct: false, showDtm: true });
+            });
         } else {
             this.setState(prevState => ({
-                Txt,
-                dtmSelected: [data.value]
+                Txt
             }));
         }
     }
@@ -269,19 +308,25 @@ class Page extends PureComponent {
         this.setState(prevState => ({
             ...prevState,
             inputText,
-            selectedData: [],
-            dtmSelected: [],
             actShowData,
             showAct: true,
             showDtm: false,
         }));
     }
 
-    onClearInputValue = () => {
+    onClearInputValue = (data) => {
+        const { selectedData, radio } = this.state;
+        const newSelectedData = selectedData.filter(e => e.value !== data.value);
+        const newDtmSelected = newSelectedData.map(e => e.value);
+        let newRadio = radio;
+        if (newSelectedData.length < 2) {
+            newRadio = '';
+        }
         this.setState(prevState => ({
             inputText: '',
-            selectedData: [],
-            dtmSelected: [],
+            selectedData: newSelectedData,
+            dtmSelected: newDtmSelected,
+            radio: newRadio,
             showAct: false,
             showDtm: true,
         }));
@@ -292,6 +337,7 @@ class Page extends PureComponent {
             inputText,
             dtmLevelKey,
             dtmSelected,
+            selectedData,
             showAct,
             showDtm,
             dtmData,
@@ -310,14 +356,27 @@ class Page extends PureComponent {
                 <header>
                     <h3 className="txt-center page_title">目的地</h3>
                     <div className="search_input">
-                        <IntRcln
-                            className="ipuCBtn_p"
-                            placeholder={placeholder}
-                            value={inputText}
-                            color="blue"
-                            onChange={this.onInputChange}
-                            onClearValue={this.onClearInputValue}
-                        />
+                        <div className="input_wrap">
+                            <div className="label_wrap">
+                                {selectedData.map((e, i) =>
+                                    <Label
+                                        key={e.value || i}
+                                        text={e.text}
+                                        removeData={() => this.onClearInputValue(e)}
+                                    />
+                                )}
+                            </div>
+                            {selectedData.length < this.maxLabel && (
+                                <IntRcln
+                                    ref={e => { this.destinationInput = e }}
+                                    color="blue"
+                                    placeholder={selectedData.length ? null : '目的地'}
+                                    onClick={this.onClickInput}
+                                    onChange={this.onInputChange}
+                                    value={inputText}
+                                />
+                            )}
+                        </div>
                         <BtRcnb
                             radius
                             whenClick={() => { onClickConfirm(this.state) }}

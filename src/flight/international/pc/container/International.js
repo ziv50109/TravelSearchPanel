@@ -459,13 +459,14 @@ class International extends PureComponent {
         if (prevProps !== this.props) {
             this.updateCabinNumber();
             this.updateTotalNum();
+            this.updateHaveseat();
         }
     }
     updateCabinNumber = () => {
         const { cabinNumber } = this.props;
         let clstypeText = '';
         ClsTypeLevel.forEach((obj, i) => {
-            if (obj.value === this.state.cabinNumber) {
+            if (obj.value === cabinNumber) {
                 clstypeText = obj.text;
             }
         });
@@ -480,6 +481,13 @@ class International extends PureComponent {
         } = this.props;
         const total = adtNum + chdNum + infNum;
         this.setState({ total });
+    }
+    updateHaveseat = () => {
+        const { haveseat } = this.props;
+        const newHaveseat = haveseat === 1 ? true : false;
+        this.setState({
+            haveseat: newHaveseat
+        });
     }
 
     // 快速選單吃的資料
@@ -529,13 +537,32 @@ class International extends PureComponent {
         // console.log('ddd', e.target.value);
         this.props.singleInputChange && this.props.singleInputChange(e.target.value);
     }
+    singleInputKeyDown = (e, inputType) => {
+        if (e.keyCode === 13) {
+            this.cinput1.blur();
+            this.props.closeInputCalendar('single');
+        }
+    }
 
     dcInputChange = (e, target) => {
         this.props.dcInputChange && this.props.dcInputChange(e.target.value, target);
     }
+    dcInputKeyDown = (e, inputType) => {
+        if (e.keyCode === 13) {
+            this.cinput2.blur();
+            this.cinput3.blur();
+            this.props.closeInputCalendar('two');
+        }
+    }
 
     muitInputChange = (e, index) => {
         this.props.muitInputChange && this.props.muitInputChange(e.target.value, index);
+    }
+    muitInputKeyDown = (e, i) => {
+        if (e.keyCode === 13) {
+            this[`cinput4${i}`].blur();
+            this.props.closeCalendar(i + 1);
+        }
     }
     handleSwitch = () => {
         this.setState({ isSwitch: true }, () => {
@@ -544,7 +571,6 @@ class International extends PureComponent {
     }
 
     render () {
-        console.log(this.props.dptSelectedData);
         const { rcfrDataResouce, newCity, isSwitch } = this.state;
         let appendItemClass = 'AppendContainer';
         this.props.rtow === 3
@@ -647,6 +673,7 @@ class International extends PureComponent {
                                                 }}
                                                 // readOnly
                                                 onChange={value => this.singleInputChange(value)}
+                                                onKeyDown={(e) => this.singleInputKeyDown(e, 'start')}
                                             />
                                             {this.props.Clean1 && (
                                                 <div className="clearBtnWrap">
@@ -735,6 +762,7 @@ class International extends PureComponent {
                                                             'dcCleanBtn1'
                                                         )
                                                     }
+                                                    onKeyDown={(e) => this.dcInputKeyDown(e, 'start')}
                                                 />
                                                 {this.props.dcCleanBtn1 && (
                                                     <div className="clearBtnWrap">
@@ -778,6 +806,7 @@ class International extends PureComponent {
                                                         )
                                                     }
                                                     onChange={(e) => this.dcInputChange(e, 'end')}
+                                                    onKeyDown={(e) => this.dcInputKeyDown(e, 'end')}
                                                 />
                                                 {this.props.dcCleanBtn2 && (
                                                     <div className="clearBtnWrap">
@@ -973,6 +1002,7 @@ class International extends PureComponent {
                                                         this.props.multiBlur(item.id)
                                                     }
                                                     onChange={(e) => this.muitInputChange(e, item.id)}
+                                                    onKeyDown={(e) => this.muitInputKeyDown(e, i)}
                                                 />
                                                 {item.cleanBtn && (
                                                     <div className="clearBtnWrap">
@@ -1061,7 +1091,7 @@ class International extends PureComponent {
                     type="checkbox"
                     textContent="只想找有機位的結果"
                     whenChange={e => this.props.setHaveSeat({ haveseat: e ? 1 : 2 })}
-                    defaultChecked
+                    checked={this.state.haveseat}
                 />
 
                 {/* 更多搜尋選項 */}

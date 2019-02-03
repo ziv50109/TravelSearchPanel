@@ -1,0 +1,541 @@
+@import "Magaele/core/core/mixins";
+@import "Magaele/core/core/variables";
+
+$classname: 'cruise';
+
+//面板可能共用的css
+$SelectedFontColor: #0077b3;
+$LightgrayTxt: #999;
+
+.#{$classname} {
+    // min-width: 330px;
+    // max-width: 370px;
+    > *:not(:last-child) {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    input {
+        color: $SelectedFontColor;
+        font-size: 16px;
+        &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+            color: $LightgrayTxt;
+        }
+        &::-moz-placeholder { /* Firefox 19+ */
+            color: $LightgrayTxt;
+        }
+        &:-ms-input-placeholder { /* IE 10+ */
+            color: $LightgrayTxt;
+        }
+        &:-moz-placeholder { /* Firefox 18- */
+            color: $LightgrayTxt;
+        }
+    }
+    .floatL {
+        float: left;
+        vertical-align: top;
+        width: calc(50% - 5px);
+        &.int_rcln {
+            border: 1px solid #bbb;
+        }
+
+    }
+    .intRclnWrap {
+        border: 1px solid #bbb;
+        .breakline {
+            margin: 0 !important;
+        }
+    }
+    .pp-w {
+        max-width: 360px;
+    }
+
+    .m-t-30 {
+        margin-top: 30px;
+    }
+
+    .lightgray {
+        color: $LightgrayTxt;
+    }
+    // 所有藍字粗體
+    .st_rcln {
+        .dropdown-place-holder {
+            font-weight: bold;
+        }
+        .dropdown-label {
+            font-weight: normal;
+        }
+    }
+
+    .int_rcln_input {
+        padding-top: 20px !important;
+    }
+
+    //[目的地 關鍵字]單選項input
+    .int_rcln {
+        &_input {
+            padding: 0;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            color: $SelectedFontColor;
+            &:focus {
+                border-color: #bbb;
+            }
+        }
+
+        .int_rcln_label {
+            font-size: 14px;
+        }
+        // [出發日曆] label
+        &.breakline {
+            .int_rcln_label {
+                cursor: pointer;
+            }
+        }
+        .clearBtn {
+            bottom: 8px;
+        }
+    }
+    .int_rctg {
+        line-height: 1;
+    }
+    .int_rctg label {
+        text-overflow: clip;
+        cursor: pointer;
+    }
+    // [目的地] m 版 label
+    .m-dtm_wrap {
+        position: relative;
+        .int_rctg {
+            position: absolute;
+        }
+        .int-tag {
+            max-width: calc((100% - 10px) / 3);
+            &:last-of-type {
+                margin: 0;
+            }
+            span {
+                text-align: right;
+                right: 0;
+                width: 28px;
+                padding-right: 10px;
+                background-color: #eaeaea;
+                z-index: 1;
+            }
+        }
+    }
+    .int-tag {
+        font-size: 16px;
+    }
+
+    //label, icon 對齊
+    // .int_rctg {
+    //     .int-col {
+    //         padding-left: 15px;
+    //     }
+    // }
+
+    //icon
+    .pp_rcln_custom_content .ic_rcln, .pp_rcln.ic_rcln {
+        color: #8894a9;
+        cursor: pointer;
+    }
+
+    //[旅遊主題、出發地] 下拉選單
+    .st_rcln {
+        &.action {
+            .dropdown-place-holder {
+                border-color: #bbb;
+            }
+        }
+        .dropdown-place-holder {
+            &.selected {
+                color: $SelectedFontColor;
+            }
+        }
+        .dropdown-label {
+            font-size: 14px;
+        }
+    }
+
+    // [只找保證出團、只找可報名團體] checkbox 樣式調整
+    .cr_rcln {
+        margin-top: 7px;
+        margin-bottom: 0;
+        input:focus + .indicator {
+            border-color: #bbb;
+        }
+        .indicator{
+            border:solid 1px #bbb;
+        }
+    }
+    .pp_rcln {
+        margin-top: 7px;
+        margin-bottom: 0;
+    }
+
+    // [出發日曆] label
+    .calendar_compose {
+        .int_rcln {
+            height: 48px;
+            &.breakline {
+                .int_rcln_label {
+                    left: 30px;
+                }
+            }
+            .int_rcln_input {
+                position: relative;
+            }
+            .int_rcln_input:not(input):empty::before{
+                color: $LightgrayTxt;
+                left: 1px;
+            }
+        }
+        .ic_rcln {
+            cursor: pointer;
+        }
+    }
+    // [popovers] popup 樣式調整
+    &-pp_rcln-popup {
+        font-size: 14px;
+        color: #222;
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            margin-top: 10px;
+        }
+        p, span { display: inline-block; }
+        &.lbx_wrap {
+            padding: 30px 10px 10px;
+        }
+    }
+
+}
+
+//popup
+.popup {
+    ul {
+        padding: 0;
+        li {
+            list-style: none;
+            display: flex;
+        }
+    }
+}
+
+
+// [目的地] 快速選單
+.#{$classname} .dtm_rcfr,
+.#{$classname}-nvb .dtm_rcfr {
+    position: relative;
+    width: auto;
+    height: auto;
+    &-row {
+        display: flex;
+        margin: 0 15px;
+        .int_rcln_input {
+            color: #0077b3;
+            border: none;
+        }
+        .bt_rcnb {
+            min-width: 50px;
+            margin-left: 10px;
+        }
+    }
+    &-input-wrap {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 0 0 0 10px;
+        border: 2px solid #ff8b88;
+    }
+    &-wrap {
+        display: none;
+        position: static;
+        width: 100%;
+        height: calc(100vh - 130px);
+        overflow: auto;
+        background-color: #fff;
+        &.open {
+            display: block;
+        }
+    }
+    &-label {
+        margin: 8px 0 10px 16px;
+        font-size: 14px;
+        color: #24a07d;
+    }
+    &-close_btn {
+        display: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 10px;
+        cursor: pointer;
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+    .ic_rcln {
+        color: #fff;
+    }
+    // 選取的 select 區塊
+    &-selected-wrap {
+        white-space: nowrap;
+    }
+    // 選取的 select item
+    &-selected {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 83/375*100vw;
+        line-height: 1.3;
+        margin: 0 4px 0 0;
+        padding-left: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        color: $SelectedFontColor;
+        background-color: #eaeaea;
+        cursor: pointer;
+        &:last-of-type {
+            margin: 0;
+        }
+        span {
+            width:100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        i {
+            position: relative;
+            top: -1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            line-height: 1;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: normal;
+            color: #999;
+        }
+        svg {
+            width: 6px;
+            height: 6px;
+            fill: #999;
+        }
+    }
+
+}
+// [目的地] 補字選單
+.#{$classname} .act_racp,
+.#{$classname}-nvb .act_racp {
+    box-shadow: none;
+    outline: none;
+    left: 0;
+    min-width: 100%;
+    height: calc(100vh - 130px);
+    max-height: 100%;
+    margin-top: 40px;
+    &-future {
+        & .m-place .close,
+        & .noMatchText .close {
+            display: none;
+        }
+        .noMatchText {
+            color: #24a07d;
+            padding: 0;
+        }
+    }
+    .section {
+        max-width: 100%;
+    }
+}
+// pc
+.#{$classname}.pc {
+    // [目的地] 第一層標題不斷行
+    .dtm_rcfr {
+        &-wrap {
+            width: 690px;
+        }
+    }
+    // [目的地] 快速選單
+    .dtm_rcfr {
+        &-row {
+            height: 20px;
+            margin: 0;
+            .clearBtnWrap {
+                top: 24px;
+                right: -10px;
+            }
+            .int_rcln {
+                height: auto;
+                .int_rcln_input {
+                    padding-top: 0 !important;
+                }
+            }
+        }
+        &-wrap {
+            position: absolute;
+            top: 100%;
+            left: -1px;
+            width: 690px;
+            height: auto;
+            overflow: visible;
+            padding: 16px 14px 0;
+            border: 1px solid rgba(153, 153, 153, 0.7);
+            z-index: 11;
+        }
+        &-close_btn {
+            display: block;
+        }
+        // 選取的 select item
+        &-selected {
+            width: auto;
+            span {
+                width: 82px;
+            }
+            i {
+                top: 0;
+            }
+        }
+    }
+    // [目的地] 補字選單
+    .act_racp {
+        height: auto;
+        max-height: 360px;
+        margin-top: auto;
+        box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
+        &-future {
+            & .m-place .close,
+            & .noMatchText .close {
+                display: block;
+            }
+            .noMatchText {
+                color: #24a07d;
+                padding: 12px 46px 7px 10px;
+            }
+        }
+    }
+    // [出發區間] 樣式調整
+    .calendar_compose {
+        .input_group {
+            margin: 0;
+        }
+        .int_rcln_label {
+            cursor: pointer;
+        }
+        .input_group .int_rcln {
+            height: 50px !important;
+            .int_rcln_input {
+                line-height: 1;
+                padding-bottom: 0;
+                padding-top: 24px !important;
+                background-color: transparent;
+            }
+        }
+        .nights {
+            display: none;
+        }
+        .clearBtn {
+            bottom: 6px;
+            right: 6px;
+        }
+        .cal_icon {
+            padding-top: 22px;
+        }
+    }
+    .cr_rcln{
+        .indicator{
+            border:solid 1px #bbb;
+        }
+    }
+    .btn-wrap {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+    }
+}
+// 手機板日曆
+.#{$classname}-cyRcmnWrap {
+    height: 100vh;
+    .today {
+        // background-color: #eee;
+        &:after {
+            // content: '今天';
+            // line-height: 1;
+            // font-size: 12px;
+        }
+    }
+    .active {
+        .today:after {
+            display: none;
+        }
+    }
+    .confirm_btn {
+        span {
+            display: none;
+        }
+    }
+}
+// 手機板目的地
+.#{$classname}_panel-m_destination {
+    height: 100%;
+    padding-top: 125px;
+}
+.#{$classname}_panel-m_header-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 125px;
+    background-color: #fff;
+    z-index: 1;
+}
+.#{$classname}_panel-m_dtm-wrap {
+    touch-action: manipulation;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #fff;
+    .act_racp {
+        margin: 0 !important;
+        box-shadow: none !important;
+        &-future {
+            .m-place .close,
+            .noMatchText .close {
+                display: none !important;
+            }
+            .noMatchText {
+                padding: 0;
+            }
+        }
+    }
+    .cr_rcln{
+        .indicator{
+            border:solid 1px #bbb;
+        }
+    }
+}
+
+.#{$classname} {
+    .st_rcln .dropdown-place-holder, .int_rctg.require, .input_group, .floatL.int_rcln {
+        border: 1px solid #bbb;
+    }
+    .st_rcln .dropdown-label, .int_rctg .int-col .int-label, .int_rcln > .int_rcln_label {
+        color: #222;
+    }
+    &::placeholder, &::-webkit-input-placeholder, &::-moz-placeholder, &:-ms-input-placeholder, &:-moz-placeholder {
+        font-weight: normal;
+        // color: #999;
+    }
+    .int-tags > .int-tag, .st_rcln .dropdown-place-holder.selected, .dtm_rcfr-selected, .input_group .int_rcln .int_rcln_input, .int_rcln_input, &-nvb .dtm_rcfr-row .int_rcln_input, &-nvb .dtm_rcfr-selected, .dtm_rcfr-row .int_rcln_input {
+        font-weight: normal;
+        // color: #0077b3;
+    }
+}

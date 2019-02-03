@@ -15,7 +15,6 @@ function calcShowText (roomList) {
         const total = a + b + c;
         str += `${total}、`;
     }
-
     str = str.replace(/\、$/g, '人');
     return str;
 }
@@ -62,7 +61,6 @@ function parseRoomListArray (roomList) {
         roomlist.push(str);
     });
 
-
     return [roomlist, roomage];
 }
 
@@ -70,15 +68,17 @@ function parseRoomListArray (roomList) {
 const NoticeText = () => (
     <React.Fragment>
         <p className="txt_green m-b-none">一筆訂單總人數若超過8位，請分兩張單位訂購。</p>
-        <p className="txt_green m-b-none">一位大人最多只能帶2名小孩或1名小孩+1名嬰兒，（小孩定義：年滿2歲(含)以上未滿12歲。嬰兒定義：未滿2歲。，</p>
+        <p className="txt_green m-b-none">一位大人最多只能帶2名小孩或1名小孩+1名嬰兒</p>
+        <p className="txt_green m-b-none">（小孩定義：年滿2歲(含)以上未滿12歲。嬰兒定義：未滿2歲。)</p>
     </React.Fragment>
 );
 
 const ChildrenAgeSelect = ({
     onchange,
+    defaultValue
 }) => (
     <label className="children_age_select">
-        <select onChange={onchange}>
+        <select onChange={onchange} value={defaultValue}>
             <option value="0">0歲</option>
             <option value="1">1歲</option>
             <option value="2">2歲</option>
@@ -105,7 +105,7 @@ const ChildAgeSection = (props) => {
     } = props;
     return (
         <div className="children_ages_section">
-            {/* <span className="row_title">小孩年齡</span> */}
+            <span className="row_title">小孩年齡</span>
             <div className="age_select_section">
                 {
                     ageArray.map((v, i) => (
@@ -132,7 +132,7 @@ const RoomLitSection = (props) => {
         onClickAdd, // 點選增加人數
         onClickMinus, // 點選減少人數
         onChangeChildAge, // 小孩年齡change
-        noHotel // 不含住宿
+        noHotel,
     } = props;
 
     const childBedCount = childrenWithBed.length;
@@ -140,9 +140,7 @@ const RoomLitSection = (props) => {
 
     return (
         <section className="room_list_section">
-            {noHotel === 0 &&
-                <h4 className="room_count_title">{`第${roomCount + 1}間`}</h4>
-            }
+            {noHotel === 0 && <h4 className="room_count_title">{`第${roomCount + 1}間`}</h4>}
             <div className="room_list_row">
                 <span className="row_title">成人</span>
                 <IntGpct
@@ -185,34 +183,34 @@ const RoomLitSection = (props) => {
                     }
                 </div>
                 {noHotel === 0 &&
-                <div className="room_list_row">
-                    <div className="child_count_control">
-                        <span className="row_title">小孩不佔床</span>
-                        <IntGpct
-                            max={3}
-                            min={0}
-                            count={childNoBedCount}
-                            btnClassMinus="ic_rcln toolcancelb"
-                            btnClassAdd="ic_rcln tooladdb"
-                            onClickAdd={() => { onClickAdd(roomCount, 'childrenNoBed') }}
-                            onClickMinus={() => { onClickMinus(roomCount, 'childrenNoBed') }}
-                        />
+                    <div className="room_list_row">
+                        <div className="child_count_control">
+                            <span className="row_title">小孩不佔床</span>
+                            <IntGpct
+                                max={3}
+                                min={0}
+                                count={childNoBedCount}
+                                btnClassMinus="ic_rcln toolcancelb"
+                                btnClassAdd="ic_rcln tooladdb"
+                                onClickAdd={() => { onClickAdd(roomCount, 'childrenNoBed') }}
+                                onClickMinus={() => { onClickMinus(roomCount, 'childrenNoBed') }}
+                            />
+                        </div>
+                        {
+                            childNoBedCount > 0
+                                ?
+                                (
+                                    <ChildAgeSection
+                                        ageArray={childrenNoBed}
+                                        onChange={onChangeChildAge}
+                                        roomCount={roomCount}
+                                        target="childrenNoBed"
+                                    />
+                                )
+                                :
+                                null
+                        }
                     </div>
-                    {
-                        childNoBedCount > 0
-                            ?
-                            (
-                                <ChildAgeSection
-                                    ageArray={childrenNoBed}
-                                    onChange={onChangeChildAge}
-                                    roomCount={roomCount}
-                                    target="childrenNoBed"
-                                />
-                            )
-                            :
-                            null
-                    }
-                </div>
                 }
             </div>
         </section>
@@ -225,6 +223,6 @@ export {
     ChildAgeSection,
     RoomLitSection,
     calcShowText,
-    parseRoomListArray,
     calcShowText1,
+    parseRoomListArray,
 };

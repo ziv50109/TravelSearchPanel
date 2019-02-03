@@ -13,7 +13,7 @@ import Label from '../../../magaele/int_rctg/components/Label/Label';
 
 import WrapperDtmRcln from '../component/WrapperDtmRcln.js'; // 目的地
 import ComposeCalendar from '../../component/ComposeCalendar';// 日曆
-
+import dayjs from 'dayjs';
 import '../css.scss';
 
 // [ popup ]
@@ -39,8 +39,8 @@ class Panel extends Component {
         this.month = this.date.getMonth() + 1;
         this.day = this.date.getDate();
         this.today = `${this.year}-${this.month}-${this.day}`;
-        this.defaultStartDate = `${addDate(this.today, 15)[1]}-${addDate(this.today, 15)[2]}-${addDate(this.today, 15)[3]}`;
-        this.defaultEndtDate = `${addDate(this.today, 30)[1]}-${addDate(this.today, 30)[2]}-${addDate(this.today, 30)[3]}`;
+        this.defaultStartDate = dayjs().add(15, 'day').format('YYYY-MM-DD');
+        this.defaultEndtDate = dayjs().add(30, 'day').format('YYYY-MM-DD');
 
         this.state = {
             data: {},

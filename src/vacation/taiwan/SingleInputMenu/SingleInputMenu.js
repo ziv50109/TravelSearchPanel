@@ -250,7 +250,7 @@ class SingleInputMenu extends Component {
                                     onClearValue={(e) => this.handleEmitRemoveData(e, selectedData)}
                                 />
                             </div>
-                            {Object.keys(destinationAct).length &&
+                            {(Object.keys(destinationAct).length && !selectedData.length ) &&
                                 <ActRacp
                                     InputIsFocus={showAct}
                                     url={destinationAct}

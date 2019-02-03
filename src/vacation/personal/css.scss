@@ -4,13 +4,13 @@
 }
 %act_new_item {
     font-size: 14px;
-    line-height: 45px;
     border-bottom: 1px solid #e3e3e3;
-    padding: 0 10px;
+    padding: 13px 10px;
 }
 %act_rajx_inside {
     position: static;
     border:none;
+    padding: 0;
     font-size: 14px;
     background: transparent;
     box-shadow:none;
@@ -95,8 +95,10 @@ select::-ms-expand {
     .int_rcln * {
         color:#222;
         cursor: pointer;
-        font-weight:normal ;
-
+        font-weight: normal;
+    }
+    .int_rcln.icon > i {
+        color: #999;
     }
     input,
     select,
@@ -137,8 +139,8 @@ select::-ms-expand {
 }
 
 .vacation_personal_pc {
-     //目的地的clearBtn調整
-    height: 296px;
+    //目的地的clearBtn調整
+    min-height: 296px;
     .input_group{
         border:none;
     }
@@ -149,7 +151,6 @@ select::-ms-expand {
                     position: relative;
                     font-weight:normal ;
                     @extend %border-style;
-                    border-left:none;
                 }
             }
             .clearBtn{
@@ -163,20 +164,138 @@ select::-ms-expand {
         }
     }
     .vacation_select_group{
+        flex: 1.15;
         border:solid 1px #bbb;
-        border-right:none;
-        padding: 8px 0 0;
+        height: 50px;
+        margin-right: 10px;
+        padding: 0;
         position: relative;
         .strcln_custom {
+            position: static;
+            height: 100%;
+            padding: 8px 0 0 25px;
             .dropdown-place-holder.breakline {
+                background-color: transparent;
                 border: none;
                 height: 40px;
                 line-height: 1.6;
                 padding: 0 6px;
             }
-            &:after {
-                display: none;
+        }
+        .ic_rcln {
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+        & + div {
+            flex: 3;
+        }
+    }
+    .vacation_destination_group {
+        height: 50px;
+        border: solid 1px #bbb;
+        > .destinationInput_wrap {
+            display: flex;
+            cursor: pointer;
+            > div {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+                padding-top: 4px;
             }
+            .int_rcln {
+                height: auto;
+            }
+            .int_rcln .int_rcln_input {
+                padding: 0;
+                border: none;
+            }
+            .ic_rcln {
+                font-size: 20px;
+                line-height: 50px;
+                padding: 0 5px;
+                color: #999;
+            }
+            .title {
+                height: 14px;
+                line-height: 14px;
+                margin-bottom: 2px;
+                font-size: 14px;
+                color: #222;
+                span {
+                    vertical-align: middle;
+                    display: inline-block;
+                    line-height: 1;
+                    margin-top: 4px;
+                    color: #e10500;
+                }
+            }
+            .input_wrap {
+                display: flex;
+            }
+        }
+        & + .radio_wrap {
+            margin: 5px 0 0;
+            .cr_rcio {
+                margin-right: 10px;
+                font-size: 14px;
+                color: #222;
+                .indicator {
+                    border-color: #bbb;
+                }
+            }
+        }
+    }
+    // 選取的 select item
+    .dtm_rcfr-selected {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 82/375*100vw;
+        line-height: 1;
+        margin: 0 5px 0 0;
+        padding-left: 4px;
+        font-size: 16px;
+        color: #0077b3;
+        background-color: #eaeaea;
+        cursor: pointer;
+        &:last-of-type {
+            margin: 0;
+        }
+        span {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        i {
+            position: relative;
+            top: -1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            line-height: 1;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: normal;
+            color: #999;
+        }
+        svg {
+            width: 6px;
+            height: 6px;
+            fill: #999;
+        }
+    }
+    // 選取的 select item
+    .dtm_rcfr-selected {
+        width: auto;
+        span {
+            width: 133px;
+        }
+        i {
+            top: 0;
         }
     }
     //日曆的clearBtn調整
@@ -210,10 +329,15 @@ select::-ms-expand {
 
 
     .act_wrap_container{
-        width: 70%;
         .m-place, .noMatchText, .searching{
             padding: 7px 20px 0 10px;
             color: #24a07d;
+        }
+    }
+    .keywords {
+        .act_wrap_container{
+            max-width: 370px;
+            width: 100%;
         }
     }
     >.bt_rcnb {
@@ -238,11 +362,23 @@ select::-ms-expand {
                 font-weight: normal;
             }
         }
+        .dropdown-place-holder {
+            background-color: transparent;
+        }
+        &.flexDirectionColumn {
+            flex-direction: column;
+            border: none;
+        }
         .vacation_select_group{
-            border-right:none;
-            padding: 8px 0 0;
+            border: solid 1px #bbb;
+            height: 50px;
+            padding: 0;
+            margin: 0 0 10px;
             position: relative;
             .strcln_custom {
+                position: static;
+                height: 100%;
+                padding: 8px 0 0 25px;
                 .dropdown-place-holder.breakline {
                     border: none;
                     height: 40px;
@@ -252,6 +388,67 @@ select::-ms-expand {
                 &:after {
                     display: none;
                 }
+            }
+            .ic_rcln {
+                top: 0;
+                left: 0;
+                cursor: pointer;
+            }
+        }
+        .vacation_destination_group {
+            border: solid 1px #bbb;
+            > .destinationInput_wrap {
+                display: flex;
+                cursor: pointer;
+                > div {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    width: 100%;
+                    padding-top: 4px;
+                }
+                .int_rcln {
+                    height: auto;
+                }
+                .int_rcln .int_rcln_input {
+                    padding: 0;
+                    border: none;
+                }
+                .ic_rcln {
+                    font-size: 20px;
+                    line-height: 50px;
+                    padding: 0 5px;
+                    color: #999;
+                }
+                .title {
+                    height: 14px;
+                    line-height: 14px;
+                    margin-bottom: 2px;
+                    font-size: 14px;
+                    color: #222;
+                    span {
+                        vertical-align: middle;
+                        display: inline-block;
+                        line-height: 1;
+                        margin-top: 4px;
+                        color: #e10500;
+                    }
+                }
+                .input_wrap {
+                    display: flex;
+                }
+            }
+        }
+    }
+    .radio_wrap {
+        margin: 0 0 10px;
+        padding: 0 5px;
+        .cr_rcio {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #222;
+            .indicator {
+                border-color: #bbb;
             }
         }
     }
@@ -279,10 +476,69 @@ select::-ms-expand {
         select {
             position: absolute;
             top: 0;
+            right: 0;
             bottom: 0;
             background: transparent;
             padding-top: 18px;
             font-weight: normal;
+        }
+    }
+    // 目的地
+    &.dtmPage {
+        .input_wrap {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            padding: 6px;
+            border: 2px solid #ff8b88;
+        }
+        .int_rcln {
+            height: auto;
+            border: none !important;
+        }
+        .int_rcln > .int_rcln_input {
+            padding: 0;
+        }
+    }
+    // 選取的 select item
+    .dtm_rcfr-selected {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: calc(100% / 3 - 6px);
+        line-height: 1;
+        margin: 0 5px 0 0 !important;
+        padding-left: 4px;
+        font-size: 16px;
+        color: #0077b3;
+        background-color: #eaeaea;
+        cursor: pointer;
+        &:last-of-type {
+            margin: 0 !important;
+        }
+        span {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        i {
+            position: relative;
+            top: -1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            line-height: 1;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: normal;
+            color: #999;
+        }
+        svg {
+            width: 6px;
+            height: 6px;
+            fill: #999;
         }
     }
 }
@@ -407,7 +663,7 @@ select::-ms-expand {
 
 // 目的地補字的外框
 .act_wrap_container {
-    width: 450px;
+    width: 370px;
     overflow-y: auto;
     min-height: 38px;
     max-height: 535px;
@@ -477,21 +733,34 @@ select::-ms-expand {
     &.active {
         .moreSeach_content {
             margin-top: 10px;
-            display: block;
+            display: inline-block;
         }
         .control_arrow {
             transform: rotate(0);
+        }
+    }
+    .moreSeach_content.mobile {
+        width: 100%;
+        .st_rcln {
+            width: 100%;
+            margin-bottom: 10px;
+            &:last-of-type {
+                margin-bottom: 0;
+            }
         }
     }
 }
 .moreSeach_content {
     display: none;
     background-color: #f1f1f1;
-    padding-top: 10px;
+    padding: 10px;
     > .st_rcln {
-        margin: 0 10px;
-        width: calc(50% - 20px);
+        margin-right: 10px;
+        width: 190px;
         float: left;
+        &:last-of-type {
+            margin: 0;
+        }
     }
     &:after {
         display: block;

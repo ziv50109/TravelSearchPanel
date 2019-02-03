@@ -5,12 +5,30 @@ import IntRcln from '../../../../magaele/int_rcln';
 import DtmRcfr from '../../../../magaele/dtm_rcfr';
 import IcRcln from '../../../../magaele/ic_rcln';
 import ActRajx from '../../../../magaele/act_rajx';
+import CrRcio from '../../../../magaele/cr_rcio';
 import { ClickOutSide, isJsonString } from '../../../../utils';
 import {
     transformFetchData,
     transformActFetchData,
     CloseButton, transformRawProductData
 } from '../common';
+
+const changeToDtmRcfrValue = (before) => {
+    const [
+        City,
+        Country,
+        Line,
+    ] = before.split('_');
+    return `${Line}-${City}-${Country}`;
+};
+const Label = ({ text, removeData }) => {
+    return (
+        <p className="dtm_rcfr-selected" onClick={removeData}>
+            <span title={text}>{text}</span>
+            <i><svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg></i>
+        </p>
+    );
+};
 
 class DestinationInput extends PureComponent {
     constructor (props) {
@@ -30,6 +48,7 @@ class DestinationInput extends PureComponent {
             actShowData: [], // 補字選單show的資料
             airportData: [], // 補字選單機場資料區
             anotherData: [], // 補字選單第二資料區
+            radio: '',
             // airportSource: './json/UNRELEASED_AIRPORT_DATA.json', // 補字選單機場資料來源 (2018/11/21 新增需求，分類增加城市/機場)
             dataResouce: vacationPersonal.destination, // 快速選單跟補字選單的資料來源
             anotherAPI: vacationPersonal.destinationAutoComplete, // 第二資料源 (2018/11/21 新增需求，城市/機場皆無資料則使用此 API)
@@ -49,9 +68,25 @@ class DestinationInput extends PureComponent {
             ]
         };
         this.timer = null;
+        this.maxLabel = 3;
     }
 
     componentDidMount () {
+        this.fetchDestinationData();
+    }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.Destination !== this.props.Destination || prevProps.radio !== this.props.radio) {
+            const { Destination, radio } = this.props;
+            if (!Object.keys(this.state.dtmData).length) {
+                this.fetchDestinationData(Destination);
+                return;
+            }
+            this.updateDestination(Destination);
+            this.updateRadio(radio);
+        }
+    }
+
+    fetchDestinationData = (Destination) => {
         const {
             dataResouce
         } = this.state;
@@ -59,26 +94,51 @@ class DestinationInput extends PureComponent {
         const sessionData = sessionStorage.getItem(dataResouce);
         if (sessionData && isJsonString(sessionData)) {
             const jsonData = JSON.parse(sessionData);
-            console.log('has data: ', JSON.parse(jsonData));
             this.setState({
                 dtmData: transformFetchData(JSON.parse(jsonData))
-            });
+            }, () => this.updateDestination(Destination));
             this.fetchDataToAct(jsonData);
         } else {
             fetch(dataResouce).then(r => r.json()).then(d => {
                 let stringifyData = JSON.stringify(d);
-                console.log('no data: ', d);
                 this.setState({
                     dtmData: transformFetchData(JSON.parse(d))
-                });
-
+                }, () => this.updateDestination(Destination));
                 this.fetchDataToAct(d);
                 sessionStorage.setItem(dataResouce, stringifyData);
             });
         }
     }
-    componentDidUpdate () {
-        this.props.onChange(this.state);
+    updateDestination = (Destination) => {
+        if (!Destination) return;
+        let selectedData = [];
+        Destination.split(',').filter(e => e !== '').forEach(e => {
+            const { dtmData } = this.state;
+            const value = changeToDtmRcfrValue(e);
+            const [
+                Line,
+                Country,
+                City,
+            ] = value.split('-');
+
+            selectedData.push({
+                City,
+                Country,
+                Line,
+                CountryText: dtmData.Country[Line][Country],
+                LineText: dtmData.Line[Line],
+                text: dtmData.City[Country][City],
+                value
+            });
+        });
+
+        this.setState({
+            selectedData,
+            dtmSelected: selectedData.map(e => e.value),
+        }, () => this.props.onChange(this.state));
+    }
+    updateRadio = (radio) => {
+        this.onClickRadio(radio);
     }
     fetchDataToAct = (data) => {
         const {
@@ -256,33 +316,72 @@ class DestinationInput extends PureComponent {
     }
 
     onClickDtm = (data) => {
-        const inputText = data.text;
+        const { selectedData, radio } = this.state;
+        const prevDtmSelected = selectedData.map(e => e.value);
+        // 資料已存在就刪除
+        if (selectedData.filter(e => e.value === data.value).length) {
+            this.onClearInputValue(data);
+            return;
+        }
+        // 最多選 3 個
+        if (prevDtmSelected.length + 1 > this.maxLabel) return;
+        let newRadio = radio;
+        // 如果複選了 改變 radio value
+        if ([...selectedData, data].length > 1) {
+            newRadio = 0;
+        }
         this.setState(prevState => ({
-            inputText,
-            selectedData: [data],
-            dtmSelected: [data.value],
-            showDtm: false,
-        }));
+            inputText: '',
+            selectedData: [...prevState.selectedData, data],
+            dtmSelected: [...prevDtmSelected, data.value],
+            radio: newRadio
+        }), () => {
+            this.props.onChange(this.state);
+        });
     }
 
     onClickDestnAct = (data, str) => {
+        const { selectedData, radio } = this.state;
         const {
             txt: Txt,
         } = data;
+        const prevDtmSelected = selectedData.map(e => e.value);
+        // 資料已存在就刪除
+        if (selectedData.filter(e => e.value === data.value).length) {
+            this.onClearInputValue(data);
+            return;
+        }
+        // 最多選 3 個
+        if (prevDtmSelected.length + 1 > this.maxLabel) return;
+        let newRadio = radio;
+        // 如果複選了 改變 radio value
+        if ([...selectedData, data].length > 1) {
+            newRadio = 0;
+        }
         if (str === 'choosed') {
             this.setState(prevState => ({
                 Txt,
-                inputText: Txt,
-                dtmSelected: [],
-                selectedData: [data],
-                showAct: false
-            }));
+                inputText: '',
+                selectedData: [...prevState.selectedData, data],
+                dtmSelected: [...prevDtmSelected, data.value],
+                radio: newRadio
+            }), () => {
+                this.setState({ showAct: false });
+                this.props.onChange(this.state);
+            });
         } else {
             this.setState(prevState => ({
                 Txt
-            }));
+            }), () => this.props.onChange(this.state));
         }
     }
+    // checkHasThisData = (data) => {
+    //     const { selectedData } = this.state;
+    //     const hasSelectedData = selectedData.filter(e => e.value !== data.value);
+    //     if (hasSelectedData) {
+    //         return;
+    //     }
+    // }
     onInputChange = (e) => {
         const { actAllData } = this.state;
 
@@ -304,36 +403,53 @@ class DestinationInput extends PureComponent {
         this.setState(prevState => ({
             ...prevState,
             inputText,
-            selectedData: [],
-            dtmSelected: [],
             actShowData,
             showAct: showAct,
             showDtm: !showAct
         }));
-
     }
 
-    onClearInputValue = () => {
+    onClearInputValue = (data) => {
+        const { selectedData, radio } = this.state;
+        const newSelectedData = selectedData.filter(e => e.value !== data.value);
+        const newDtmSelected = newSelectedData.map(e => e.value);
+        let newRadio = radio;
+        if (newSelectedData.length < 2) {
+            newRadio = '';
+        }
         this.setState(prevState => ({
             inputText: '',
-            selectedData: [],
-            dtmSelected: [],
+            selectedData: newSelectedData,
+            dtmSelected: newDtmSelected,
+            radio: newRadio,
             showAct: false,
             showDtm: true,
-        }));
+        }), () => {
+            this.props.onChange(this.state);
+        });
+    }
+
+    onClickRadio = (value) => {
+        this.setState(prevState => ({
+            radio: value
+        }), () => {
+            this.props.onChange(this.state);
+        });
     }
     render () {
         const {
             inputText,
             dtmLevelKey,
             dtmSelected,
+            selectedData,
             showAct,
             showDtm,
             dtmData,
             actShowData,
             noMatchText,
             actRules,
-            dtmOrderMaps
+            dtmOrderMaps,
+            radio
         } = this.state;
         const dtm_wrap_classes = cx('wrap_container', {
             'd-no': !showDtm,
@@ -346,17 +462,37 @@ class DestinationInput extends PureComponent {
         // console.log(allData.length);
         return (
             <ClickOutSide onClickOutside={this.closMenu}>
-                <div className="input_compose">
-                    <IntRcln
-                        placeholder="目的地"
-                        label="目的地"
-                        breakline
-                        request
-                        onClick={this.onClickInput}
-                        onChange={this.onInputChange}
-                        onClearValue={this.onClearInputValue}
-                        value={inputText}
-                    />
+                <svg viewBox="0 0 10 10" display="none"><path id="dtm_rcfr-x" d="M10 8.59L8.59 10 5 6.41 1.41 10 0 8.59 3.59 5 0 1.41 1.41 0 5 3.59 8.59 0 10 1.41 6.41 5z" /></svg>
+                <div className="input_compose vacation_destination_group" onClick={() => {
+                    this.onClickInput();
+                    this.destinationInput && this.destinationInput.inputDOM.focus();
+                }}>
+                    <div className="destinationInput_wrap">
+                        <IcRcln name="toolmap" />
+                        <div>
+                            <p className="title">目的地<span>*</span></p>
+                            <div className="input_wrap">
+                                <div className="label_wrap">
+                                    {selectedData.map((e, i) =>
+                                        <Label
+                                            key={e.value || i}
+                                            text={e.text}
+                                            removeData={() => this.onClearInputValue(e)}
+                                        />
+                                    )}
+                                </div>
+                                {selectedData.length < this.maxLabel && (
+                                    <IntRcln
+                                        ref={e => { this.destinationInput = e }}
+                                        placeholder={selectedData.length ? null : '目的地'}
+                                        onClick={this.onClickInput}
+                                        onChange={this.onInputChange}
+                                        value={inputText}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
                     <div className={dtm_wrap_classes}>
                         <CloseButton onClick={this.closMenu} />
                         <p className="txt_green">找不到選項？請輸入關鍵字查詢</p>
@@ -388,6 +524,24 @@ class DestinationInput extends PureComponent {
 
                     </div>
                 </div>
+                {selectedData.length > 1 && (
+                    <div className="radio_wrap">
+                        <CrRcio
+                            defaultChecked={radio === 0}
+                            type="radio"
+                            name="vacationPersonalLocation"
+                            textContent="任一地點"
+                            whenClick={() => this.onClickRadio(0)}
+                        />
+                        <CrRcio
+                            defaultChecked={radio === 1}
+                            type="radio"
+                            name="vacationPersonalLocation"
+                            textContent="全都要去"
+                            whenClick={() => this.onClickRadio(1)}
+                        />
+                    </div>
+                )}
             </ClickOutSide>
         );
     }

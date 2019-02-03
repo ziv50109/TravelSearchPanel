@@ -14,6 +14,7 @@ import Label from '../../../../magaele/int_rctg/components/Label/Label';
 import WrapperDtmRcln from '../component/WrapperDtmRcln.js'; // 目的地
 import ComposeCalendar from '../../../component/ComposeCalendar';// 日曆
 
+import dayjs from 'dayjs';
 import '../css.scss';
 
 // [ popup ]
@@ -39,8 +40,8 @@ class Panel extends Component {
         this.month = this.date.getMonth() + 1;
         this.day = this.date.getDate();
         this.today = `${this.year}-${this.month}-${this.day}`;
-        this.defaultStartDate = `${addDate(this.today, 15)[1]}-${addDate(this.today, 15)[2]}-${addDate(this.today, 15)[3]}`;
-        this.defaultEndtDate = `${addDate(this.today, 30)[1]}-${addDate(this.today, 30)[2]}-${addDate(this.today, 30)[3]}`;
+        this.defaultStartDate = dayjs().add(15, 'day').format('YYYY-MM-DD');
+        this.defaultEndtDate = dayjs().add(30, 'day').format('YYYY-MM-DD');
 
         this.state = {
             DepartureID: '',
@@ -263,55 +264,56 @@ class Panel extends Component {
         return (
 
             <div className="vacationGroup pc">
+                <div className="vacationGroup-row">
+                    <StRcln
+                        option={option1}
+                        placeholder="請選擇"
+                        label="出發地"
+                        icon={<IcRcln name="toolmap" />}
+                        defaultValue={DepartureID || ''}
+                        ClassName="strcln_custom"
+                        req
+                        breakline
+                        onChangeCallBack={(e) => this.setState({ DepartureID: e })}
+                    />
 
-                <StRcln
-                    option={option1}
-                    placeholder="請選擇"
-                    label="出發地"
-                    icon={<IcRcln name="toolmap" />}
-                    defaultValue={DepartureID || ''}
-                    ClassName="strcln_custom"
-                    req
-                    breakline
-                    onChangeCallBack={(e) => this.setState({ DepartureID: e })}
-                />
-
-                <Label
-                    isRequired
-                    label="目的地"
-                    iconName="toolmap"
-                    onClick={() => this.dtmChild.handleOpenMenu()}
-                    subComponent={
-                        <WrapperDtmRcln
-                            ref={ref => { this.dtmChild = ref }}
-                            travelDataSource={data}
-                            fetchPath={this.fetchPath}
-                            selectedData={destination}
-                            max={this.WrapperDtmRclnMax}
-                            // int rcln
-                            placeholder={!destination.length ? '請選擇/可輸入目的地、景點關鍵字' : ''}
-                            // act racp
-                            minimumStringQueryLength={2}            // 最少輸入幾個字
-                            minimumStringQuery="請輸入至少兩個文字"  // 尚未輸入文字字數到達要求會顯示此字串
-                            noMatchText="很抱歉，找不到符合的項目"   // 當沒有配對資料時顯示那些文字
-                            // dtm rcln
-                            sublabel="找不到選項?請輸入關鍵字查詢 / 最多可選擇3則目的地"
-                            onChange={(data) => {
-                                if (destination.some(item => data.value === item.value)) {
-                                    this.setState({
-                                        destination: this.changeDestination.remove(data)
-                                    });
-                                } else if (destination.length < this.WrapperDtmRclnMax) {
-                                    this.setState({
-                                        destination: this.changeDestination.add(data)
-                                    });
-                                } else {
-                                    return;
-                                }
-                            }}
-                        />
-                    }
-                />
+                    <Label
+                        isRequired
+                        label="目的地"
+                        iconName="toolmap"
+                        onClick={() => this.dtmChild.handleOpenMenu()}
+                        subComponent={
+                            <WrapperDtmRcln
+                                ref={ref => { this.dtmChild = ref }}
+                                travelDataSource={data}
+                                fetchPath={this.fetchPath}
+                                selectedData={destination}
+                                max={this.WrapperDtmRclnMax}
+                                // int rcln
+                                placeholder={!destination.length ? '請選擇/可輸入目的地、景點關鍵字' : ''}
+                                // act racp
+                                minimumStringQueryLength={2}            // 最少輸入幾個字
+                                minimumStringQuery="請輸入至少兩個文字"  // 尚未輸入文字字數到達要求會顯示此字串
+                                noMatchText="很抱歉，找不到符合的項目"   // 當沒有配對資料時顯示那些文字
+                                // dtm rcln
+                                sublabel="找不到選項?請輸入關鍵字查詢 / 最多可選擇3則目的地"
+                                onChange={(data) => {
+                                    if (destination.some(item => data.value === item.value)) {
+                                        this.setState({
+                                            destination: this.changeDestination.remove(data)
+                                        });
+                                    } else if (destination.length < this.WrapperDtmRclnMax) {
+                                        this.setState({
+                                            destination: this.changeDestination.add(data)
+                                        });
+                                    } else {
+                                        return;
+                                    }
+                                }}
+                            />
+                        }
+                    />
+                </div>
 
                 <ComposeCalendar
                     titleTxt="出發日期"

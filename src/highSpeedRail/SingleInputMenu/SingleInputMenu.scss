@@ -1,0 +1,106 @@
+$classname: 'SingleInputMenu';
+$blue: #0077b3;
+.#{$classname} {
+    .dtm_rcfr {
+        position: relative;
+        .sec_all{
+            text-decoration: none !important;
+            cursor: default;
+        }
+        &-row {
+            display: flex;
+        }
+        &-wrap {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: -1px;
+            width: 690px;
+            padding: 16px 14px 0;
+            background-color: #fff;
+            z-index: 11;
+            border: 1px solid rgba(153, 153, 153, 0.7);
+            &.open {
+                display: block;
+            }
+        }
+        &-label {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #24a07d;
+        }
+        &-close_btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 16px;
+            cursor: pointer;
+            svg {
+                width: 16px;
+                height: 16px;
+            }
+        } // 選取的 select 區塊
+        &-selected-wrap {
+            white-space: nowrap;
+        }
+        &-selected {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 107px;
+            line-height: 1.3;
+            margin: 0 4px 0 0;
+            padding-left: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0077b3;
+            background-color: #eaeaea;
+            cursor: pointer;
+            &:last-of-type {
+                margin: 0;
+            }
+            span {
+                width: 80px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            i {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+            }
+            svg {
+                width: 6px;
+                height: 6px;
+                fill: #999;
+            }
+        }
+    }
+    .act_racp {
+        left: 0;
+        min-width: 100%;
+    }
+    .int_rctg .dtm_rcfr {
+        width: auto;
+        height: auto;
+    }
+    // [產品名/關鍵字] input 樣式調整
+    .int_rcln {
+        height: auto;
+        &_input {
+            border: none;
+            padding: 0;
+            font-weight: bold;
+            color: $blue;
+        }
+    }
+    .int_rctg {
+        padding-right: 0;
+        .int_rcln_input {
+            flex: 0 0 auto;
+        }
+    }
+}

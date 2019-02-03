@@ -76,6 +76,21 @@ function isJsonString (str) {
     return true;
 }
 
+function isLeapYear (dateString) {
+    const regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
+    if (!regex.test(dateString)) return false;
+
+    const result = dateString.match(regex);
+    const year = parseInt(result[1], 10);
+    const month = parseInt(result[2], 10);
+    const day = parseInt(result[3], 10);
+
+    const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) monthLength[1] = 29;
+
+    return day <= monthLength[month - 1];
+}
+
 const utils = {
     fetchJsToObj: fetchJsToObj,
     findHighestZIndex: findHighestZIndex,
@@ -84,8 +99,9 @@ const utils = {
     getYearAndMonth: getYearAndMonth,
     getNowMonth: getNowMonth,
     addDate: addDate,
-    isJsonString: isJsonString
+    isJsonString: isJsonString,
+    isLeapYear: isLeapYear
 };
 
-export { fetchJsToObj, findHighestZIndex, getDomPosition, toQueryString, getYearAndMonth, getNowMonth, addDate, isJsonString };
+export { fetchJsToObj, findHighestZIndex, getDomPosition, toQueryString, getYearAndMonth, getNowMonth, addDate, isJsonString, isLeapYear };
 export { utils as default };

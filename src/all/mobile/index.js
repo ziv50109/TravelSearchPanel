@@ -96,11 +96,12 @@ class SearchPanelAllMobile extends PureComponent {
                 <Tab label="國際機票預訂">
                     {(show === 1 || show === 10) && LoadComponent(import(/* webpackChunkName: "internationalFlight-m" */ '../../flight/international/mobile'), hrefTarget)}
                 </Tab>
-                <Tab label="大陸境內機票">
-                    {show === 11 && LoadComponent(import(/* webpackChunkName: "chineseFlight-m" */ '../../flight/chinese/mobile'), hrefTarget)}
-                </Tab>
+                {/* <Tab label="大陸境內機票">
+                    {webpackChunkName: "chineseFlight-m"}
+                    {show === 11 && LoadComponent(import('../../flight/chinese/mobile'), hrefTarget)}
+                </Tab> */}
                 <Tab label="台灣境內機票">
-                    {show === 12 && LoadComponent(import(/* webpackChunkName: "taiwanFlight-m" */ '../../flight/taiwan/mobile'), hrefTarget)}
+                    {show === 11 && LoadComponent(import(/* webpackChunkName: "taiwanFlight-m" */ '../../flight/taiwan/mobile'), hrefTarget)}
                 </Tab>
             </NtbRcln>
         );
@@ -150,8 +151,14 @@ class SearchPanelAllMobile extends PureComponent {
                 <Tab label={<span><span className="search_panel-block">主題</span>旅遊</span>}>
                     {show === 4 && LoadComponent(import(/* webpackChunkName: "themeTravel-m" */ '../../themeTravel/mobile'), hrefTarget)}
                 </Tab>
+                <Tab label="郵輪">
+                    { show === 5 && LoadComponent(import(/* webpackChunkName: "cruise-m" */ '../../cruise/mobile'), hrefTarget)}
+                </Tab>
+                <Tab label={<span><span className="search_panel-block">高鐵</span>旅行</span>}>
+                    { show === 6 && LoadComponent(import(/* webpackChunkName: "highSpeedRail-m" */ '../../highSpeedRail/mobile'), hrefTarget)}
+                </Tab>
                 <Tab label={<span><span className="search_panel-block">票券</span>當地遊</span>}>
-                    {show === 5 && LoadComponent(import(/* webpackChunkName: "activity-m" */ '../../activity/mobile'), hrefTarget)}
+                    {show === 7 && LoadComponent(import(/* webpackChunkName: "activity-m" */ '../../activity/mobile'), hrefTarget)}
                 </Tab>
             </NtbRcln>
         );

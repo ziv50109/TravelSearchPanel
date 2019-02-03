@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { vacationTaiwan } from '../../../../source.config';
 
 // 單純組件
-import Label from '../../../../magaele/int_rctg/components/Label/Label.js';
 import CrRcln from '../../../../magaele/cr_rcln';
 import StRcln from '../../../../magaele/st_rcln';
 import IcRcln from '../../../../magaele/ic_rcln';
@@ -12,9 +11,16 @@ import CyRcmn from '../../../../magaele/cy_rcmn';
 import NvbRslb from '../../../../magaele/nvb_rslb';
 import ActRajax from '../../../../magaele/act_rajx';
 
+import { useLocalStorage } from '../../../../utils';
+
 // 複合組件
 import SingleInputMenuM from '../SingleInputMenu/SingleInputMenu_m';
 import SearchInput from '../SingleInput/SearchInput';
+import RoomPageContent from './RoomPageContent'; // 間數人數分頁
+import {
+    parseRoomListArray,
+    calcShowText
+} from '../RoomListCommon';
 import dayjs from 'dayjs';
 import '../../../component/ComposeCalendar';
 import '../css.scss';
@@ -39,11 +45,22 @@ class DestinationContentComponent extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            selectedData: this.props.selectedData || [], // 需要提交的所有關鍵字：含預設關鍵字以及自行輸入
+            selectedData: this.props.selectedData ? this.props.selectedData : [], // 需要提交的所有關鍵字：含預設關鍵字以及自行輸入
             dptSelectedData: [],
             dtnSelectedData: []
         };
         this.fetchPath = vacationTaiwan.destination;
+    }
+
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.selectedData !== this.props.selectedData) {
+            this.updateSelectedData();
+        }
+    }
+    updateSelectedData = () => {
+        this.setState({
+            selectedData: this.props.selectedData
+        });
     }
 
     // 交換
@@ -80,7 +97,6 @@ class DestinationContentComponent extends Component {
     };
 
     handleChange = data => {
-        const { selectedData } = this.state;
         let arr = [];
         if (data.value) {
             arr.push(data);
@@ -105,7 +121,8 @@ class DestinationContentComponent extends Component {
         this.props.getdatavTcity(datavTcity, datavTcityTxt, this.state.selectedData);
     }
     render () {
-        const { selectedData, dptSelectedData, dtnSelectedData } = this.state;
+        console.log('selectedData', this.state.selectedData);
+        const { selectedData } = this.state;
         return (
             <div style={Object.assign({}, responsiveStyle())} className="nvbRslb_destination">
                 <span className="nvb_rslb_goBack" onClick={() => { this.closeNvbRslb() }}>
@@ -140,8 +157,8 @@ class ContentComponentKeyword extends Component {
         super(props);
         this.state = {
             data: [],
-            searchKeyWord: '',
-            selectText: '',
+            searchKeyWord: this.props.sHotelName ? this.props.sHotelName : '',
+            selectText: this.props.sHotelName ? this.props.sHotelName : '',
             isFocus: false,
             show: true,
             // showText: Math.random() > 0.5 ? '請先點選出發地' : '',
@@ -150,7 +167,26 @@ class ContentComponentKeyword extends Component {
         this.fetchData = this.fetchData.bind(this);
         this.AbortController = null;
     }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.sHotelName !== this.props.sHotelName) {
+            this.updateSearchKeyWord();
+        }
+        if (prevProps.parentStcity !== this.props.parentStcity) {
+            this.clearShowData();
+        }
+    }
+    updateSearchKeyWord = () => {
+        this.setState({
+            searchKeyWord: this.props.sHotelName,
+            selectText: this.props.sHotelName
+        });
+        this._inputOnChangeHandler(this.props.sHotelName);
+    }
+    clearShowData = () => {
+        this.setState({ showData: [] });
+    }
     _inputOnChangeHandler (value) {
+        if (!this.props.parentStcity) return;
         let self = this;
         if (this.timer) {
             clearTimeout(this.timer);
@@ -160,6 +196,7 @@ class ContentComponentKeyword extends Component {
         }, 500);
     }
     fetchData (value) {
+        if (value.length < 2) return;
         this.AbortController && this.AbortController.abort();
         this.AbortController = new AbortController();
         const signal = this.AbortController.signal;
@@ -192,15 +229,11 @@ class ContentComponentKeyword extends Component {
         this.setState({ searchKeyWord: value, selectText: value });
     }
     isFocus (bool) {
-        let show = false;
-        if (!this.state.show) {
-            show = true;
-        }
         this.setState({ isFocus: bool, show: true });
     }
     processData (d, value) {
         let p = new Promise(function (resolve, reject) {
-            d.Data.map((item) => {
+            d.Data.forEach((item) => {
                 item.level2 = '飯店';
                 item.level3 = item.HotelCode;
                 item.txt = item.HotelName;
@@ -221,9 +254,6 @@ class ContentComponentKeyword extends Component {
         this.props.getdataKeyword(this.state.selectText);
     }
     render () {
-        const selectedData = this.state.selectedData;
-        const txt = (selectedData.length > 0) ? selectedData[0].text : '';
-        const selected = selectedData.map(v => v.value);
         return (
             <div>
                 <div className="nvb_rslb_title">
@@ -250,7 +280,7 @@ class ContentComponentKeyword extends Component {
                     getItemClickValue={(v) => this.setState({ selectText: v.txt })}
                     isFocus={this.state.isFocus}
                     showText={this.state.showText}
-                    noMatchText="很抱歉，找不到符合的項目"
+                    noMatchText={this.props.parentStcity ? '很抱歉，找不到符合的項目' : '請先選擇目的地'}
                     minimumStringQuery={this.props.parentStcity ? '請至少輸入兩個字' : '請先選擇目的地'}
                     minimumStringQueryLength={2}
                     footer={true}
@@ -267,11 +297,23 @@ class ContentComponentKeyword extends Component {
 
 class Destination extends Component {
     state = {
-        visible: false,
+        visible: this.props.visible,
         sTcity: '',
-        sTcitytxt: '',
-        allData: []
+        // sTcitytxt: this.props.sTcitytxt ? this.props.sTcitytxt : '',
+        allData: this.props.selectedData ? this.props.selectedData : [],
     };
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.selectedData !== this.props.selectedData) {
+            // console.log('中間', this.props.selectedData);
+            this.updateSelectedData();
+        }
+    }
+    updateSelectedData = () => {
+        this.setState({
+            allData: this.props.selectedData
+        });
+    }
+
     openPage = (e, value, input) => {
         input.blur();
         this.setState({
@@ -281,11 +323,11 @@ class Destination extends Component {
     getdatavTcity = (e, data, allData) => {
         this.setState({
             sTcity: e,
-            sTcitytxt: data,
+            // sTcitytxt: data,
             visible: false,
             allData: allData
         });
-        this.props.getdatavTcity(e);
+        this.props.getdatavTcity(e, data, allData);
     }
     render () {
         return (
@@ -296,16 +338,17 @@ class Destination extends Component {
                     placeholder="請輸入/選擇目的地"
                     breakline
                     icon={<IcRcln name="toolmap" />}
-                    value={this.state.sTcitytxt}
+                    value={this.state.allData.length > 0 ? this.state.allData[0].text : ''}
                     onClick={this.openPage}
                 />
                 <NvbRslb
                     visible={this.state.visible}
-                    ContentComponent={this.state.visible && <DestinationContentComponent
-                        getdatavTcity={(e, data, allData) => this.getdatavTcity(e, data, allData)}
-                        closeNvbRslb={value => { this.setState({ visible: false }) }}
-                        selectedData={this.state.allData}
-                    />}
+                    ContentComponent={this.state.visible &&
+                        <DestinationContentComponent
+                            getdatavTcity={(e, data, allData) => this.getdatavTcity(e, data, allData)}
+                            closeNvbRslb={value => { this.setState({ visible: false }) }}
+                            selectedData={this.state.allData}
+                        />}
                     direction="right"
                     width="100%"
                 />
@@ -316,9 +359,21 @@ class Destination extends Component {
 class Keyword extends Component {
     state = {
         visible: false,
-        sHotelName: ''
+        sHotelName: this.props.sHotelName ? this.props.sHotelName : ''
 
     };
+
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.sHotelName !== this.props.sHotelName) {
+            this.updateSHotelName();
+        }
+    }
+
+    updateSHotelName = () => {
+        this.setState({
+            sHotelName: this.props.sHotelName
+        });
+    }
     openPage = () => {
         this.setState({
             visible: true,
@@ -333,7 +388,7 @@ class Keyword extends Component {
     }
     render () {
         return (
-            <div className="keywordComponent m-b-sm">
+            <div className="keywordComponent m-t">
                 <IntRcln
                     label="關鍵字"
                     placeholder="請輸入飯店名稱"
@@ -354,6 +409,7 @@ class Keyword extends Component {
                             getdataKeyword={(data) => { this.getdataKeyword(data) }}
                             getSelect={(data) => { this.getSelect(data) }}
                             parentStcity={this.props.parentStcity}
+                            sHotelName={this.state.sHotelName}
                         />
                     }
                     direction="right"
@@ -363,14 +419,41 @@ class Keyword extends Component {
         );
     }
 }
+
+const ArrckList = (props) => {
+    const arrck = [
+        { name: '1', value: 'highRail', text: '高鐵' },
+        { name: '2', value: 'train', text: '火車' },
+        { name: '3', value: 'airCraft', text: '飛機' },
+        { name: '4', value: 'bus', text: '巴士' },
+        { name: '5', value: 'carRental', text: '租車' }
+    ];
+
+    return (
+        <div>
+            {
+                arrck.map((item, index) => {
+                    const isChecked = props.Tools.indexOf(index + 1) !== -1;
+                    return (
+                        <CrRcln type="checkbox" checked={isChecked} key={item.name} name={item.name} value={item.value}
+                            className="blue m-r-sm " textContent={item.text}
+                            whenChange={(e) => props.getTools(index, e)}
+                        />
+                    );
+                })
+            }
+        </div>
+    );
+};
+
 class Panel extends Component {
     constructor (props) {
         super(props);
         this.state = {
             data: [],
             searchKeyWord: '',
-            selectedStartDate: '',
-            selectedEndDate: '',
+            selectedStartDate: dayjs().add(5, 'days').format('YYYY-MM-DD'),
+            selectedEndDate: dayjs().add(30, 'days').format('YYYY-MM-DD'),
             activeInput: null,
 
             sFcountry: 'TW',
@@ -379,22 +462,29 @@ class Panel extends Component {
             sTcountry: 'TW',
             sTcity: '',
 
+            // sTcitytxt: '',
+            selectedData: [],
 
             sFreekind: '',
             sFreekind1: '',
 
-            sDatef: '20181023',
-            sDatet: '20181031',
+            // sDatef: dayjs().add(5, 'days').format('YYYY-MM-DD'),
+            // sDatet: dayjs().add(30, 'days').format('YYYY-MM-DD'),
 
             sHotelName: '',
-            items: {
-                '0': false,
-                '1': false,
-                '2': false,
-                '3': false,
-                '4': false,
-            },
-            Tools: []
+            Tools: [1, 2, 3, 4, 5],
+
+            days:'',
+            dayOption: [
+                { text: '不限', value: '' },
+                { text: '1~5天', value: '1,2,3,4,5' },
+                { text: '6~10天', value: '6,7,8,9,10' },
+                { text: '10天以上', value: '10' }
+            ],
+            noHotel: false,
+            roomlist: '2-0-0', // 預設一間, 兩大人
+            roomage: '-',
+            roomListInput: '共1間，2人',
         };
         this.option = [
             { text: '不限', value: '_' },
@@ -414,40 +504,73 @@ class Panel extends Component {
             { text: '花蓮', value: '_HLN' },
             { text: '台東', value: '_TTT' }
         ];
+        this.calendar = null;
     }
-    // state = {
-    //     data: [],
-    //     searchKeyWord: '',
-    //     selectedStartDate: '',
-    //     selectedEndDate: '',
-    //     activeInput: null,
+    componentDidMount () {
+        useLocalStorage(
+            {
+                panel: 'taiwanVacation',
+                methods: 'get'
+            },
+            (data) => {
+                this.validataLocalstorageData(data);
+            }
+        );
+    }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        const { sFcity, sTcity, sDatef, sDatet, selectedStartDate, selectedEndDate, Tools, selectText, selectedData, sHotelName } = data;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'taiwanVacation',
+                methods: 'delete',
+            });
+            return;
+        }
+        let cStart = sDatef || selectedStartDate;
+        let cEnd = sDatet || selectedEndDate;
+        if (dayjs(sDatef || selectedStartDate).isBefore(dayjs()) || dayjs(sDatet || selectedEndDate).isBefore(dayjs())) {
+            cStart = dayjs().add(5, 'days').format('YYYY-MM-DD');
+            cEnd = dayjs().add(30, 'days').format('YYYY-MM-DD');
+        }
+        if (!cStart) {
+            cEnd = '';
+        }
+        this.setState(
+            {
+                sFcity: sFcity,
+                sTcity: sTcity,
+                selectedStartDate: cStart,
+                selectedEndDate: cEnd,
+                Tools: Tools,
+                selectedData: selectedData,
+                sHotelName: selectText || sHotelName
+            }
+        );
+    };
+    // 取得間數/人數
+    updateRoomListInput = (data) => {
+        const {
+            roomlist,
+            roomage
+        } = data;
 
-    //     sFcountry: 'TW',
-    //     sFcity: '',
-
-    //     sTcountry: 'TW',
-    //     sTcity: '',
-
-
-    //     sFreekind: '',
-    //     sFreekind1: '',
-
-    //     sDatef: '20181023',
-    //     sDatet: '20181031',
-
-    //     sHotelName: '',
-    //     items: {
-    //         '0': false,
-    //         '1': false,
-    //         '2': false,
-    //         '3': false,
-    //         '4': false,
-    //     },
-    //     Tools: []
-
-    // }
-    calendar = null;
-    showCalendar (target) {
+        // props還原成陣列包陣列
+        const listArr = roomlist.split(',').map(e => e.split('-').filter(e => e.length).map(e => Number(e)));
+        const ageArr = roomage.split(',').map(e => e.split('-').map(e => e.split(';').filter(e => e.length).map(e => Number(e))));
+        // props還原成陣列包物件
+        const newRoomList = listArr.map((e, i) =>
+            ({
+                adult: listArr[i][0],
+                childrenWithBed: ageArr[i][0],
+                childrenNoBed: ageArr[i][1]
+            })
+        );
+        // 算人數
+        return calcShowText(newRoomList);
+    }
+    showNvbPage (target) {
         this.setState(prevState => ({
             ...prevState,
             activeInput: target,
@@ -470,6 +593,22 @@ class Panel extends Component {
             activeInput: null,
         }));
     }
+    roomPageConfirm = (pageState) => {
+        // 間數人數分頁按確定
+        const {
+            inputText: roomListInput,
+            roomList,
+        } = pageState;
+
+        const [roomlist, roomage] = parseRoomListArray(roomList);
+
+        this.setState(prevState => ({
+            roomListInput,
+            roomlist: roomlist.join(','),
+            roomage: roomage.join(','),
+            activeInput: null,
+        }));
+    }
     selectSFcity = (e) => {
         if (e) {
             this.setState({
@@ -477,57 +616,79 @@ class Panel extends Component {
             });
         }
     }
-    getTools = (data, e) => {
-        let old = this.state.items;
-        let arrnew = [];
-        old[data] = e;
-        for (let i = 0; i < 5; i++) {
-            if (old[i]) {
-                arrnew.push(i + 1);
-            }
-        }
-        this.setState({
-            items: old,
-            Tools: arrnew,
-        });
+    getTools = (data, isChecked) => {
+        const { Tools } = this.state;
+        const arrnew = [...Tools];
 
+        if (!isChecked) {
+            const i = Tools.indexOf(data + 1);
+            arrnew.splice(i, 1);
+        } else {
+            arrnew.push(data + 1);
+        }
+
+        this.setState({
+            Tools: arrnew.sort(),
+        });
     }
     getdataKeyword (data) {
         this.setState({
             sHotelName: data,
         });
     }
-    getdatavTcity (e) {
+    getdatavTcity (e, data, allData) {
         this.setState({
             sTcity: e,
+            // sTcitytxt: data,
+            selectedData: allData
         });
     }
+
     handleAllSubmit () {
         const {
             sFcity,
             sTcity,
-            sDatef,
-            sDatet,
+            // sDatef,
+            // sDatet,
+            selectedStartDate,
+            selectedEndDate,
             Tools,
+            // sTcitytxt,
+            selectedData,
             sHotelName,
         } = this.state;
-
-        window.open('https://www.liontravel.com/webft/webftse01.aspx?' + `sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${sDatef.replace(/-/g, '')}&sDatef=${sDatet.replace(/-/g, '')}&sTools=${Tools}&sHotelName=${sHotelName}`, this.props.hrefTarget);
+        useLocalStorage({
+            panel: 'taiwanVacation',
+            methods: 'post',
+            data: {
+                sFcity,
+                sTcity,
+                // sDatef,
+                // sDatet,
+                selectedStartDate,
+                selectedEndDate,
+                Tools,
+                // sTcitytxt,
+                selectedData,
+                sHotelName
+            }
+        });
+        if (!sTcity.length) return alert('請輸入 / 選擇目的地');
+        window.open(`https://www.liontravel.com/webft/webftse01.aspx?sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${selectedStartDate.replace(/-/g, '')}&sDatet=${selectedEndDate.replace(/-/g, '')}&sTools=${Tools}&sHotelName=${sHotelName}`, this.props.hrefTarget);
     }
     render () {
         const {
             selectedStartDate,
             selectedEndDate,
             activeInput,
+            roomlist,
+            roomage,
+            roomListInput
         } = this.state;
-        const visible = activeInput === 0 || activeInput === 1;
-        const arrck = [
-            { name: '1', value: 'highRail', text: '高鐵' },
-            { name: '2', value: 'train', text: '火車' },
-            { name: '3', value: 'airCraft', text: '飛機' },
-            { name: '4', value: 'bus', text: '巴士' },
-            { name: '5', value: 'carRental', text: '租車' }
-        ];
+        const showCalendarPage = activeInput === 0 || activeInput === 1;
+        const showRoomPage = activeInput === 'roomlist';
+        const showDestinationPage = activeInput === 'destination';
+        const pageVisible = showCalendarPage || showDestinationPage || showRoomPage;
         return (
             <div className="vacation_taiwan_m m-t-sm">
                 <StRcln ClassName="fwb-b m-b-sm"
@@ -536,11 +697,17 @@ class Panel extends Component {
                     label="出發地"
                     // defaultValue={'_'}
                     icon={<IcRcln name="toolmap" />}
+                    defaultValue={!!this.state.sFcity ? this.state.sFcity : '_'}
                     breakline
                     req
                     onChangeCallBack={(value) => this.setState({ sFcity: value })}>
                 </StRcln>
-                <Destination getdatavTcity={(e) => { this.getdatavTcity(e) }}></Destination>
+                <Destination
+                    getdatavTcity={(e, data, allData) => { this.getdatavTcity(e, data, allData) }}
+                    selectedData={this.state.selectedData}
+                    visible={ this.activeInput==='destination' ? true : false}
+                    // sTcitytxt={this.state.sTcitytxt}
+                />
                 <div className="calendar_compose">
                     <div className="input_group">
                         <IntRcln
@@ -549,66 +716,102 @@ class Panel extends Component {
                             placeholder="YYYY/MM/DD"
                             label="出發區間"
                             icon={<IcRcln name="tooldate" />}
-                            onClick={() => { this.showCalendar(0) }}
-                            value={selectedStartDate}
+                            onClick={() => { this.showNvbPage(0) }}
+                            value={dayjs(selectedStartDate).format('YYYY/MM/DD')}
                         />
                         <span className="cal_icon">~</span>
                         <IntRcln
                             readOnly
                             placeholder="YYYY/MM/DD"
-                            onClick={() => { this.showCalendar(1) }}
-                            value={selectedEndDate}
+                            onClick={() => { this.showNvbPage(1) }}
+                            value={dayjs(selectedEndDate).format('YYYY/MM/DD')}
                         />
                     </div>
-                    <NvbRslb
-                        visible={visible}
-                        direction="right"
-                        className="confirmBtn_span_d-no"
-                    >
-                        <span className="nvb_rslb_goBack" onClick={this.handleClose}>
-                            <IcRcln name="toolbefore" />
-                        </span>
-                        {
-                            visible && (
-                                <CyRcmn
-                                    ClassName="mm"
-                                    doubleChoose
-                                    selectedStartDate={selectedStartDate}
-                                    selectedEndDate={selectedEndDate}
-                                    endMonth={dayjs().add(12, 'months').format('YYYY-MM')}
-                                    startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
-                                    activeInput={activeInput}
-                                    startLabelTitle="最早出發日"
-                                    endLabelTitle="最晚出發日"
-                                    startTxt="最早"
-                                    endTxt="最晚"
-                                    ref={e => { this.calendar = e }}
-                                    onClickConfirm={this.handleConfirm}
-                                    customDiffTxt={diffDate => {
-                                        const showTxt = diffDate + 1;
-                                        return '共' + showTxt + '天';
-                                    }}
-                                />
-                            )
-                        }
-                    </NvbRslb>
+
                 </div>
-                <Keyword getdataKeyword={(data) => { this.getdataKeyword(data) }} parentStcity={this.state.sTcity}></Keyword>
-                <div>
-                    {
-                        arrck.map((item, index) => {
-                            return (
-                                <CrRcln defaultChecked={true} type="checkbox" key={index} name={item.name} value={item.value}
-                                    className="blue m-r-sm " textContent={item.text}
-                                    whenChange={(e) => this.getTools(item.name - 1, e)}
-                                />
-                            );
-                        })
-                    }
+
+                <div className="vacation_taiwan-row m-b-sm">
+                    <StRcln
+                        option={this.state.dayOption}
+                        placeholder="請選擇"
+                        label="旅遊天數"
+                        defaultValue={this.state.days}
+                        ClassName="strcln_day"
+                        breakline
+                        onChangeCallBack={(value) => this.setState({ days: value })}
+                    />
+                    <div className="t15">
+                        <CrRcln
+                            textContent="只找不含住宿"
+                            checked={this.state.noHotel}
+                            whenChange={(e) => this.setState({ noHotel: e })}
+                        />
+                    </div>
                 </div>
+                <IntRcln
+                    placeholder="共N間，N人"
+                    label="間數/人數"
+                    breakline
+                    readOnly
+                    icon={<IcRcln name="toolmember" />}
+                    className="m-b roomListInput"
+                    onClick={() => { this.showNvbPage('roomlist') }}
+                    value={roomListInput}
+                />
+                <ArrckList
+                    Tools={this.state.Tools}
+                    getTools={this.getTools}
+                />
+                <Keyword
+                    getdataKeyword={(data) => { this.getdataKeyword(data) }}
+                    parentStcity={this.state.sTcity}
+                    sHotelName={this.state.sHotelName}
+                />
                 <div className="txt-right">
                     <BtRcnb prop="string" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
                 </div>
+                <NvbRslb
+                    visible={pageVisible}
+                    direction="right"
+                    className="confirmBtn_span_d-no"
+                >
+                    <span className="nvb_rslb_goBack" onClick={this.handleClose}>
+                        <IcRcln name="toolbefore" />
+                    </span>
+                    {
+                        showCalendarPage && (
+                            <CyRcmn
+                                ClassName="mm"
+                                doubleChoose
+                                selectedStartDate={selectedStartDate}
+                                selectedEndDate={selectedEndDate}
+                                endMonth={dayjs().add(12, 'months').format('YYYY-MM')}
+                                startDate={dayjs().format('YYYY-MM-DD')}
+                                // startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
+                                activeInput={activeInput}
+                                startLabelTitle="最早出發日"
+                                endLabelTitle="最晚出發日"
+                                startTxt="最早"
+                                endTxt="最晚"
+                                ref={e => { this.calendar = e }}
+                                onClickConfirm={this.handleConfirm}
+                                customDiffTxt={diffDate => {
+                                    const showTxt = diffDate + 1;
+                                    return '共' + showTxt + '天';
+                                }}
+                            />
+                        )
+                    }
+                    {
+                        showRoomPage && (
+                            <RoomPageContent
+                                roomlist={roomlist}
+                                roomage={roomage}
+                                onClickConfirm={this.roomPageConfirm}
+                            />
+                        )
+                    }
+                </NvbRslb>
             </div>
         );
     }

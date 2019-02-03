@@ -25,7 +25,7 @@ class Panel extends Component {
       const PostTime = new Date().setHours(0, 0, 0, 0);
       const hasValue = home ? taiwanSelectData : foreignSelectData;
       if (Object.keys(hasValue).length === 0) {
-          alert('請填寫目的地欄位!');
+          alert('請選擇目的地或輸入關鍵字');
       } else {
           useLocalStorage({
               panel: 'activity',

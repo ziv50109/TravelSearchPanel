@@ -29,8 +29,25 @@ class KeyWordInput extends PureComponent {
         this.taskQueue = null;
     }
 
-    componentDidUpdate () {
-        this.props.onChange(this.state);
+    componentDidUpdate (prevProps, prevState) {
+        if (prevState !== this.state) {
+            this.props.onChange(this.state);
+        }
+        if (prevProps.Keywords !== this.props.Keywords) {
+            this.updateKeywords(this.props.Keywords);
+        }
+    }
+
+    updateKeywords = (inputText) => {
+        this.setState({ inputText });
+        const searchTimeGap = this.state.searchTimeGap;
+        // 若已經有任務了 就取消
+        if (typeof this.taskQueue === 'function') this.taskQueue.cancel();
+        const throttled = throttle(this.callKeyWordAPI, searchTimeGap, { 'leading': false });
+        this.taskQueue = throttled;
+        this.setState(prevState => ({
+            inputText,
+        }), throttled);
     }
 
     callKeyWordAPI () {
@@ -141,7 +158,7 @@ class KeyWordInput extends PureComponent {
 
         return (
             <ClickOutSide onClickOutside={this.closMenu}>
-                <div className="input_compose">
+                <div className="input_compose keywords">
                     <IntRcln
                         placeholder="請輸入產品名稱、飯店名稱或關鍵字"
                         label="關鍵字"

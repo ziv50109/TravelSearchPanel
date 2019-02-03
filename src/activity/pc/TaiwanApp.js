@@ -4,6 +4,7 @@ import { activity } from '../../../source.config';
 import DtmRcfr from '../../../magaele/dtm_rcfr';
 import ActRajax from '../../../magaele/act_rajx';
 import ClickOutSide from '../../../utils/click_outside';
+import ActivityLinks from '../component/ActivityLinks';
 import '../activity.scss';
 import useLocalStorage from '../../../utils/useLocalStorage';
 import today from 'dayjs';
@@ -24,6 +25,14 @@ class TaiwanApp extends Component {
             height: null,
             ticketAbroadData: {},
             ticketTaiwanData: {},
+            activityData: [
+                { title: '精選日本一日遊', href: '#'},
+                { title: '搭巴士遊歐洲', href: '#'},
+                { title: '全台樂園', href: '#'},
+                { title: '超值住宿', href: '#'},
+                { title: '水舞間特惠價', href: '#'},
+                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#'},
+            ],
         };
         this.AbortController = null;
         this.textInput = React.createRef();
@@ -371,6 +380,10 @@ class TaiwanApp extends Component {
                       }
                   </div>
               )}
+              <ActivityLinks
+                links={this.state.activityData}
+                targetBlank={true}
+            />
           </ClickOutSide>
       );
   }

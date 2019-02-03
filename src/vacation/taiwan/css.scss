@@ -36,8 +36,6 @@ input::placeholder {
 }
 
 
-
-
 .vacation_taiwan_pc,.vacation_taiwan_m{
     .dtm_rcfr {
         width: 100%; // border-top: 2px solid #e3e3e3;
@@ -108,7 +106,21 @@ input::placeholder {
         }
     }
 }
+.vacation_taiwan-row {
+    display: flex;
+    >div {
+        flex: 1;
+        &:first-child {
+            margin-right: 10px;
+        }
+        .cr_rcln {
+            top: 15px;
+        }
+    }
+}
 .vacation_taiwan_pc {
+    height: 100%;
+    padding-top: 5px;
     .int-tags-single{
         overflow: unset;
     }
@@ -126,9 +138,13 @@ input::placeholder {
            span{
             color:#222;
            }
-
            padding-left: 30px;
-
+           border-color: #bbb;
+        }
+        &.strcln_day {
+            .dropdown-place-holder{
+                padding-left: 5px;
+            }
         }
     }
     .SingleInputMenu {
@@ -175,9 +191,29 @@ input::placeholder {
             cursor: pointer;
         }
     }
+    //間數人數
+    .roomListInput {
+        // color: #0077b3;
+        background-color: transparent;
+        .int_rcln {
+            > .int_rcln_input {
+                border-color: #bbb;
+                color: #0077b3;
+            }
+            > .int_rcln_label {
+                color: #222;
+            }
+            &.amount {
+                .int_rcln_input {
+                    color: #222;
+                }
+            }
+        }
+    }
     .pc_keyWord {
         .int-label{
             color:#222;
+            top: 6px;
         }
         position: relative;
         * {
@@ -201,7 +237,7 @@ input::placeholder {
                 }
             }
             .int_rcln_input{
-                padding: 8px 5px 0;
+                padding: 16px 5px 0;
             }
             input {
                 width: 100%;
@@ -218,7 +254,7 @@ input::placeholder {
             position: absolute;
             top:0;
             left:0;
-            width: 80%;
+            width: 100%;
             max-height: 500px;
             padding: 0;
             box-shadow: none;
@@ -279,7 +315,7 @@ input::placeholder {
             height: 30px;
             position: absolute;
             top: 2px;
-            right: 78px;
+            right: 2px;
             z-index: 15;
             color: transparent;
             cursor: pointer;
@@ -303,6 +339,11 @@ input::placeholder {
     }
     .submitBtn {
         margin-top: 6px;
+    }
+    .txt-right {
+        position: absolute;
+        right: 0;
+        bottom: 0;
     }
 }
 
@@ -382,8 +423,14 @@ input::placeholder {
         }
         .dropdown-place-holder {
             padding-left: 30px;
+            border-color: #bbb;
             .dropdown-label{
                color:#222;
+            }
+        }
+        &.strcln_day {
+            .dropdown-place-holder{
+                padding-left: 5px;
             }
         }
     }
@@ -443,6 +490,8 @@ input::placeholder {
             left: 0;
             right: 0;
             bottom: 0;
+            padding-left: 10px;
+            max-height: none;
         }
         .clearBtnWrap {
             bottom: 1px;
@@ -518,6 +567,22 @@ input::placeholder {
             background: transparent;
         }
     }
+    //間數人數
+    .roomListInput {
+        // background-color: transparent;
+        &.int_rcln {
+            .int_rcln_input {
+                border-color: #bbb;
+                color: #0077b3;
+                &:not(input):empty::before {
+                    color: #0077b3;
+                }
+            }
+            .int_rcln_label {
+                color: #222;
+            }
+        }
+    }
     .bt_rcnb {
         width: 100%;
         margin-top: 30px;
@@ -556,7 +621,7 @@ input::placeholder {
         font-size: 14px;
         background: transparent;
         box-shadow: none;
-        .m-place {
+        .m-place, .noMatchText {
             color: #24a07d;
             button {
                 display: none;

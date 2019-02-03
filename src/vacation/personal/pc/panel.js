@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import cx from 'classnames';
-import { isJsonString } from '../../../../utils';
+import { isJsonString, useLocalStorage } from '../../../../utils';
 import { vacationPersonal } from '../../../../source.config';
 import VacationDaparture from '../VacationDaparture'; // 出發地下拉
 import CrRcln from '../../../../magaele/cr_rcln';
@@ -29,12 +29,13 @@ class Panel extends Component {
         this.state = {
             Departure: '',
             Destination: '',
+            radio: '',
             roomlist: '2-0-0', // 預設一間, 兩大人
             roomage: '-',
             Days: '',
             Airline: '',
             clskd: 0,
-            noTrans: 0,
+            noTrans: 1,
             Keywords: '',
             FromDate: dayjs().add(3, 'days').format('YYYY-MM-DD'),
             ToDate: dayjs().add(30, 'days').format('YYYY-MM-DD'),
@@ -67,7 +68,37 @@ class Panel extends Component {
                     sessionStorage.setItem(vacationPersonal.departure, stringifyData);
                 });
         }
+
+        useLocalStorage({
+            panel: 'personalVacation',
+            methods: 'get'
+        }, (data) => this.validataLocalstorageData(data));
     }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'personalVacation',
+                methods: 'delete',
+            });
+            return;
+        }
+        let FromDate = data.FromDate;
+        let ToDate = data.ToDate;
+        if (dayjs(data.FromDate).isBefore(dayjs()) || dayjs(data.ToDate).isBefore(dayjs())) {
+            FromDate = dayjs().add(3, 'days').format('YYYY-MM-DD');
+            ToDate = dayjs().add(30, 'days').format('YYYY-MM-DD');
+        }
+        if (!FromDate) {
+            ToDate = '';
+        }
+        this.setState({
+            ...data,
+            FromDate,
+            ToDate
+        });
+    };
 
     formatDepartureData = (d) => {
         const data = JSON.parse(d);
@@ -115,6 +146,7 @@ class Panel extends Component {
     onDestinationChange = (destState) => {
         const {
             selectedData,
+            radio
         } = destState;
 
         if (!selectedData.length) {
@@ -123,15 +155,17 @@ class Panel extends Component {
             }));
         }
 
-        const {
-            City,
-            Country,
-            Line,
-        } = selectedData[0];
+        let Destination = '';
+        destState.selectedData.forEach(e => {
+            const {
+                City,
+                Country,
+                Line,
+            } = e;
+            Destination += `${Country}_${City}_${Line},`;
+        });
 
-        this.setState(prevState => ({
-            Destination: `${Country}_${City}_${Line}`,
-        }));
+        this.setState({ Destination, radio });
     }
 
     onKeyWordChange = (keyWordState) => {
@@ -151,6 +185,7 @@ class Panel extends Component {
         const {
             Destination,
             departureData,
+            radio,
             destinationInput,
             noTrans,
             clskd,
@@ -158,7 +193,11 @@ class Panel extends Component {
             Days,
             openMoreSearch,
             FromDate,
-            ToDate
+            ToDate,
+            Departure,
+            roomlist,
+            roomage,
+            Keywords
         } = this.state;
 
         const moreSearch_classes = cx('moreSearch', {
@@ -174,14 +213,16 @@ class Panel extends Component {
                 <div className="input_group">
                     <VacationDaparture
                         data={departureData}
+                        defaultValue={Departure}
                         onChange={(val) => {
                             this.setState(prevState => ({
                                 Departure: val,
                             }));
                         }}
                     />
-                    <span className="cal_icon">→</span>
                     <DestinationInput
+                        Destination={Destination}
+                        radio={radio}
                         inputText={destinationInput}
                         onChange={this.onDestinationChange}
                     />
@@ -194,9 +235,12 @@ class Panel extends Component {
                     onChange={(e) => { this.onDateChange(e) }}
                 />
                 <RoomListInput
+                    roomlist={roomlist}
+                    roomage={roomage}
                     onChange={this.onRoomListChange}
                 />
                 <KeyWordInput
+                    Keywords={Keywords}
                     Destination={Destination}
                     onChange={this.onKeyWordChange}
                 />
@@ -222,30 +266,27 @@ class Panel extends Component {
                     <div className="moreSeach_content">
                         <StRcln
                             option={airLineOptions}
-                            placeholder="請選擇"
                             label="航空公司"
                             breakline
                             onChangeCallBack={(val) => { this.onSelectChange('Airline', val) }}
-                            ClassName="m-b-sm"
-                            defaultValue={Airline}
+                            ClassName=""
+                            defaultValue={Airline || ''}
                         />
                         <StRcln
                             option={clskdOptions}
-                            placeholder="請選擇"
                             label="艙等"
                             breakline
                             onChangeCallBack={(val) => { this.onSelectChange('clskd', val) }}
                             defaultValue={clskd}
-                            ClassName="m-b-sm"
+                            ClassName=""
                         />
                         <StRcln
                             option={daysOptions}
-                            placeholder="請選擇"
                             label="旅遊天數"
                             breakline
                             onChangeCallBack={(val) => { this.onSelectChange('Days', val) }}
-                            ClassName="m-b-sm"
-                            defaultValue={Days}
+                            ClassName=""
+                            defaultValue={Days || ''}
                         />
                     </div>
                 </div>

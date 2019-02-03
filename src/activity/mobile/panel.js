@@ -13,7 +13,15 @@ class Panel extends Component {
             home: false,
             visible: 0,
             taiwanSelectData: {},
-            foreignSelectData: {}
+            foreignSelectData: {},
+            activityData: [
+                { title: '精選日本一日遊', href: '#'},
+                { title: '搭巴士遊歐洲', href: '#'},
+                { title: '全台樂園', href: '#'},
+                { title: '超值住宿', href: '#'},
+                { title: '水舞間特惠價', href: '#'},
+                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#'},
+            ],
         };
     }
     componentDidMount () {
@@ -62,7 +70,7 @@ class Panel extends Component {
         } = this.state;
         const hasValue = home ? taiwanSelectData : foreignSelectData;
         if (!Object.keys(hasValue).length) {
-            alert('請填選您想要去的城市、景點、體驗行程或活動名稱喲！');
+            alert('請選擇目的地或輸入關鍵字');
         }
 
         const PostTime = new Date().setHours(0, 0, 0, 0);
@@ -82,7 +90,8 @@ class Panel extends Component {
             visible,
             home,
             foreignSelectData,
-            taiwanSelectData
+            taiwanSelectData,
+            activityData
         } = this.state;
         const foreignText = foreignSelectData.text || foreignSelectData.txt || '';
         const taiwanText = taiwanSelectData.text || taiwanSelectData.txt || '';
@@ -111,6 +120,7 @@ class Panel extends Component {
                         appSelectedData={foreignSelectData}
                         onClickItem={this.onClickItem}
                         handlePost={this.handlePost}
+                        links={activityData}
                     />
                 )}
                 {home && (
@@ -122,6 +132,7 @@ class Panel extends Component {
                         appSelectedData={taiwanSelectData}
                         onClickItem={this.onClickItem}
                         handlePost={this.handlePost}
+                        links={activityData}
                     />
                 )}
             </div>

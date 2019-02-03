@@ -9,7 +9,7 @@ import {
     calcShowText,
     calcShowText1
 } from '../../share/RoomListCommon';
-import { CloseButton } from '../../share/option';
+import { CloseButton, roomCount } from '../../share/option';
 
 class RoomPeople extends PureComponent {
     state = {
@@ -26,15 +26,43 @@ class RoomPeople extends PureComponent {
         minAdult: 1, // 每間房最少1位大人
         inputText: '共1間，2人',
         inputText1: '2人',
-        showDropDown: false
+        showDropDown: false,
     };
 
     componentDidMount () {
-        this.props.setPanelState({ roomlist: this.transforRoomList(), roomage: this.transforRoomage() });
+        this.updatePanelRooms();
     }
 
-    componentDidUpdate () {
-        this.props.setPanelState({ roomlist: this.transforRoomList(), roomage: this.transforRoomage() });
+    componentDidUpdate (prevProps, prevState) {
+        if (prevState.roomList !== this.state.roomList) {
+            this.props.setPanelState({ roomlist: this.transforRoomList(), roomage: this.transforRoomage() });
+        }
+    }
+
+    updatePanelRooms = () => {
+        const { roomlist, roomage } = this.props;
+
+        // props還原成陣列包陣列
+        const listArr = roomlist.split(',').map(e => e.split('-').filter(e => e.length).map(e => Number(e)));
+        const ageArr = roomage.split(',').map(e => e.split('-').map(e => e.split(';').filter(e => e.length).map(e => Number(e))));
+        // props還原成陣列包物件
+        const newRoomList = listArr.map((e, i) =>
+            ({
+                adult: listArr[i][0],
+                childrenWithBed: ageArr[i][0],
+                childrenNoBed: ageArr[i][1]
+            })
+        );
+
+        // 算人數
+        const inputText = calcShowText(newRoomList);
+        const inputText1 =  calcShowText1(newRoomList);
+
+        this.setState({
+            roomList: newRoomList,
+            inputText,
+            inputText1
+        });
     }
 
     transforRoomList () {
@@ -148,7 +176,6 @@ class RoomPeople extends PureComponent {
 
             const inputText = calcShowText(roomList);
             const inputText1 = calcShowText1(roomList);
-
             return {
                 roomList,
                 inputText,
@@ -241,18 +268,19 @@ class RoomPeople extends PureComponent {
                         <CloseButton onClick={this.closMenu} />
                         {noHotel === 0 && (
                             <label className="room_count_select">
-                                <select onChange={this.changeRoomCount}>
-                                    <option value="1">共1間</option>
-                                    <option value="2">共2間</option>
-                                    <option value="3">共3間</option>
-                                    <option value="4">共4間</option>
-                                    <option value="5">共5間</option>
-                                    <option value="6">共6間</option>
-                                    <option value="7">共7間</option>
+                                <select onChange={this.changeRoomCount} value={roomList.length}>
+                                    {roomCount.map(e =>
+                                        <option
+                                            key={e.value}
+                                            value={e.value}
+                                        >
+                                            {e.text}
+                                        </option>
+                                    )}
                                 </select>
                             </label>
                         )}
-                        {roomList.map((v, i) => (
+                        {roomList.length && roomList.map((v, i) => (
                             <RoomLitSection
                                 key={i}
                                 roomCount={i}

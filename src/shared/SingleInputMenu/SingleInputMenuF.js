@@ -92,7 +92,6 @@ class SingleInputMenu extends Component {
     }
     componentDidMount () {
         // this.getData(flightInternational.place);
-
     }
     UNSAFE_componentWillReceiveProps (nextProps) {
         if (nextProps.selectedData !== this.props.selectedData) {
@@ -263,7 +262,7 @@ class SingleInputMenu extends Component {
         } = this.state;
 
         // DtmRcfr highlight
-        const selected = selectedData.length ? selectedData.map(item => item.value) : [];
+        const selected = (selectedData.length && selectedData[0].value) ? selectedData.map(item => item.value) : [];
 
         return (
             <div

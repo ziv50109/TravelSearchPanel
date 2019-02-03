@@ -5,6 +5,7 @@ import NvbRslb from '../../../../magaele/nvb_rslb';
 import BtRcnb from '../../../../magaele/bt_rcnb';
 import App from '../components/App';
 import { activity } from '../../../../source.config';
+import ActivityLinks from '../../component/ActivityLinks';
 
 import '../../activity.scss';
 
@@ -23,22 +24,28 @@ const Foreign = (props) => {
                 direction="right"
                 className="activityM custom"
             >
-                <span className="nvb_rslb_goBack fz-xxl" onClick={props.closePage}>
-                    <IcRcln name="toolbefore" />
-                </span>
-                <App
-                    home={false} // 告訴 Component 這是國外
-                    fetchData={activity.ticketAbroad}
-                    selectedData={props.appSelectedData}
-                    showAct={props.appSelectedData.txt ? true : false}
-                    dtmLevelKey={['vLine', 'vCountry', 'vCity']}
-                    onClickItem={props.onClickItem}
-                />
+                {props.nvbRslbVisible && <>
+                    <span className="nvb_rslb_goBack fz-xxl" onClick={props.closePage}>
+                        <IcRcln name="toolbefore" />
+                    </span>
+                    <App
+                        home={false} // 告訴 Component 這是國外
+                        fetchData={activity.ticketAbroad}
+                        selectedData={props.appSelectedData}
+                        showAct={props.appSelectedData.txt ? true : false}
+                        dtmLevelKey={['vLine', 'vCountry', 'vCity']}
+                        onClickItem={props.onClickItem}
+                    />
+                </>}
             </NvbRslb>
             <BtRcnb
                 className="w-full btn-wrap search b-no" lg radius
                 whenClick={props.handlePost}
             >搜尋</BtRcnb>
+            <ActivityLinks
+                links={props.links}
+                targetBlank={true}
+            />
         </React.Fragment>
     );
 };

@@ -90,6 +90,8 @@ function transformActFetchData (data) {
                     level3: `${Country}-${City}`, // act-rajx的Key
                     level2: 'only', // act-rajx分區區域用的
                     txt: `${CityName}(${CityEName})${City}-${CountryName}`,
+                    text: `${CityName}(${CityEName})${City}-${CountryName}`,
+                    value: `${line.Line}-${Country}-${City}`
                 };
                 dataArray.push(dataObj);
             }

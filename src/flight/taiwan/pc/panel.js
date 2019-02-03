@@ -7,7 +7,7 @@ import IcRcln from '../../../../magaele/ic_rcln';
 import IntRcln from '../../../../magaele/int_rcln';
 import CyRcln from '../../../../magaele/cy_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
-import { ClickOutSide, isJsonString, useLocalStorage } from '../../../../utils';
+import { ClickOutSide, isJsonString, useLocalStorage, isLeapYear } from '../../../../utils';
 import '../css.scss';
 import '../../../component/ComposeCalendar.scss';
 
@@ -122,22 +122,34 @@ class ComposeCalendar extends PureComponent {
                 panel: 'taiwanFlight',
                 methods: 'get'
             },
-            ({ PC_depDate, PC_dtnDate }) => {
-                console.log(PC_depDate, PC_dtnDate);
-                const depDate = !PC_depDate ? dayjs().format('YYYY-MM-DD') : PC_depDate; // !PC_dep 判斷是否有值
-                const dtnDate = !PC_dtnDate ? '' : PC_dtnDate;
-                this.setState(
-                    {
-                        selectedStartDate: depDate,
-                        startInputValue: depDate,
-                        selectedEndDate: dtnDate,
-                        endInputValue: dtnDate
-                    },
-                    this.onChange
-                );
+            (data) => {
+                this.validataLocalstorageData(data);
             }
         );
     }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        const { PC_depDate, PC_dtnDate } = data;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'taiwanFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        const depDate = (!PC_depDate || dayjs(PC_depDate).isBefore(dayjs())) ? dayjs().format('YYYY-MM-DD') : PC_depDate; // !PC_dep 判斷是否有值
+        const dtnDate = (!PC_dtnDate || dayjs(PC_dtnDate).isBefore(dayjs())) ? '' : PC_dtnDate;
+        this.setState(
+            {
+                selectedStartDate: depDate,
+                startInputValue: depDate,
+                selectedEndDate: dtnDate,
+                endInputValue: dtnDate
+            },
+            this.onChange
+        );
+    };
 
     onChange () {
         this.props.onChange(this.state);
@@ -189,12 +201,12 @@ class ComposeCalendar extends PureComponent {
             : inputValue === selectedEndDate;
 
         // 若input沒有值
-        if (!inputValue.length || noChange) return;
+        if (noChange) return;
 
         let regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
         // 若日期是3碼或4碼(326 > 當年/03/26, 1105 > 當年/11/05)
-        if (startInputValue.length === 4) regex = /^()(\d{2})(\d{2})/;
-        if (startInputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
+        if (inputValue.length === 4) regex = /^()(\d{2})(\d{2})/;
+        if (inputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
         const result = inputValue.match(regex);
         const isValidDate = (d) => d instanceof Date && !isNaN(d);
 
@@ -232,7 +244,7 @@ class ComposeCalendar extends PureComponent {
         const calcStartDate = this.calcStartDate();
 
         // 日期格式正確但是不存在的日期
-        if (!isValidDate(new Date(d))) {
+        if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
             if (isStart) {
                 this.setState(
                     {
@@ -298,6 +310,16 @@ class ComposeCalendar extends PureComponent {
             this.onChange
         );
     };
+
+    inputKeyDown = (e, inputType) => {
+        if (e.keyCode === 13) {
+            const input = inputType === 'start' ? 'calendarInput1' : 'calendarInput2';
+            this[input].inputDOM.blur();
+            this.setState(prevState => ({
+                activeInput: null
+            }));
+        }
+    }
 
     inputFocus = target => {
         this.setState(prevState => ({
@@ -373,6 +395,7 @@ class ComposeCalendar extends PureComponent {
                 <div className="calendar_compose">
                     <div className="input_group aroundInput">
                         <IntRcln
+                            ref={e => { this.calendarInput1 = e }}
                             placeholder="YYYY/MM/DD"
                             label={TRIP === 1 ? '出發日期' : '去程日期'}
                             icon={<IcRcln name="tooldate" />}
@@ -386,11 +409,13 @@ class ComposeCalendar extends PureComponent {
                             onClearValue={() => {
                                 this.clearValue('start');
                             }}
+                            onKeyDown={(e) => this.inputKeyDown(e, 'start')}
                             value={startInputValue.replace(/\-/g, '/')}
                             className={TRIP === 1 ? '' : 'bor-right'}
                         />
                         {TRIP === 1 ? null : (
                             <IntRcln
+                                ref={e => { this.calendarInput2 = e }}
                                 placeholder="YYYY/MM/DD"
                                 label="回程日期"
                                 breakline
@@ -404,6 +429,7 @@ class ComposeCalendar extends PureComponent {
                                 onClearValue={() => {
                                     this.clearValue('end');
                                 }}
+                                onKeyDown={(e) => this.inputKeyDown(e, 'end')}
                                 value={endInputValue.replace(/\-/g, '/')}
                             />
                         )}
@@ -640,7 +666,6 @@ class TaiwanBody extends Component {
     }
 
     roundDate (e) {
-        console.log(e);
         this.setState({
             DEPARTURE_DATE: e.startInputValue,
             RETURN_DATE: e.endInputValue
@@ -658,6 +683,7 @@ class TaiwanBody extends Component {
             PASSENGER_ADULTNUM,
             PASSENGER_CHILDNUM
         } = this.state;
+        const PostTime = new Date().setHours(0, 0, 0, 0);
 
         this.validDate((isValid, warnText) => {
             if (isValid) {
@@ -679,7 +705,8 @@ class TaiwanBody extends Component {
                         PC_depDate,
                         PC_dtnDate,
                         PC_adult,
-                        PC_child
+                        PC_child,
+                        PostTime
                     }
                 });
                 let searchString;

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 // tools
 import './css.scss';
-// import { vacationTaiwan } from '../../source.config';
 import { daysOptions } from '../share/option';
 import today from 'dayjs';
 import IcRcln from '../../../magaele/ic_rcln';
@@ -51,39 +50,22 @@ class Panel extends Component {
     }
 
     componentDidMount () {
-        const url = 'https://www.liontravel.com/webft/webftse01.aspx?Departure=TW_PAN_9&Destination=TW_MZG_9&roomlist=2-1-0&roomage=2-,-&Days=2&Keywords=&FromDate=20190210&ToDate=20190220&Traffic=TRA,THSR&noHotel=0';
-        this.test1(url);
+        const url = 'https://www.liontravel.com/webft/webftse01.aspx?Departure=TW_TPE_&Destination=03_KHH_&roomlist=2-2-0&roomage=2;3-&Days=8&Keywords=&FromDate=20190130&ToDate=20190220&Traffic=ALL&noHotel=0&fthotel=';
+        this.analysisUrl(url);
     }
-
-    test1 (url) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                this.transformUrl(url);
-                resolve();
-            }, 100);
-        });
-    }
-
-    // componentDidUpdate (prevProps, prevState) {
-    //     if (prevState.noHotel !== this.state.noHotel) {
-    //         this.testUpdate();
-    //     }
-    // }
-
-    // testUpdate = () => {
-    //     this.setState({ noHotel: this.state.noHotel, isLoad: true });
-    // };
 
     // 解析網址
-    transformUrl (url) {
+    analysisUrl (url) {
         const hasQuery = url.indexOf('?');
-        const query =
-            hasQuery >= 0 ? url.substring(hasQuery + 1).split('&') : null;
+        const query = hasQuery >= 0 ? url.substring(hasQuery + 1).split('&') : null;
         const result = query.map(e => e.split('='));
-        const finalResult = result.map(e => [{ [e[0]]: e[1] }]);
         const state = {};
+        // this.setState({ vTcity: `TW_${}`  });
         result.forEach(e => {
             state[e[0]] = e[1];
+            if (e[0] === 'Destination') {
+                this.setState({ vTcity: `TW_${e[1].split('_')[1]}` });
+            }
         });
 
         this.setState({ ...state }, () => {
@@ -111,13 +93,14 @@ class Panel extends Component {
             ToDate,
             noHotel,
             Traffic,
+            fthotel
         } = this.state;
 
         this.ValidData((isValid, warnText) => {
             if (isValid) {
                 const apiUrl = this.apiUrl();
-                const keyUrl = `Departure=${Departure}&Destination=${Destination}&roomlist=${roomlist}&roomage=${roomage}&Days=${Days}&Keywords=${Keywords}&FromDate=${FromDate}&ToDate=${ToDate}&Traffic=${Traffic}&noHotel=${noHotel}`;
-                window.location.replace('https://vacation.liontravel.com/search?' + keyUrl);
+                const keyUrl = `Departure=${Departure}&Destination=${Destination}&roomlist=${roomlist}&roomage=${roomage}&Days=${Days}&Keywords=${Keywords}&FromDate=${FromDate}&ToDate=${ToDate}&Traffic=${Traffic}&noHotel=${noHotel}&fthotel=${fthotel}`;
+                window.location.replace(`${apiUrl}${keyUrl}`);
             } else {
                 alert(warnText.join('、'));
             }
@@ -125,18 +108,6 @@ class Panel extends Component {
     };
 
     ValidData (callback) {
-        // API 網址
-        // https://www.liontravel.com/webft/webftse01.aspx
-        // ?Departure=TW_TPE_TPE
-        // &Destination=TW_MZG_9
-        // &roomlist=2-1-0
-        // &roomage=2-,-
-        // &Days=2
-        // &Keywords=
-        // &FromDate=20190210
-        // &ToDate=20190220
-        // &Traffic=TRA,THSR
-        // &noHotel=0
         let warnText = [];
         const { Destination, FromDate, ToDate, Traffic } = this.state;
 
@@ -161,114 +132,103 @@ class Panel extends Component {
 
     // 子層修改 state
     setPanelState = val => {
+        // console.log(val);
         this.setState(val);
     };
-
-    // 關鍵字
-    getkeywordData (e) {
-        this.setState({
-            searchKeyWord: e
-        });
-    }
-    getkeywordtxt (txt) {
-        this.setState({
-            selectText: txt
-        });
-    }
 
     render () {
         const { FromDate, ToDate } = this.state;
         return (
             <div className="tw_vacation_search w-component">
                 {this.state.isLoad &&
-                <div>
-                    <div className="search_top_container">
-                        {/* 出發地、目的地 */}
+                    <div>
+                        <div className="search_top_container">
+                            {/* 出發地、目的地 */}
+                            <DepAndDtn
+                                customClass={'pc_DepAndDtn'}
+                                Departure={this.state.Departure}
+                                Destination={this.state.Destination}
+                                setPanelState={this.setPanelState}
+                            />
 
-                        <DepAndDtn
-                            customClass={'pc_DepAndDtn'}
-                            Departure={this.state.Departure}
-                            Destination={this.state.Destination}
-                            setPanelState={this.setPanelState}
-                        />
+                            {/* 出發區間 */}
+                            <div className={'pc_DepDateRange'}>
+                                <DepDateRange
+                                    defaultStartDate={today(FromDate).format(
+                                        'YYYY-MM-DD'
+                                    )}
+                                    defaultEndDate={today(ToDate).format('YYYY-MM-DD')}
+                                    onChange={e =>
+                                        this.setState({
+                                            FromDate: today(e.startInputValue).format(
+                                                'YYYYMMDD'
+                                            ),
+                                            ToDate: today(e.endInputValue).format(
+                                                'YYYYMMDD'
+                                            )
+                                        })
+                                    }
+                                />
+                            </div>
 
-                        {/* 出發區間 */}
-                        <div className={'pc_DepDateRange'}>
-                            <DepDateRange
-                                defaultStartDate={today(FromDate).format(
-                                    'YYYY-MM-DD'
-                                )}
-                                defaultEndDate={today(ToDate).format('YYYY-MM-DD')}
-                                onChange={e =>
-                                    this.setState({
-                                        FromDate: today(e.startInputValue).format(
-                                            'YYYYMMDD'
-                                        ),
-                                        ToDate: today(e.endInputValue).format(
-                                            'YYYYMMDD'
-                                        )
-                                    })
+                            {/* 旅遊天數 */}
+                            <StRcln
+                                ClassName={'StrclnStyle pc_travelDay w-travelday'}
+                                option={daysOptions}
+                                placeholder="請選擇"
+                                label="旅遊天數"
+                                breakline
+                                onChangeCallBack={val =>
+                                    this.setState({ Days: val === '' ? '' : Number(val) })
+                                }
+                                // defaultValue={Number(this.state.Days)}
+                                defaultValue={this.state.Days === '' ? '' : Number(this.state.Days)}
+                            />
+
+                            {/* 只找不含住宿 */}
+                            <CrRcln
+                                className={'pc_noHotel'}
+                                type="checkbox"
+                                textContent="只找不含住宿"
+                                whenChange={val =>
+                                    this.setState({ noHotel: val ? 1 : 0 })
+                                }
+                                defaultChecked={
+                                    Number(this.state.noHotel) === 1 ? true : false
                                 }
                             />
+                            {/* 搜尋按鈕 */}
+                            <button className="pc_searchBtn" onClick={this.onSubmit}>
+                                <IcRcln name="toolsearch" />
+                            </button>
                         </div>
 
-                        {/* 旅遊天數 */}
-                        <StRcln
-                            ClassName={'StrclnStyle pc_travelDay w-travelday'}
-                            option={daysOptions}
-                            placeholder="請選擇"
-                            label="旅遊天數"
-                            breakline
-                            onChangeCallBack={val =>
-                                this.setState({ Days: Number(val) })
-                            }
-                            // defaultValue={Number(this.state.Days) || ''}
-                            defaultValue={Number(this.state.Days)}
-                        />
+                        <div className="search_bottom_container">
+                            {/* 間數/人數 */}
+                            <RoomPeople
+                                customClass={'pc_Roompeople'}
+                                noHotel={Number(this.state.noHotel)}
+                                roomlist={this.state.roomlist}
+                                roomage={this.state.roomage}
+                                setPanelState={this.setPanelState}
+                            />
 
-                        {/* 只找不含住宿 */}
-                        <CrRcln
-                            className={'pc_noHotel'}
-                            type="checkbox"
-                            textContent="只找不含住宿"
-                            whenChange={val =>
-                                this.setState({ noHotel: val ? 1 : 0 })
-                            }
-                            defaultChecked={
-                                Number(this.state.noHotel) === 1 ? true : false
-                            }
-                        />
-                        {/* 搜尋按鈕 */}
-                        <button className="pc_searchBtn" onClick={this.onSubmit}>
-                            <IcRcln name="toolsearch" />
-                        </button>
+                            {/* 交通工具 */}
+                            <Transport
+                                customClass={'pc_Transport'}
+                                Traffic={this.state.Traffic}
+                                setPanelState={this.setPanelState}
+                            />
+
+                            {/* 關鍵字 */}
+                            <KeywordPlace
+                                customClass={'pc_Keyword'}
+                                Keywords={this.state.Keywords}
+                                setPanelState={this.setPanelState}
+                                Destination={this.state.vTcity}
+                            />
+                        </div>
                     </div>
-
-                    <div className="search_bottom_container">
-                        {/* 間數/人數 */}
-                        <RoomPeople
-                            customClass={'pc_Roompeople'}
-                            noHotel={Number(this.state.noHotel)}
-                            setPanelState={this.setPanelState}
-                        />
-
-                        {/* 交通工具 */}
-                        <Transport
-                            customClass={'pc_Transport'}
-                            Traffic={this.state.Traffic}
-                            setPanelState={this.setPanelState}
-                        />
-
-                        {/* 關鍵字 */}
-                        <KeywordPlace
-                            customClass={'pc_Keyword'}
-                            getkeywordData={e => this.getkeywordData(e)}
-                            getkeywordtxt={txt => this.getkeywordtxt(txt)}
-                            Keywords={this.state.Keywords}
-                            Destination={this.state.vTcity}
-                        />
-                    </div>
-                </div>
                 }
             </div>
         );

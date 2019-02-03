@@ -38,7 +38,32 @@ class RoomPeopleM extends PureComponent {
     };
 
     componentDidMount () {
+        this.updatePanelRooms();
         this.setState({ zIndex: this.getHighestZIndex() });
+    }
+
+    updatePanelRooms = () => {
+        const { roomlist, roomage } = this.props;
+        // props還原成陣列包陣列
+        const listArr = roomlist.split(',').map(e => e.split('-').filter(e => e.length).map(e => Number(e)));
+        const ageArr = roomage.split(',').map(e => e.split('-').map(e => e.split(';').filter(e => e.length).map(e => Number(e))));
+        // props還原成陣列包物件
+        const newRoomList = listArr.map((e, i) =>
+            ({
+                adult: listArr[i][0],
+                childrenWithBed: ageArr[i][0],
+                childrenNoBed: ageArr[i][1]
+            })
+        );
+
+        // 算人數
+        const inputText = calcShowText(newRoomList);
+
+        this.setState({
+            roomList: newRoomList,
+            inputText,
+            pageText: inputText,
+        });
     }
 
     // 取得最高 zindex
@@ -209,28 +234,17 @@ class RoomPeopleM extends PureComponent {
     }
 
     onChangeChildAge = (roomCount, target, targetIndex, value) => {
-        const roomList = this.state.roomList;
+        const roomList = [...this.state.roomList];
         const val = Number(value);
-
         roomList[roomCount][target][targetIndex] = val;
-
         this.setState(prevState => ({
-            roomList,
+            roomList
         }));
     }
 
     showCalendar = () => {
         this.setState({
             visible: !this.state.visible,
-            inputText: '共1間，2人',
-            inputText1: '2人',
-            roomList: [
-                {
-                    adult: 2,
-                    childrenWithBed: [],
-                    childrenNoBed: []
-                }
-            ]
         });
     }
 
@@ -253,7 +267,6 @@ class RoomPeopleM extends PureComponent {
             customClass,
             noHotel
         } = this.props;
-
 
         return (
             <div className={customClass}>
@@ -314,6 +327,7 @@ class RoomPeopleM extends PureComponent {
                                                 onClickAdd={this.onClickAdd} // 點選增加人數
                                                 onClickMinus={this.onClickMinus} // 點選減少人數
                                                 onChangeChildAge={this.onChangeChildAge} // 小孩年齡change
+                                                noHotel={noHotel}
                                             />
                                         ))
                                     }

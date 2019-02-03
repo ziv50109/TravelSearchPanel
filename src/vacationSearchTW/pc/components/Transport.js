@@ -3,28 +3,54 @@ import IcRcln from '../../../../magaele/ic_rcln';
 import Label from '../../share/Label';
 import StRnls from '../../../../magaele/st_rnls';
 import CrRcln from '../../../../magaele/cr_rcln';
+import { vacationTaiwanSearch } from '../../../../source.config';
 
 class Transport extends PureComponent {
     constructor (props) {
         super(props);
         this.state = {
-            transport: [
-                { name: 'NONE', text: '不限', isChecked: true },
-                { name: 'THSR', text: '高鐵', isChecked: true },
-                { name: 'TRA', text: '火車', isChecked: true },
-                { name: 'AIR', text: '飛機', isChecked: true },
-                { name: 'BUS', text: '巴士', isChecked: true },
-                { name: 'RENT', text: '租車', isChecked: true },
-            ]
+            transport: []
         };
     }
 
     componentDidMount () {
-        this.setPanelState();
+        this.fetchData();
     }
 
-    componentDidUpdate () {
-        this.setPanelState();
+    componentDidUpdate (prevProps) {
+        if (prevProps.Traffic !== this.props.Traffic) {
+            this.setPanelState();
+        }
+    }
+
+    // 抓取 api 資料
+    fetchData () {
+        fetch(vacationTaiwanSearch.traffic)
+            .then(res => res.json())
+            .then((data) => {
+                const jsonData = JSON.parse(data);
+                const fetchData = jsonData.map((v) => {
+                    return { ...v, isChecked: false, disabled: false };
+                });
+                this.handleData(fetchData);
+            });
+    }
+
+    // 整理成 component 會讀的格式
+    handleData (data) {
+        const transport = data.map((ele) => {
+            if (this.props.Traffic === 'ALL') {
+                return { ...ele, isChecked: true };
+            } else {
+                if (this.props.Traffic.indexOf(ele.name) !== -1) {
+                    return { ...ele, isChecked: true };
+                } else {
+                    return { ...ele, isChecked: false };
+                }
+            }
+        });
+
+        this.setState({ transport });
     }
 
     // 交通工具轉換
@@ -35,9 +61,19 @@ class Transport extends PureComponent {
             if (!transport[i].isChecked) {
                 continue;
             }
-            arr.push(this.state.transport[i].name);
+            arr.push(transport[i].name);
         }
-        return arr.join(',');
+
+        const isNone = arr.filter((v) => v === 'ALL'); // 是否有點擊不限，有點擊不限就回傳空值
+        if (isNone.length) { // 判斷有無點擊不限
+            return 'ALL';
+        } else {
+            if (arr.length === transport.length - 1) {
+                return 'ALL';
+            } else {
+                return arr.join(',');
+            }
+        }
     }
 
     // 傳回父層
@@ -47,6 +83,7 @@ class Transport extends PureComponent {
 
     // 打勾和取消
     handleChecked = (transName, isTrue, source) => {
+        // const transName = transName === '' ? 'NONE' : transName;
         source && document.getElementById(transName).click();
         const transport = this.state.transport.map((item) => {
             let temp = Object.assign({}, item);
@@ -56,7 +93,7 @@ class Transport extends PureComponent {
             return temp;
         });
 
-        this.setState({ transport });
+        this.setState({ transport }, this.setPanelState);
     }
 
     // 有打勾的回傳
@@ -80,15 +117,16 @@ class Transport extends PureComponent {
     renderCom = () => {
         const { transport } = this.state;
         return (
-            transport.map(({ name, text, isChecked }) =>
+            transport.map(({ name, text, isChecked, disabled }) =>
                 <CrRcln
                     key={text}
                     type="checkbox"
                     textContent={text}
-                    id={name}
+                    id={name === '' ? 'NONE' : name}
                     defaultChecked={isChecked}
                     whenClick={() => {}}
                     whenChange={(e) => this.handleChecked(name, e)}
+                    // disabled={disabled}
                 />
             )
         );

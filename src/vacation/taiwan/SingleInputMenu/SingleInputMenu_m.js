@@ -242,7 +242,7 @@ class SingleInputMenuM extends Component {
                     <p className="dtm_rcfr-label">{subLabel}</p>
                 </header>
                 <div className="dtm_rcfr-content">
-                    {Object.keys(destinationAct).length &&
+                    {(Object.keys(destinationAct).length && !selectedData.length) &&
                         <ActRacp
                             InputIsFocus={showAct}
                             url={destinationAct}

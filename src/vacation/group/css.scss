@@ -8,6 +8,18 @@ $SelectedFontColor: #0077b3;
 $LightgrayTxt: #999;
 
 .#{$classname} {
+    .vacationGroup-row{
+        display: flex;
+        >div {
+            &:first-child {
+                flex: 1.15;
+                margin-right: 10px;
+            }
+            &:last-child {
+                flex: 3;
+            }
+        }
+    }
      //目的地的clearBtn調整
      .input_compose{
         .int_rcln_input{
@@ -395,6 +407,7 @@ $LightgrayTxt: #999;
 }
 // pc
 .#{$classname}.pc {
+    height: 100%;
     // [目的地] 第一層標題不斷行
     .dtm_rcfr {
         &-wrap {
@@ -476,14 +489,19 @@ $LightgrayTxt: #999;
             bottom: 6px;
             right: 6px;
         }
-        .cal_icon {
-            padding-top: 22px;
-        }
+        // .cal_icon {
+        //     padding-top: 22px;
+        // }
     }
     .cr_rcln{
         .indicator{
             border:solid 1px #bbb;
         }
+    }
+    .txt-right {
+        position: absolute;
+        right: 0;
+        bottom: 0;
     }
 }
 // 手機板日曆

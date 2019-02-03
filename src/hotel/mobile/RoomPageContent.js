@@ -196,12 +196,9 @@ class RoomPageContent extends PureComponent {
         inputText: '共1間，2位大人、0位小孩',
     };
     componentDidMount () {
-        this.props.changeSum(this.state);
+        this.updatePanelRooms();
     }
     componentDidUpdate (prevProps, prevState) {
-        if (prevProps.Rooms !== this.props.Rooms) {
-            this.updatePanelRooms();
-        }
         if (prevState !== this.state) {
             this.props.changeSum(this.state);
         }

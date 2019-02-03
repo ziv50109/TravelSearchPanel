@@ -20,36 +20,36 @@ function calcShowText (Rooms) {
 }
 
 // 間數options
-// const roomCount = [
-//     {
-//         text: '共1間',
-//         value: 1,
-//     },
-//     {
-//         text: '共2間',
-//         value: 2,
-//     },
-//     {
-//         text: '共3間',
-//         value: 3,
-//     },
-//     {
-//         text: '共4間',
-//         value: 4,
-//     },
-//     {
-//         text: '共5間',
-//         value: 5,
-//     },
-//     {
-//         text: '共6間',
-//         value: 6,
-//     },
-//     {
-//         text: '共7間',
-//         value: 7,
-//     }
-// ];
+const roomCount = [
+    {
+        text: '共1間',
+        value: 1,
+    },
+    {
+        text: '共2間',
+        value: 2,
+    },
+    {
+        text: '共3間',
+        value: 3,
+    },
+    {
+        text: '共4間',
+        value: 4,
+    },
+    {
+        text: '共5間',
+        value: 5,
+    },
+    {
+        text: '共6間',
+        value: 6,
+    },
+    {
+        text: '共7間',
+        value: 7,
+    }
+];
 
 const ChildrenAgeSelect = ({
     onchange,
@@ -372,14 +372,15 @@ class RoomPageContent extends PureComponent {
         return (
             <React.Fragment>
                 <label className="hotel_roomList">
-                    <select onChange={this.changeRoomCount} defaultValue={Rooms.length}>
-                        <option value="1">共1間</option>
-                        <option value="2">共2間</option>
-                        <option value="3">共3間</option>
-                        <option value="4">共4間</option>
-                        <option value="5">共5間</option>
-                        <option value="6">共6間</option>
-                        <option value="7">共7間</option>
+                    <select onChange={this.changeRoomCount} value={Rooms.length}>
+                        {roomCount.map(e =>
+                            <option
+                                key={e.value}
+                                value={e.value}
+                            >
+                                {e.text}
+                            </option>
+                        )}
                     </select>
                 </label>
                 {

@@ -228,10 +228,10 @@ $input-color: #0077b3;
                     }
 
                     .act_racp-future {
-                        padding: 0;
-
+                        padding: 0 10px 5px 16px;
+                        min-width: 368px;
                         .section {
-                            width: 98%;
+                            width: 100%;
                         }
 
                         .noMatchText {
@@ -374,7 +374,7 @@ $input-color: #0077b3;
                     .filterTransfer {
                         flex: 1;
                         .act_racp-future{
-                            min-width: 173px;
+                            min-width: 370px;
                         }
                     }
                 }
@@ -393,7 +393,7 @@ $input-color: #0077b3;
             }
             .act_racp-future{
                 padding: 0;
-                min-width: 168px;
+                min-width: 370px;
                 .section {
                     .title{
                         margin-top:-19px;

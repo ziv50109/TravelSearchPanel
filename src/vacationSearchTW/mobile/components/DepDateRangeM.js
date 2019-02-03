@@ -9,13 +9,19 @@ class DepDateRangeM extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            selectedStartDate: dayjs().format('YYYY-MM-DD'),
-            selectedEndDate: dayjs().add(1, 'days').format('YYYY-MM-DD'),
+            selectedStartDate: '',
+            selectedEndDate: '',
         };
     }
 
     componentDidMount () {
         this.setState({ zIndex: this.getHighestZIndex() });
+        this.handlePropsDate();
+    }
+
+    handlePropsDate () {
+        const { FromDate, ToDate } = this.props;
+        this.setState({ selectedStartDate: dayjs(FromDate).format('YYYY-MM-DD'), selectedEndDate: dayjs(ToDate).format('YYYY-MM-DD') });
     }
 
     calendar = null;

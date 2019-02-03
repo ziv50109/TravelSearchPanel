@@ -6,6 +6,8 @@ const useLocalStorage = ({ panel, methods, data }, cbfn) => {
         'hotel',
         'personalVacation', 'groupVacation', 'taiwanVacation',
         'themeTravel',
+        'cruise',
+        'highSpeedRail',
         'activity'
     ];
     const queryKey = '_queryKey';

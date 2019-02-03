@@ -1,33 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
-// 單純組件
-import Label from '../../../magaele/int_rctg/components/Label/Label';    // 外框
+// magaele
+import Label from '../../../magaele/int_rctg/components/Label/Label'; // 外框
 import DtmRcfr from '../../../magaele/dtm_rcfr';
-import ActRacp from '../../../magaele/act_racp';
 import IntRcln from '../../../magaele/int_rcln';
+import ActRajx from '../../../magaele/act_rajx';
+
 // Utils
-import { fetchJsToObj, ClickOutSide, isJsonString } from '../../../utils';
+import { ClickOutSide, isJsonString } from '../../../utils';
 
-// import './SingleInputMenu.scss';
-// 補字選單分區的callBack
-// e.g. "祕魯(PE)__利馬-(LIM)".split('__') = ['祕魯(PE)', '利馬-(LIM)']
-//      "泰國(TH)__烏汶-(UBP)__烏汶機場(UBP)".split('__') = ['泰國(TH)', '烏汶-(UBP)', '烏汶機場(UBP)']
-const catalogueCallBack = [
-    {
-        catalogueName: '城市',
-        catafilter: (data) => data
-    }
-];
-// 補字選單changeKey
-const actRacpChangeKey = (data) => {
-    data.forEach((item) => {
-        item.txt = `${item.text}`;
-    });
-    return data;
-};
+// JSON 連結
+import { vacationTaiwanSearch } from '../../../source.config';
 
-const vLine = JSON.parse(`{ "vLine": { "_9": "台灣" } }`);
+// 樣式
+import './SingleInputMenu.scss';
 
 class SingleInputMenu extends Component {
     static defaultProps = {
@@ -59,8 +47,8 @@ class SingleInputMenu extends Component {
          * removeData: dtm rcln 的 callback function，通知移除物件
          */
         label: PropTypes.string,
-        onChange: PropTypes.func,
-    }
+        onChange: PropTypes.func
+    };
 
     constructor (props) {
         super(props);
@@ -68,121 +56,235 @@ class SingleInputMenu extends Component {
         this.state = {
             keyword: '',
             showDtm: false,
-            destinationDtm: {},
             showAct: false,
-            destinationAct: {}
+
+            destinationDtm: [],
+            destinationAct: [],
+            actRules: [
+                {
+                    title: '城市',
+                    // icon: <IcRcln name="toolmapf" key={1} />
+                },
+                {
+                    title: '景觀',
+                    // icon: <IcRcln name="toolmapf" key={2} />
+                }
+            ]
         };
+
+        this.fetchDtn = vacationTaiwanSearch.destination; // 補字 JSON
+        // this.fetchDtn = 'https://uvacation.liontravel.com/gendata/jsondata/destinationlocaltw'; // 補字 JSON
     }
+
     componentDidMount () {
-        this.getData(this.props.fetchPath);
+        // const sessionDtnData = sessionStorage.getItem(this.props.fetchPath);
+        // if (sessionDtnData && isJsonString(sessionDtnData)) {
+        //     const jsonData = JSON.parse(JSON.parse(sessionDtnData));
+        //     this.setState({
+        //         destinationDtm: this.handleFetchData(jsonData)
+        //     });
+        // } else {
+        //     fetch(this.props.fetchPath)
+        //         .then(r => r.json())
+        //         .then(data => {
+        //             this.setState({
+        //                 destinationDtm: this.handleFetchData(JSON.parse(data))
+        //             });
+        //         });
+        // }
+
+        fetch(this.props.fetchPath)
+            .then(r => r.json())
+            .then(data => {
+                this.setState({
+                    destinationDtm: this.handleFetchData(JSON.parse(data))
+                });
+            });
+
+        this.fetchActData();
     }
 
     UNSAFE_componentWillReceiveProps (nextProps) {
-        let text = nextProps.selectedData.length ?
-            (nextProps.selectedData[0].text)
+        let text = nextProps.selectedData.length
+            ? nextProps.selectedData[0].text
             : '';
         this.setState({
             keyword: text
         });
     }
-    // fetch data
-    getData = (source) => {
-        const sessionData = sessionStorage.getItem(source);
-        if (sessionData && isJsonString(sessionData)) {
-            const jsonData = JSON.parse(sessionData);
-            this.setState({
-                destinationDtm: Object.assign(jsonData, vLine)
+
+    // 補字的全部資料
+    fetchActData () {
+        fetch(this.fetchDtn)
+            .then(r => r.json())
+            .then(data => {
+                this.handleActData(JSON.parse(data));
             });
-            this._getDataCallBack(jsonData);
-        } else {
-            fetchJsToObj(source, (d) => {
-                let stringifyData = JSON.stringify(d);
-                this.setState({
-                    destinationDtm: Object.assign(d, vLine)
-                });
-                this._getDataCallBack(d);
-                sessionStorage.setItem(source, stringifyData);
+    }
+
+    // 補字資料 fetch 下來存進 localStorage
+    handleActData (data) {
+        // example
+        // {
+        //     Kind: '30',
+        //     level2: '城市',
+        //     level3: 'JP_UEN',
+        //     txt: '上野原市-山梨縣(UENOHARA SHI) UEN-日本'
+        // },
+        const destinationAct = []; // 要存進 localstorage 的陣列
+        const actArea = [];
+
+        // 城市
+        data['City'].forEach(v => {
+            v['CityList'].forEach(cityV => {
+                const newObj = {};
+                newObj['Kind'] = 30;
+                newObj['level2'] = '城市';
+                newObj['level3'] = `${cityV['City']}_${cityV['CityEName']}`;
+                newObj['txt'] = cityV.CityName;
+                newObj['city'] = cityV['City'];
+                destinationAct.push(newObj);
+                actArea.push(cityV);
             });
+        });
+
+        // 景點
+        // data['Spot'].forEach(v => {
+        //     v['SpotList'].forEach(spotV => {
+        //         console.log(spotV);
+        //         const newObj = {};
+        //         newObj['Kind'] = 40;
+        //         newObj['level2'] = '景觀';
+        //         newObj['level3'] = `${spotV['Spot']}`;
+        //         newObj['txt'] = spotV.SpotName;
+        //         newObj['city'] = v['City'];
+        //         destinationAct.push(newObj);
+        //     });
+        // });
+
+        this.setState({ actArea });
+        // 存進 localstorage 的方法
+        sessionStorage.setItem(
+            this.fetchDtn,
+            JSON.stringify(destinationAct)
+        );
+    }
+
+    // 根據 keyword 篩選要灌入的資料
+    findAboutKeyword (keyword) {
+        const { actArea } = this.state;
+        const sessionDepData = sessionStorage.getItem(this.fetchDtn);
+        const jsonData = JSON.parse(sessionDepData);
+        const areaMatch = actArea.filter(area => area['CityName'] === keyword); // 傳進來的 keyword 去找對應的城市
+        const destinationAct = jsonData.filter((v) => {
+            if (areaMatch.length) {
+                return areaMatch[0]['City'] === v['city'] && v;
+            } else if (v['txt'].indexOf(keyword) !== -1) {
+                return v;
+            } else {
+                return false;
+            }
+        });
+
+        this.setState({ destinationAct });
+    }
+
+    // 快速選單 json 資料格式
+    handleFetchData (data) {
+        const newObj = {};
+        const zoneObj = {};
+        const cityObj = {};
+        for (let i = 0; i < data['Zone'].length; i++) {
+            zoneObj[data['Zone'][i]['Zone']] = data['Zone'][i]['ZoneName'];
+            cityObj[data['Zone'][i]['Zone']] = {};
         }
-    }
-    // 處理 fetch 回來的 data
-    _getDataCallBack = (data) => {
-        // const { vLine, vLinetravel, vLinewebarea } = data;
-        let arr = [];
-        let listA = Object.keys(data.vArea['_9']);
-        listA.map((kind, i) => {
-            let listB = Object.keys(data.vTcity[listA[i]]);
-            listB.map((item, idx) => {
-                let listC = listB[idx];
-                let listD = data.vTcity[listA[i]][listB[idx]];
-                const obj = {
-                    vArea: listA[i],
-                    vLineText: data.vArea['_9'][`${listA[i]}`],
-                    vLinewebarea: '_',
-                    vLinetravel: listC,
-                    vLinetravelText: listD,
-                    text: `${listD}-${data.vArea['_9'][`${listA[i]}`]}`,
-                    vTcity: `${listC}`,
-                    value: `_9-${listA[i]}-${listC}`,
-                };
-                arr.push(obj);
+
+        data['City'].forEach((v) => {
+            const temp = {};
+            v.CityList.forEach((vcity) => {
+                temp[vcity['City']] = vcity['CityName'];
             });
+            cityObj[v.Zone] = temp;
         });
-        this.setState({
-            destinationAct: arr
-        });
+
+        // First
+        newObj.vLine = { _9: '台灣' };
+        // Zone
+        newObj.vArea = {
+            _9: zoneObj
+        };
+        newObj.vTcity = cityObj;
+        return newObj;
     }
+
     // 通知 parent component data 更新
-    emitPushData = (data) => {
+    emitPushData = data => {
         const { selectedData } = this.props;
-        let propsText = selectedData.length > 0 ?
-            selectedData[0].text + '-' + selectedData[0].vLinetravelText : '';
+        let propsText =
+            selectedData.length > 0
+                ? selectedData[0].text + '-' + selectedData[0].vLinetravelText
+                : '';
         let dataText = data ? data.text + '-' + data.vLinetravelText : '';
         let text = propsText === dataText ? '' : dataText;
         if (data) {
             this.props.onChange && this.props.onChange(data);
             this.setState({ keyword: text, showDtm: false });
-
-            // console.log(propsText, dataText, data.text, dataText === propsText, data.text === propsText);
-        }
-        else {
+        } else {
             this.setState({ keyword: '', showDtm: true });
             this.props.onChange && this.props.onChange('');
         }
+    };
+
+    onClickItem = (v) => {
+        this.props.onChange && this.props.onChange(v);
     }
+
+    // 補字點擊時
+    onClickAct =(v) => {
+        const newObj = {
+            vTcity: v['city'],
+            value: `_9_${v['city']}`
+        };
+
+        this.onClickItem(newObj);
+    }
+
     handleOpenMenuFocus = () => {
         this.setState({ showDtm: true, showAct: false });
-    }
+    };
+
     handleOpenMenuDown = () => {
-        this.state.keyword ? this.setState({ showDtm: false, showAct: true }) : this.setState({ showDtm: true, showAct: false });
-    }
+        this.state.keyword
+            ? this.setState({ showDtm: false, showAct: true })
+            : this.setState({ showDtm: true, showAct: false });
+    };
     handleCloseMenu = () => {
         const { selectedData } = this.props;
         const { keyword } = this.state;
         if (selectedData.length > 0) {
-            let text = selectedData ?
-                selectedData[0].text
-                : '';
+            let text = selectedData ? selectedData[0].text : '';
             if (keyword.length !== text.length) {
                 this.setState({
                     keyword: text,
-                    showDtm: false, showAct: false
+                    showDtm: false,
+                    showAct: false
                 });
             }
         }
         this.setState({
-            showDtm: false, showAct: false
+            showDtm: false,
+            showAct: false
         });
-    }
+    };
     // 通知 parent component 移除 data
     handleEmitRemoveData = (e, data) => {
         this.emitPushData('');
-    }
+    };
     // 點擊 label wrap 就 focus search input
     handleLabelWrapClick = () => {
         this.searchInput.current.inputDOM.focus();
-    }
-    handleChange=(e) => {
+    };
+    handleChange = e => {
         if (!e.target.value) {
             this.setState({
                 keyword: '',
@@ -197,42 +299,56 @@ class SingleInputMenu extends Component {
                 showDtm: false
             });
         }
-    }
+
+        this.findAboutKeyword(e.target.value); // 補字
+    };
     handleFocus = () => {
         this.searchInput.current.inputDOM.focus();
-    }
+    };
+
     render () {
         const {
             placeholder,
-            minimumStringQueryLength,
-            minimumStringQuery,
-            noMatchText,
-            label, subLabel,
-            fetchPath, isRequired, size, iconName,
-            selectedData
+            label,
+            subLabel,
+            isRequired,
+            size,
+            iconName,
+            selectedData,
+            className
         } = this.props;
         const {
             keyword,
             showAct,
-            destinationAct,
             showDtm,
-            destinationDtm
+            destinationDtm,
+            destinationAct,
+            actRules
         } = this.state;
 
         // DtmRcfr highlight
         const selected = selectedData.map(item => item.value);
+
+        const act_wrap_classes = classNames('act_wrap_container', {
+            'd-no': !showAct,
+        });
+
         return (
-            <div
-                className="SingleInputMenu">
+            <div className={className}>
                 <Label
                     isRequired={isRequired} // 是否為必填欄位
-                    size={size}             // 高度
-                    label={label}           // 標籤
-                    iconName={iconName}     // icon
+                    size={size} // 高度
+                    label={label} // 標籤
+                    iconName={iconName} // icon
                     onClick={this.handleOpenMenuFocus}
                     subComponent={
                         <ClickOutSide onClickOutside={this.handleCloseMenu}>
-                            <svg viewBox="0 0 10 10" display="none"><path id="dtm_rcfr-x" d="M10 8.59L8.59 10 5 6.41 1.41 10 0 8.59 3.59 5 0 1.41 1.41 0 5 3.59 8.59 0 10 1.41 6.41 5z" /></svg>
+                            <svg viewBox="0 0 10 10" display="none">
+                                <path
+                                    id="dtm_rcfr-x"
+                                    d="M10 8.59L8.59 10 5 6.41 1.41 10 0 8.59 3.59 5 0 1.41 1.41 0 5 3.59 8.59 0 10 1.41 6.41 5z"
+                                />
+                            </svg>
 
                             <div className="dtm_rcfr-row">
                                 {/* <div className="dtm_rcfr-selected-wrap" onClick={this.handleLabelWrapClick}>
@@ -246,52 +362,58 @@ class SingleInputMenu extends Component {
                                     onKeyDown={this.handleOpenMenuDown}
                                     onFocus={this.handleOpenMenuFocus}
                                     value={keyword}
-                                    onChange={(e) => this.handleChange(e)}
-                                    onClearValue={(e) => this.handleEmitRemoveData(e, selectedData)}
+                                    onChange={e => this.handleChange(e)}
+                                    onClearValue={e =>
+                                        this.handleEmitRemoveData(
+                                            e,
+                                            selectedData
+                                        )
+                                    }
                                 />
                             </div>
-                            {/* {Object.keys(destinationAct).length &&
-                                <ActRacp
-                                    InputIsFocus={showAct}
-                                    url={destinationAct}
-                                    minimumStringQueryLength={minimumStringQueryLength} // 最少輸入幾個字
-                                    minimumStringQuery={minimumStringQuery} // 尚未輸入文字字數到達要求會顯示此字串
-                                    searchKeyWord={keyword} // 傳入篩選的字串
-                                    noMatchText={noMatchText} // 當沒有配對資料時顯示那些文字
-                                    ClassName={(!showAct && 'd-no')} // 傳入custom class
-                                    footer={false} // 是否顯示footer
-                                    theme={'future'} // 樣式調整: future(站長平台)
-                                    closeActcallback={(data) => {
-                                        if (typeof data !== 'undefined') {
-                                            this.setState({ showAct: false, keyword: '' });
-                                            this.emitPushData(data);
-                                        } else {
-                                            this.handleCloseMenu();
-                                        }
-                                    }} // 鍵盤上下鍵改變選取項目
-                                    changeKey={actRacpChangeKey}
-                                    catalogue={catalogueCallBack}
+
+                            {/* 補字 */}
+                            <div className={act_wrap_classes}>
+                                <span className="closeBtn"></span>
+                                <ActRajx
+                                    titleClass={showAct ? '' : 'd-no'}
+                                    isFocus={showAct}
+                                    data={destinationAct}
+                                    matchWord={keyword}
+                                    getItemClickValue={this.onClickAct}
+                                    minimumStringQuery={'請至少輸入兩個字'}
+                                    noMatchText="很抱歉，找不到符合的項目"
+                                    minimumStringQueryLength={1}
+                                    footer={false}
+                                    rules={actRules}
                                 />
-                            } */}
+                            </div>
+
                             <div className={`dtm_rcfr-wrap ${showDtm ? 'open' : null}`}>
                                 <p className="dtm_rcfr-label">{subLabel}</p>
                                 <span
                                     className="dtm_rcfr-close_btn"
-                                    onClick={(e) => {
+                                    onClick={e => {
                                         e.stopPropagation();
                                         this.handleCloseMenu();
                                     }}
                                 >
-                                    <svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg>
+                                    <svg viewBox="0 0 10 10">
+                                        <use xlinkHref="#dtm_rcfr-x" />
+                                    </svg>
                                 </span>
-                                {Object.keys(destinationDtm).length &&
+                                {Object.keys(destinationDtm).length && (
                                     <DtmRcfr
-                                        levelKey={['vLine', 'vArea', 'vTcity']}
-                                        onClickItem={this.emitPushData}
-                                        dataResouce={destinationDtm}
+                                        levelKey={[
+                                            'vLine',
+                                            'vArea',
+                                            'vTcity'
+                                        ]}
+                                        onClickItem={this.onClickItem}
+                                        dataResouce={this.state.destinationDtm}
                                         selectedData={selected}
                                     />
-                                }
+                                )}
                             </div>
                         </ClickOutSide>
                     }

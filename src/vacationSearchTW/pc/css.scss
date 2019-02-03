@@ -44,14 +44,15 @@ $className: 'tw_vacation_search';
 }
 
 .#{$className} {
-    
     max-width: 1200px;
     min-width: 960px;
     position: relative;
-    z-index:999;
-    ::placeholder {
-        color: #aaa;
+    z-index: 999;
+    -ms-input-placeholder,
+    input::placeholder {
+        color: #aaa !important;
     }
+
     // font-family: Arial,'微軟正黑體';
     // margin: 0 auto;
     // 上半部
@@ -66,7 +67,7 @@ $className: 'tw_vacation_search';
         }
 
         .pc_DepAndDtn {
-            background-color:#fff;
+            background-color: #fff;
             @extend .col-md-8;
             background-color: white;
             > .st_rcln {
@@ -98,22 +99,117 @@ $className: 'tw_vacation_search';
                     @include label;
                 }
             }
+            .clearBtnWrap {
+                width: 24px;
+                height: 19px;
+                top: auto;
+                .clearBtn {
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    margin: auto;
+                }
+                &:after {
+                    top: none;
+                    bottom: 0;
+                    height: 26px;
+                }
+            }
+            
+            .act_wrap_container {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                z-index: 10;    
+                width: 390px;
+                overflow-y: auto;
+                overflow-x: hidden; 
+                min-height: 38px;
+                max-height: 535px;
+                &::-webkit-scrollbar {
+                    width: 6px;
+                }
+                &::-webkit-scrollbar-thumb {
+                    background: #d8d8d8;
+                    &:hover{
+                        background-color: #888;
+                        opacity: .8;
+                    }
+                }
+                &::-webkit-scrollbar-track {
+                    background: #fff;
+                }
+                .act_rajx{
+                    width:100%;
+                    position: static;
+                    border: none;
+                    font-size: 14px;
+                    background: transparent;
+                    box-shadow: none;
+                    overflow:visible;
+                    box-sizing:border-box;
+                    .section{
+                        .title{
+                            padding: 9px 8px 5px;
+                            color: #222;
+                            font-size: 16px;
+                            font-weight: bold;
+                            border-top: none;
+                        }
+                        .item{
+                            display:block;
+                            color:#444;
+                            line-height: 1.4;
+                            user-select: none;
+                            cursor: pointer;
+                            font-size: 14px ;
+                            border-bottom: 1px solid #e3e3e3;
+                            padding:12px 8px;
+                        }
+                    }
+                }
+            }
+            .SingleInputMenu .dtm_rcfr-wrap {
+                border: 1px solid #ddd;
+                .sec {
+                    border-bottom: 1px solid #ddd;
+                }
+            }
         }
         .pc_DepDateRange {
             @extend .col-md-8;
             > * {
                 background-color: white;
-
             }
             > .cal_icon {
                 color: #ddd;
                 font-size: 20px;
             }
+            .clearBtnWrap {
+                width: 24px;
+                height: 29px;
+                top: auto;
+                .clearBtn {
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    margin: auto;
+                }
+                &:after {
+                    top: none;
+                    bottom: 0;
+                    height: 26px;
+                }
+            }
         }
         .pc_travelDay {
             @extend .labelStyle;
             @extend .col-md-3;
-            background-color:#fff;
+            background-color: #fff;
             height: 52px;
             background-color: white;
 
@@ -137,8 +233,8 @@ $className: 'tw_vacation_search';
             > :nth-of-type(2) {
                 margin-left: 20px;
             }
-            > .indicator{
-                border:1px solid #bbb;
+            > .indicator {
+                border: 1px solid #bbb;
             }
         }
         .pc_searchBtn {
@@ -156,9 +252,10 @@ $className: 'tw_vacation_search';
             @extend .col-md-5;
             padding: 0;
             padding-right: 2px;
-            &>.input_compose{
+            & > .input_compose {
                 background-color: #fff;
             }
+
             .room_list_wrap_container {
                 border-top: none;
                 .txt_green {
@@ -177,14 +274,13 @@ $className: 'tw_vacation_search';
                         color: #444;
                     }
                 }
-                select::-ms-expand  {
-                    display: none;  
+                select::-ms-expand {
+                    display: none;
                 }
             }
             > * {
                 background-color: white;
             }
-            
         }
         .pc_Transport {
             // @extend .col-md-9 ;
@@ -192,9 +288,7 @@ $className: 'tw_vacation_search';
             padding-left: 3px;
             padding-right: 4px;
             position: relative;
-            // top: 100%;
-            // margin-right: 5px;
-            &>.transBox{
+            & > .transBox {
                 background-color: #fff;
             }
             .st_rnls_descendant_content {
@@ -214,7 +308,6 @@ $className: 'tw_vacation_search';
             }
             > * {
                 background-color: white;
-
             }
         }
         .pc_Keyword {
@@ -223,22 +316,42 @@ $className: 'tw_vacation_search';
             position: relative;
             width: 25%;
             margin-left: 1px;
-            &>.input_compose {
+            .clearBtnWrap {
+                width: 24px;
+                height: 20px;
+                top: auto;
+                .clearBtn {
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    margin: auto;
+                }
+                &:after {
+                    top: auto;
+                    bottom: auto;
+                    right: auto;
+                    height: 26px;
+                }
+            }
+            & > .input_compose {
                 height: 48px;
                 background-color: #fff;
                 .int_rcln_label {
                     @include label;
-                }
-                .breakline {
-                    > .clearBtnWrap {
-                        padding-top: 55px;
-                    }
                 }
                 .act_wrap_container {
                     box-shadow: 0 2px 4px 0 rgba(153, 153, 153, 0.7);
                     outline: 1px solid #ddd;
                     border: none;
                     width: 100%;
+                    display: flex;
+                    align-items: center;
+                    line-height: 45px;
+                    .searching {
+                        color: #999;
+                        margin-left: 10px;
+                    }
                     .close_btn {
                         position: absolute;
                         top: 10px;
@@ -275,26 +388,32 @@ $className: 'tw_vacation_search';
             }
         }
         .roompeople_content_pc,
-        .room_list_section{
-            .child_row{
-                .room_list_row{
+        .room_list_section {
+            .child_row {
+                .room_list_row {
                     display: flex;
-                    align-items: center;
                     .age_select_section {
                         display: flex;
-                        .children_age_select{
+                        .children_age_select {
                             display: flex;
-                            width:65px;
+                            align-items: center;
+                            width: 65px;
                             height: 30px;
                             margin-left: 5px;
-                            >select{
+                            > select {
                                 background-color: #fff;
+                                width: 100%;
                                 height: 100%;
                                 padding: 0 5px;
                                 border-radius: 0;
                                 border: 1px solid #ccc;
+                                font-size: 16px;
                             }
                         }
+                    }
+                    .children_ages_section {
+                        display: flex;
+                        align-items: center;
                     }
                 }
             }

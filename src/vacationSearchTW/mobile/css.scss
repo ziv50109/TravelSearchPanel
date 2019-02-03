@@ -33,6 +33,7 @@ $className: 'tw_vacation_search_mb';
     ::placeholder {
         color: #aaa;
     }
+
     .row-center {
         @include center {
             > * {
@@ -64,9 +65,8 @@ $className: 'tw_vacation_search_mb';
                 line-height: 1;
 
                 .dropdown-label {
-                   height:auto;
+                    height: auto;
                     @include label;
-                    
                 }
             }
             .real-select {
@@ -79,25 +79,6 @@ $className: 'tw_vacation_search_mb';
         }
         .int_rcln_input {
             padding-bottom: 8px;
-            
-        }
-        .int_rctg {
-            flex: 1;
-            border: 0;
-            position: relative;
-            .icon {
-                z-index: 1;
-            }
-            .int-col {
-                width: 100%;
-                position: absolute;
-                height: 50px;
-                padding-left: 30px;
-                .int-label {
-                    position: absolute;
-                    z-index: 1;
-                }
-            }
         }
 
         .int_rcln_label {
@@ -120,7 +101,7 @@ $className: 'tw_vacation_search_mb';
         }
     }
     .mb_DepDateRange {
-        background-color:#fff;
+        background-color: #fff;
         @include center;
         border: 1px solid #ddd;
         font-size: 16px;
@@ -137,7 +118,7 @@ $className: 'tw_vacation_search_mb';
                 padding-left: 30px;
                 color: #0077b3;
                 font-weight: bold;
-                line-height:1.5;
+                line-height: 1.5;
             }
             .int_rcln_input:nth-child(1) {
                 padding-left: 6px;
@@ -156,6 +137,7 @@ $className: 'tw_vacation_search_mb';
             -moz-appearance: none; /* Firefox */
             -webkit-appearance: none; /* Safari and Chrome */
             appearance: none;
+            font-size: initial;
         }
         .dropdown-place-holder {
             .dropdown-label {
@@ -168,7 +150,7 @@ $className: 'tw_vacation_search_mb';
         }
     }
     .mb_noHotel {
-        >.indicator {
+        > .indicator {
             border: 1px solid #bbb;
         }
     }
@@ -179,7 +161,7 @@ $className: 'tw_vacation_search_mb';
         justify-content: space-between;
         .mb_noHotel {
             margin: 0;
-            >.indicator {
+            > .indicator {
                 border: 1px solid #bbb;
             }
         }
@@ -203,7 +185,7 @@ $className: 'tw_vacation_search_mb';
                 padding-left: 5px;
                 @include placeholder;
                 &:not(input):empty::before {
-                    color:#aaa;
+                    color: #aaa;
                 }
             }
         }
@@ -211,156 +193,335 @@ $className: 'tw_vacation_search_mb';
             @include label;
         }
     }
-}
-
+    
+}   
 .mb_DepAndDtn {
-    &.nvbRslb_destination {
-        height: auto;
-        .header-wrap {
-            padding: 10px 15px;
-            display: flex;
-            
-        }
-        .bt_rcnb {
-            max-width: 50px;
-        }
-        .SingleInputMenu {
-            padding-top: 0 !important;
-            flex: 1;
-            .int_rcln_input {
-                height: 40px;
-                padding: 6px;
-                border: 2px solid #ff8b88;
+        &.nvbRslb_destination {
+            height: auto;
+            .header-wrap {
+                padding: 10px 15px;
+                display: flex;
             }
-            .dtm_rcfr-wrap {
-                width: 100%;
-                margin-top: 10px;
-                top: unset;
+
+            .SingleInputMenu {
+                padding-top: 0 !important;
+                flex: 1;
+                .int_rcln_input {
+                    height: 40px;
+                    padding: 6px;
+                    border: 2px solid #ff8b88;
+                }
             }
-            .int_rctg {
-                border: none;
-                height: 40px;
-                .int-col {
-                    padding: 0;
+            .nvbRslb_title {
+                margin-top: 7px;
+                margin-bottom: 10px;
+            }
+        }
+    }
+
+    .vacation_personal_mobile.nvb_content {
+        %act_new_item {
+            font-size: 14px;
+            line-height: 45px;
+            border-bottom: 1px solid #e3e3e3;
+            padding: 0 10px;
+        }
+
+        %act_rajx_inside {
+            position: static;
+            border: none;
+            font-size: 14px;
+            background: transparent;
+            box-shadow: none;
+            // line-height: 14px;
+        }
+
+        .act_wrap_container {
+            width: 70%;
+
+            .m-place,
+            .noMatchText,
+            .searching {
+                padding: 7px 20px 0 10px;
+                color: #24a07d;
+            }
+        }
+
+        // M版分頁
+        .page_content {
+            touch-action: manipulation;
+            .searching{
+                @extend %act_rajx_inside;
+                color: #24a07d;
+                padding: 5px 20px 0 18px;
+            }
+            .act_rajx {
+                @extend %act_rajx_inside;
+
+                .m-place,
+                .noMatchText{
+                    color: #24a07d;
+                }
+                .item {
+                    @extend %act_new_item;
+                }
+            }
+
+            select,
+            input {
+                font-size: 16px;
+            }
+
+            .dropdown-place-holder.selected {
+                .dropdown-label {
+                    line-height: 38px;
                 }
             }
         }
-        .nvbRslb_title {
-            margin-top: 7px;
+    }
+    .confirmBtn_span_d-no {
+        .dropdown-label {
+            margin-top: 12px;
+        }
+        .room_list_row {
             margin-bottom: 10px;
         }
-    }
-}
-
-.vacation_personal_mobile.nvb_content {
-    %act_new_item {
-        font-size: 14px;
-        line-height: 45px;
-        border-bottom: 1px solid #e3e3e3;
-        padding: 0 10px;
+        .room_list_section .row_title {
+            margin-right: 10px;
+        }
     }
 
-    %act_rajx_inside {
-        position: static;
-        border: none;
-        font-size: 14px;
-        background: transparent;
-        box-shadow: none;
-    }
+    .roompeople_content {
+        input,
+        textarea,
+        select {
+            font-size: initial;
+        }
+        .dropdown-place-holder {
+            display: flex;
+            align-items: center;
+            .dropdown-label {
+                line-height: 1 !important;
+                margin-top: 0;
+            }
+        }
+        .children_ages_section {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .row_title {
+            margin-right: 10px;
+            min-width: 5em;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .age_select_section {
+            display: flex;
+            flex: 1;
+            height: 30px;
+            align-items: stretch;
+        }
+        .children_age_select,
+        .room_count_select {
+            position: relative;
+            flex: 1;
+            margin-left: 5px;
 
-    .act_wrap_container {
-        width: 70%;
-
-        .m-place,
-        .noMatchText,
-        .searching {
-            padding: 7px 20px 0 10px;
+            > select {
+                background-color: #fff;
+                width: 100%;
+                height: 100%;
+                padding: 0 5px;
+                border-radius: 0;
+                border: 1px solid #ccc;
+            }
+        }
+        .txt_green {
             color: #24a07d;
         }
     }
 
-    // M版分頁
-    .page_content {
-        touch-action: manipulation;
+    .real-select {
+        font-size: initial;
+    }
 
+.mb_DepAndDtn_nv{
+    ////////
+    .nvbRslb_destination {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 125px;
+        padding: 0 15px;
+        background-color: #fff;
+        z-index: 999;
+        .dtm_rcfr-label {
+            color: #24a07d;
+            margin-top: 5px !important;
+            margin: 0 0 12px;
+            font-size: 14px;
+        }
+        .int_rctg {
+            flex: 1;
+            border: none;
+            height: 40px;
+            border: none !important;
+            position: relative;
+            .icon {
+                z-index: 1;
+            }
+            .int-col {
+                width: 100%;
+                padding: 0;
+                position: absolute;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                .int_rcln {
+                    height: 40px;
+                    position: relative;
+                    border: solid 2px #ff8b88;
+                    > .int_rcln_input {
+                        border: none;
+                    }
+                    .clearBtnWrap {
+                        position: absolute;
+                        top: 15px;
+                        right: 10px;
+                        height: 10px;
+                    }
+                }
+                > div {
+                    width: 100%;
+                    .dtm_rcfr-row {
+                        margin-right: 10px;
+                        .int_rcln_input {
+                            font-weight: bold;
+                        }
+                        .int-label {
+                            position: absolute;
+                            z-index: 1;
+                        }
+                    }
+                }
+                .bt_rcnb.md {
+                    max-width: 50px;
+                    min-width: 40px;
+                    margin: 0 !important;
+                }
+            }
+        }
+    }
+    .act_wrap_container {
+        position: absolute;
+        background-color: #fff;
+        // border: 1px solid #ddd;
+        z-index: 10;
+        width: 100vw;
+        height: 100vh;
+        margin-left: -10px;
+        padding-left: 10px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        // &::-webkit-scrollbar {
+        //     width: 6px;
+        // }
+        // &::-webkit-scrollbar-thumb {
+        //     background: #d8d8d8;
+        //     &:hover{
+        //         background-color: #000;
+        //         opacity: .8;
+        //     }
+        // }
+        // &::-webkit-scrollbar-track {
+        //     background: #fff;
+        // }
         .act_rajx {
-            @extend %act_rajx_inside;
+            // outline: 1px solid red;
+            width: 100vw;
+            height: 100vh;
+            position: static;
+            border: none;
+            font-size: 14px;
+            background: transparent;
+            box-shadow: none;
+            overflow: visible;
+            box-sizing: border-box;
+            padding: 0;
+            .m-place {
+                .close {
+                    display: none;
+                }
+            }
+            .noMatchText {
+                .close {
+                    display: none;
+                }
+            }
+            .section {
+                background-color: white;
 
-            .item {
-                @extend %act_new_item;
+                .title {
+                    color: #222;
+                    font-size: 16px;
+                    font-weight: bold;
+                    padding: 30px 0 0 0;
+                }
+                .item {
+                    display: block;
+                    color: #444;
+                    line-height: 1.25;
+                    user-select: none;
+                    cursor: pointer;
+                    font-size: 14px;
+                    // border-bottom: 1px solid #e3e3e3;
+                    padding: 13px 0px;
+                    &:hover {
+                        color: #fff;
+                    }
+                }
             }
         }
-
-        select,
-        input {
-            font-size: 16px;
-        }
-
-        .dropdown-place-holder.selected {
-            .dropdown-label {
-                line-height: 38px;
-            }
-        }
     }
-}
-.confirmBtn_span_d-no{
-    .dropdown-label {
-        margin-top: 12px;
-    }
-    .room_list_row {
-        margin-bottom: 10px;
-    }
-    .room_list_section .row_title {
-        margin-right: 10px;
-    }
-}
-
-.roompeople_content {
-    .dropdown-place-holder {
-        display: flex;
-        align-items: center;
-        .dropdown-label {
-            line-height: 1 !important;
-            margin-top: 0;
-        }
-    }
-    .children_ages_section {
-        display: flex;
-        align-items: center;
-        margin-top: 10px;
-    }
-    .row_title{
-        margin-right: 10px;
-        min-width: 5em;
-        display: inline-block;
-        vertical-align: middle;
-    }
-    .age_select_section{
-        display: flex;
-        flex: 1;
-        height: 30px;
-        align-items: stretch;
-        
-    }
-    .children_age_select,
-    .room_count_select {
-        position: relative;
-        flex: 1;
-        margin-left: 5px;
-        
-        >select{
-            background-color: #fff;
+    .page_content {
+        overflow-y: scroll;
+        padding-top: 120px;
+        .dtm_rcfr-wrap {
+            // padding-top: 5px !important;
             width: 100%;
-            height: 100%;
-            padding: 0 5px;
-            border-radius: 0;
-            border: 1px solid #ccc;
-
+            border: unset;
+            top: unset;
+            padding: 0 10px;
+            .dtm_rcfr {
+                border-top: 3px solid #e3e3e3;
+                margin: 0 -20px;
+                .ntb_rcln {
+                    margin: 0 20px;
+                    .tabs {
+                        display: none;
+                    }
+                    .ctns {
+                        .panel.active {
+                            padding: 0px 3px;
+                            .sec {
+                                .sec_title {
+                                    .sec_all {
+                                        font-weight: bold;
+                                        font-size: 16px;
+                                        color: #000;
+                                        text-decoration: none;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .dtm_rcfr-close_btn {
+                display: none;
+            }
         }
-        
     }
-    .txt_green {
-        color: #24a07d;
-    }
-    
 }

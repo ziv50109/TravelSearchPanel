@@ -14,6 +14,10 @@ $dropdown-content-text-color: #222222;
 $selected: #0077b3;
 
 .#{$className} {
+    margin-top: 5px;
+    &.mobile {
+        margin-top: 10px;
+    }
     &::placeholder {
         color: $selected;
     }
@@ -109,7 +113,7 @@ $selected: #0077b3;
     .int_rcln_input {
         border:solid 1px #bbb;
         color: $selected;
-        
+
         font-weight: normal;
     }
     .dpt {
@@ -120,7 +124,7 @@ $selected: #0077b3;
     }
     .bor-right {
         .int_rcln_input {
-           
+
             border-right: 1px solid #e3e3e3;
         }
     }
@@ -187,7 +191,7 @@ $selected: #0077b3;
             font-weight: bold;
         }
         .int_rcln_input {
-           
+
             font-weight: normal;
             position: relative;
             background-color: transparent;

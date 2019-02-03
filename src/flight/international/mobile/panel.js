@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './mobile.scss';
 import Header from './components/header';
 import International from './container/International';
-import today from 'dayjs';
+import dayjs from 'dayjs';
 import { useLocalStorage } from '../../../../utils';
 
 // 主畫面
@@ -13,7 +13,7 @@ class Panel extends Component {
             rtow: 0, // 頁數
             departure: [], // 出發地
             destination: [], // 目的地
-            depdate1: today().format('YYYY-MM-DD'), // 去程日期
+            depdate1: dayjs().format('YYYY-MM-DD'), // 去程日期
             depdate2: '', // 回程日期
             clstype: 1, // 艙等
             notrans: 'F', // 是否直飛(不轉機)
@@ -27,7 +27,7 @@ class Panel extends Component {
             multiItems: [
                 {
                     id: 1,
-                    startDate: today().format('YYYY-MM-DD'),
+                    startDate: dayjs().format('YYYY-MM-DD'),
                     selectedStartDate: '',
                     showCalendar: false,
                     nvbOpen1: false,
@@ -48,11 +48,23 @@ class Panel extends Component {
                 panel: 'internationalFlight',
                 methods: 'get'
             },
-            ({ clstype, adt, chd, inf }) => {
-                this.setState({ clstype, adt, chd, inf });
+            (data) => {
+                this.validataLocalstorageData(data);
             }
         );
     }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'internationalFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        this.setState({ ...data });
+    };
     // 切換 單程、來回、多個目的地
     tripChange = (target) => {
         this.setState({ rtow: target });
@@ -138,7 +150,7 @@ class Panel extends Component {
         let clone = JSON.parse(JSON.stringify(this.state.multiItems));
         // clone[0].dptSelectedData = [];
         // clone[0].dtnSelectedData = [];
-        console.log('clone', clone);
+        console.log('clone', this.state.multiItems, 'qq', clone);
         const PostTime = new Date().setHours(0, 0, 0, 0);
         useLocalStorage({
             panel: 'internationalFlight',
@@ -159,6 +171,7 @@ class Panel extends Component {
                 adt,
                 chd,
                 inf,
+                haveseat,
                 PostTime
             }
         });
@@ -419,7 +432,7 @@ class Panel extends Component {
 
     sourceCheck = (sourcesystem, depdate1, depdate2, rtow) => {
         // let { depdate1, depdate2, sourcesystem } = this.state;
-        let timeLimit = today().add(8, 'days').format('YYYY/MM/DD');
+        let timeLimit = dayjs().add(8, 'days').format('YYYY/MM/DD');
         let depDate = Date.parse(depdate1.replace(/-/g, '/')).valueOf();
         let arrDate = Date.parse(depdate2.replace(/-/g, '/')).valueOf();
         let limitDate = Date.parse(timeLimit).valueOf();
@@ -447,6 +460,7 @@ class Panel extends Component {
         return true;
     }
     render () {
+        const { haveseat } = this.state;
         return (
             <div className="flight_international_mobile">
                 <Header
@@ -463,6 +477,7 @@ class Panel extends Component {
                     // setInf={this.setVal}            // 嬰兒
                     setNoTrans={this.setVal}        // 是否直飛
                     setHaveSeat={this.setVal}       // 只有找機位
+                    haveseat={haveseat}
                     setNonprefertrans={this.setVal} // 排除轉機國家
                     setSourceSystem={this.setVal}
                     setNonprefertransnight={this.setVal}

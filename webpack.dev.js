@@ -55,7 +55,9 @@ module.exports = {
         contentBase: path.join(__dirname, './'),
         compress: true,
         port: 9000,
-        host: ip.address()
+        host: '0.0.0.0',
+        useLocalIp: true,
+        disableHostCheck: true
     },
     plugins: [
         new webpack.EnvironmentPlugin(['ENV']),

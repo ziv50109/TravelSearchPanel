@@ -45,7 +45,7 @@ class MobileCalendar extends Component {
             methods: 'get',
         }, (data) => {
             let newDate;
-            if (!data.sFdate) {
+            if (!data.sFdate || today(data.sFdate).isBefore(today().add(3, 'days'))) {
                 newDate = today().add(3, 'days').format('YYYY-MM-DD');
             } else {
                 newDate = data.sFdate;
@@ -145,7 +145,28 @@ class Panel extends Component {
 
     componentDidMount () {
         this.getOptionData(); // 去 AJAX 資料下來
+
+        useLocalStorage({
+            panel: 'chineseFlight',
+            methods: 'get',
+        }, (data) => {
+            this.validataLocalstorageData(data);
+        });
     }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'chineseFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        this.setState({
+            ...data,
+        });
+    };
 
     // get 選單裡面的資料
     getOptionData = () => {
@@ -249,12 +270,18 @@ class Panel extends Component {
             sTairp,
             sFairp
         } = this.state;
+        const PostTime = new Date().setHours(0, 0, 0, 0);
         this.validate((isVaild, warnText) => {
             useLocalStorage({
                 panel: 'chineseFlight',
                 methods: 'post',
                 data: {
-                    sFdate
+                    sFcity,
+                    sTcity,
+                    sFdate,
+                    sClass,
+                    sAdt,
+                    PostTime
                 }
             });
             // 如果都沒有未填的選項，就 true 然後 window open
@@ -283,8 +310,7 @@ class Panel extends Component {
     };
 
     render () {
-        const { isLoaded, options } = this.state;
-
+        const { isLoaded, options, sFcity, sTcity } = this.state;
         return (
             <React.Fragment>
                 <Tab label="大陸國內機票">
@@ -304,7 +330,7 @@ class Panel extends Component {
                                     onChangeCallBack={e => {
                                         this.dptChange(e);
                                     }}
-                                    defaultValue={'_PEK_PEK'}
+                                    defaultValue={`_${sFcity}_${sFcity}` || '_PEK_PEK'}
                                 />
 
                                 {/* 目的機場 */}
@@ -320,7 +346,7 @@ class Panel extends Component {
                                     onChangeCallBack={e => {
                                         this.dtnChange(e);
                                     }}
-                                    defaultValue={'_SHA_SHA'}
+                                    defaultValue={`_${sTcity}_${sTcity}` || '_SHA_SHA'}
                                 />
 
                                 {/* 出發日期 */}

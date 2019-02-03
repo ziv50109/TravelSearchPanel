@@ -3,25 +3,12 @@ import dayjs from 'dayjs';
 import CyRcln from '../../magaele/cy_rcln';
 import IntRcln from '../../magaele/int_rcln';
 import IcRcln from '../../magaele/ic_rcln';
-import { getYearAndMonth, ClickOutSide } from '../../utils';
+import { ClickOutSide, isLeapYear } from '../../utils';
 import './ComposeCalendar.scss';
 import './input_group.scss';
 
 const DateValueErrorMessage = '請輸入正確的日期格式(YYYYMMDD) EX: 2018/01/01';
-const isValidDay = (dateString) => {
-    const regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
-    if (!regex.test(dateString)) return false;
 
-    const result = dateString.match(regex);
-    const year = parseInt(result[1], 10);
-    const month = parseInt(result[2], 10);
-    const day = parseInt(result[3], 10);
-
-    const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) monthLength[1] = 29;
-
-    return day <= monthLength[month - 1];
-};
 class ComposeCalendar extends PureComponent {
     static defaultProps = {
         onChange: () => {},
@@ -86,6 +73,25 @@ class ComposeCalendar extends PureComponent {
         }));
     }
 
+    customIsAfterOtherEnd = () => {
+        const { panelName } = this.props;
+        const { selectedStartDate } = this.state;
+        switch (panelName) {
+            case 'hotel':
+                alert('單次訂購一次最多14晚');
+                this.clickDate(dayjs(selectedStartDate).add(14, 'day').format('YYYY-MM-DD'));
+                return;
+            case 'vacationPersonal':
+                alert('無效的日期');
+                this.clickDate(dayjs(selectedStartDate).add(30, 'day').format('YYYY-MM-DD'));
+                return;
+            case '':
+            default:
+                alert('無效的日期');
+                this.clickDate('');
+                return;
+        }
+    }
     checkDate = (inputType) => {
         const isStart = inputType === 'start';
         const {
@@ -94,7 +100,7 @@ class ComposeCalendar extends PureComponent {
             startInputValue,
             endInputValue,
         } = this.state;
-        const { setOtherEnd } = this.props;
+        const { setOtherEnd, setStartDate } = this.props;
         const inputValue = isStart ? startInputValue : endInputValue;
         const noChange = isStart ? inputValue === selectedStartDate : inputValue === selectedEndDate;
         let regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
@@ -112,7 +118,11 @@ class ComposeCalendar extends PureComponent {
 
         const result = inputValue.match(regex);
         const isValidDate = (d) => d instanceof Date && !isNaN(d);
-        const setStartDate = () => this.clickDate(dayjs().add(this.props.setStartDate || 0, 'day').format('YYYY-MM-DD'));
+        const setNewStartDate = () => {
+            const newStartDate = selectedStartDate ? dayjs(selectedStartDate).add(1, 'day') : dayjs().add(setStartDate || 0, 'day');
+            const endDate = (!isStart && !selectedStartDate) ? 1 : 0;
+            this.clickDate(newStartDate.add(endDate, 'day').format('YYYY-MM-DD'));
+        };
         const isAfterOtherEnd = (d) => {
             if (isStart) return false;
             const startDate = dayjs(selectedStartDate).add(setOtherEnd, 'day');
@@ -122,7 +132,7 @@ class ComposeCalendar extends PureComponent {
         // 輸入的字元不合規則
         if (result === null) {
             alert(DateValueErrorMessage);
-            setStartDate();
+            setNewStartDate();
             return;
         }
 
@@ -135,22 +145,21 @@ class ComposeCalendar extends PureComponent {
         const calcStartDate = this.calcStartDate();
 
         // 日期格式正確但是不存在的日期
-        if (!isValidDate(new Date(d)) || !isValidDay(d)) {
+        if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
             alert('無效的日期');
-            setStartDate();
+            setNewStartDate();
             return;
         }
 
         if (date.isBefore(calcStartDate)) {
             alert('日期必須大於今日');
-            setStartDate();
+            setNewStartDate();
             return;
         }
 
         // 日期超過 checkIn N天範圍
         if (isAfterOtherEnd(d)) {
-            alert('無效的日期');
-            this.clickDate('');
+            this.customIsAfterOtherEnd();
             return;
         }
 
@@ -173,7 +182,12 @@ class ComposeCalendar extends PureComponent {
 
     inputKeyDown = (e, inputType) => {
         if (e.keyCode === 13) {
-            this.checkDate(inputType);
+            // this.checkDate(inputType);
+            this.cIntRcln.inputDOM.blur();
+            this.cIntRcln2.inputDOM.blur();
+            this.setState({
+                activeInput: null
+            });
         }
     }
 

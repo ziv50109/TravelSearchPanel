@@ -271,7 +271,13 @@ class Panel extends Component {
         useLocalStorage({
             panel: 'taiwanFlight',
             methods: 'get',
-        }, ({
+        }, (data) => {
+            this.validataLocalstorageData(data);
+        });
+    }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        const {
             M_trip,
             M_depDate,
             M_dtnDate,
@@ -279,22 +285,29 @@ class Panel extends Component {
             M_dtnPlace,
             M_adult,
             M_child
-        }) => {
-            // 驗證 LocalStorage 是否 undefined
-            const trip = !M_trip ? 1 : M_trip;
-            const depDate = !M_depDate ? dayjs().format('YYYY-MM-DD') : M_depDate;
-            const dtnDate = !M_dtnDate ? '' : M_dtnDate;
-            const depPlace = !M_depPlace ? 'TSA' : M_depPlace;
-            const dtnPlace = !M_dtnPlace ? 'KNH' : M_dtnPlace;
-            const adult = !M_adult ? '1' : M_adult;
-            const child = !M_child ? '0' : M_child;
+        } = data;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'taiwanFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        // 驗證 LocalStorage 是否 undefined
+        const trip = !M_trip ? 1 : M_trip;
+        const depDate = (!M_depDate || dayjs(M_depDate).isBefore(dayjs())) ? dayjs().format('YYYY-MM-DD') : M_depDate; // !M_dep 判斷是否有值
+        const dtnDate = (!M_dtnDate || dayjs(M_dtnDate).isBefore(dayjs())) ? '' : M_dtnDate;
+        const depPlace = !M_depPlace ? 'TSA' : M_depPlace;
+        const dtnPlace = !M_dtnPlace ? 'KNH' : M_dtnPlace;
+        const adult = !M_adult ? '1' : M_adult;
+        const child = !M_child ? '0' : M_child;
 
-            // 設定 State Default
-            this.setState({
-                DEPARTURE_DATE: depDate, RETURN_DATE: dtnDate
-            }, this.setDefaultVal(depPlace, dtnPlace, adult, child, trip));
-        });
-    }
+        // 設定 State Default
+        this.setState({
+            DEPARTURE_DATE: depDate, RETURN_DATE: dtnDate
+        }, this.setDefaultVal(depPlace, dtnPlace, adult, child, trip));
+    };
 
     // 設定預設值
     setDefaultVal (depPlace, dtnPlace, adult, child, trip) {
@@ -423,6 +436,7 @@ class Panel extends Component {
             PASSENGER_ADULTNUM,
             PASSENGER_CHILDNUM
         } = this.state;
+        const PostTime = new Date().setHours(0, 0, 0, 0);
 
         this.validDate((isValid, warnText) => {
             const M_trip = TRIP;
@@ -442,7 +456,8 @@ class Panel extends Component {
                     M_depDate,
                     M_dtnDate,
                     M_adult,
-                    M_child
+                    M_child,
+                    PostTime
                 }
             });
             if (isValid) {

@@ -7,7 +7,7 @@ import IntRcln from '../../../../magaele/int_rcln';
 import IntGpct from '../../../../magaele/int_gpct';
 import CyRcln from '../../../../magaele/cy_rcln';
 import BtRcnb from '../../../../magaele/bt_rcnb';
-import { ClickOutSide, useLocalStorage } from '../../../../utils';
+import { ClickOutSide, useLocalStorage, isLeapYear } from '../../../../utils';
 import StRnls from '../../../../magaele/st_rnls';
 import PpRcln from '../../../../magaele/pp_rcln';
 import utils from '../../../../utils/';
@@ -63,7 +63,7 @@ class PcCalendar extends Component {
             methods: 'get',
         }, (data) => {
             let newDate;
-            if (!data.sFdate) {
+            if (!data.sFdate || dayjs(data.sFdate).isBefore(dayjs().add(3, 'days'))) {
                 newDate = dayjs().add(3, 'days').format('YYYY-MM-DD');
             } else {
                 newDate = data.sFdate;
@@ -95,6 +95,11 @@ class PcCalendar extends Component {
             startInputValue: value
         }));
     };
+    inputKeyDown = (e) => {
+        if (e.keyCode === 13) {
+            this.checkDate();
+        }
+    }
 
     onClickOutside = () => {
         this.checkDate('start');
@@ -106,7 +111,7 @@ class PcCalendar extends Component {
 
     // 日期驗證
     checkDate (inputType) {
-        const DateValueErrorMessage = '請輸入正確的日期格式(YYYYMMDD) EX: 20180101';
+        const DateValueErrorMessage = '請輸入正確的日期格式(YYYYMMDD) EX: 2018/01/01';
         const todayAfterThree = dayjs().add(3, 'days').format('YYYY-MM-DD'); // 今天日期三天後
         const {
             startInputValue,
@@ -136,7 +141,7 @@ class PcCalendar extends Component {
         const calcStartDate = this.calcStartDate();
 
         // 日期格式正確但是不存在的日期
-        if (!isValidDate(new Date(d))) {
+        if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
             this.setState({ startInputValue: todayAfterThree, selectedStartDate: todayAfterThree });
             return alert('無效的日期');
         }
@@ -190,6 +195,7 @@ class PcCalendar extends Component {
                         }));
                     }}
                     onChange={this.inputChange}
+                    onKeyDown={(e) => this.inputKeyDown(e)}
                     onClearValue={this.clearValue}
                     value={startInputValue.replace(/\-/g, '/')}
                 />
@@ -246,7 +252,29 @@ class ChinaBody extends Component {
 
     componentDidMount () {
         this.getOptionData(); // 去 AJAX 資料下來
+
+        useLocalStorage({
+            panel: 'chineseFlight',
+            methods: 'get'
+        }, (data) => {
+            this.validataLocalstorageData(data);
+        });
     }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'chineseFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        this.setState({
+            ...data,
+            cabinText: this.ClsTypeLevel[data.sClass].text
+        });
+    };
 
     // get 選單裡面的資料
     getOptionData = () => {
@@ -353,6 +381,7 @@ class ChinaBody extends Component {
             sTairp,
             sFairp
         } = this.state;
+        const PostTime = new Date().setHours(0, 0, 0, 0);
         this.validate((isVaild, warnText) => {
             // 如果都沒有未填的選項，就 true 然後 window open
             if (isVaild) {
@@ -360,7 +389,12 @@ class ChinaBody extends Component {
                     panel: 'chineseFlight',
                     methods: 'post',
                     data: {
-                        sFdate
+                        sFcity,
+                        sTcity,
+                        sFdate,
+                        sClass,
+                        sAdt,
+                        PostTime
                     }
                 });
                 let searchVal = `sFcity=${sFcity}&sTcity=${sTcity}&sFdate=${sFdate.replace(/\-/g, '')}&sAdt=${sAdt}&sClass=${sClass}&sTktkind=${sTktkind}&sChd=${sChd}&sTairp=${sTairp}&sFairp=${sFairp}`;
@@ -387,8 +421,7 @@ class ChinaBody extends Component {
     };
 
     render () {
-        const { isLoaded, options } = this.state;
-
+        const { isLoaded, options, sFcity, sTcity } = this.state;
         return (
             <React.Fragment>
                 <div className="flight_chinese">
@@ -407,7 +440,7 @@ class ChinaBody extends Component {
                                 onChangeCallBack={e => {
                                     this.dptChange(e);
                                 }}
-                                defaultValue={'_PEK_PEK'}
+                                defaultValue={`_${sFcity}_${sFcity}` || '_PEK_PEK'}
                             />
 
                             {/* 目的機場 */}
@@ -423,7 +456,7 @@ class ChinaBody extends Component {
                                 onChangeCallBack={e => {
                                     this.dtnChange(e);
                                 }}
-                                defaultValue={'_SHA_SHA'}
+                                defaultValue={`_${sTcity}_${sTcity}` || '_SHA_SHA'}
                             />
 
                             {/* 出發日期 */}

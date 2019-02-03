@@ -13,7 +13,7 @@ class KeyWordInput extends PureComponent {
     constructor (props) {
         super(props);
         this.state = {
-            inputText: '',
+            inputText: props.Keywords,
             actRules: [{
                 title: 'only',
             }],
@@ -29,9 +29,15 @@ class KeyWordInput extends PureComponent {
         this.taskQueue = null;
     }
 
-    // componentDidUpdate () {
-    //     this.props.onChange(this.state);
-    // }
+    componentDidMount () {
+        const obj = {
+            target: {
+                value: this.props.Keywords
+            }
+        };
+        this.onInputChange(obj);
+        this.setState({ showAct: false });
+    }
 
     callKeyWordAPI () {
         const {
@@ -45,12 +51,12 @@ class KeyWordInput extends PureComponent {
         if (inputText.length < 2) return;
 
         const splitDest = Destination.split('_');
-        const DestinationSearch = splitDest.length > 1 ? [splitDest[0], splitDest[1]].join('_') : '';
+        // const DestinationSearch = splitDest.length > 1 ? [splitDest[0], splitDest[1]].join('_') : '';
 
         // call API
         fetch(vacationPersonal.keyword, {
             method: 'POST',
-            body: `Destination=${DestinationSearch}&sKeyWord=${inputText}`,
+            body: `Destination=${Destination}&sKeyWord=${inputText}`,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             },
@@ -82,7 +88,7 @@ class KeyWordInput extends PureComponent {
                 fthotel: '',
             },
             fetchData: [],
-        }));
+        }), this.setPanelState('', ''));
     }
 
     onClickInput = () => {
@@ -108,7 +114,17 @@ class KeyWordInput extends PureComponent {
         }), throttled);
     }
 
+    setPanelState = (txt, fthotel) => {
+        console.log(fthotel);
+        if (fthotel === '') {
+            this.props.setPanelState && this.props.setPanelState({ Keywords: '', fthotel });
+        } else {
+            this.props.setPanelState && this.props.setPanelState({ Keywords: txt, fthotel });
+        }
+    }
+
     onClickAct = (data) => {
+        console.log(data);
         const {
             txt: inputText,
         } = data;
@@ -117,7 +133,7 @@ class KeyWordInput extends PureComponent {
             inputText,
             selectedData: data,
             showAct: false,
-        }));
+        }), this.setPanelState(data.txt, data.fthotel));
     }
 
     closMenu = () => {
@@ -143,7 +159,7 @@ class KeyWordInput extends PureComponent {
             <ClickOutSide className="labelSingle pc_Keyword" onClickOutside={this.closMenu}>
                 <div className="input_compose">
                     <IntRcln
-                        placeholder="請輸入飯店名稱"
+                        placeholder="請輸入產品名稱、飯店名稱或關鍵字"
                         label="關鍵字"
                         breakline
                         className="m-b-sm"
@@ -154,26 +170,30 @@ class KeyWordInput extends PureComponent {
                     />
                     <div className={act_wrap_classes}>
                         {
-                            (!fetchData.length && !isSearch) && < CloseButton onClick={this.closMenu} />
+                            (!fetchData.length && !isSearch) && <CloseButton onClick={this.closMenu} />
                         }
+
                         {
                             isSearch ?
                                 (
                                     <p className="searching">資料搜尋中...</p>
                                 ) :
-                                (
-                                    <ActRajx
-                                        titleClass="d-no"
-                                        data={fetchData}
-                                        matchWord={inputText}
-                                        getItemClickValue={this.onClickAct}
-                                        noMatchText="很抱歉，找不到符合的項目"
-                                        minimumStringQuery="請至少輸入兩個字"
-                                        minimumStringQueryLength={2}
-                                        footer={false}
-                                        rules={actRules}
-                                    />
-                                )
+                                this.props.Destination === '' ?
+                                    (<p className="searching">請先輸入上方目的地條件</p>)
+                                    :
+                                    (
+                                        <ActRajx
+                                            titleClass="d-no"
+                                            data={fetchData}
+                                            matchWord={inputText}
+                                            getItemClickValue={this.onClickAct}
+                                            noMatchText="很抱歉，找不到符合的項目"
+                                            minimumStringQuery="請至少輸入兩個字"
+                                            minimumStringQueryLength={2}
+                                            footer={false}
+                                            rules={actRules}
+                                        />
+                                    )
                         }
                     </div>
                 </div>

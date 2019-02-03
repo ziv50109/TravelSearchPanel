@@ -54,8 +54,8 @@ class Panel extends Component {
         this.month = this.date.getMonth() + 1;
         this.day = this.date.getDate();
         this.today = `${this.year}-${this.month}-${this.day}`;
-        this.defaultStartDate = `${addDate(this.today, 15)[1]}-${addDate(this.today, 15)[2]}-${addDate(this.today, 15)[3]}`;
-        this.defaultEndtDate = `${addDate(this.today, 30)[1]}-${addDate(this.today, 30)[2]}-${addDate(this.today, 30)[3]}`;
+        this.defaultStartDate = dayjs().add(15, 'day').format('YYYY-MM-DD');
+        this.defaultEndtDate = dayjs().add(30, 'day').format('YYYY-MM-DD');
 
         this.state = {
             DepartureID: '',
@@ -388,7 +388,7 @@ class Panel extends Component {
                                 endLabelTitle="最晚出發日"
                                 activeInput={activeInput}
                                 endMonth={dayjs().add(3, 'years').format('YYYY-MM')}
-                                endDate={dayjs().add(3, 'years').format('YYYY-MM-DD')}
+                                // endDate={dayjs().add(3, 'years').format('YYYY-MM-DD')}
                                 ref={e => { this.calendar = e }}
                                 onClickConfirm={() => {
                                     const {

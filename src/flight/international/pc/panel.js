@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import './pc.scss';
 import Header from './components/header';
 import International from './container/International';
-import today from 'dayjs';
-import { useLocalStorage } from '../../../../utils';
+import dayjs from 'dayjs';
+import { useLocalStorage, isLeapYear } from '../../../../utils';
 
 class Panel extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            depdate1: today().format('YYYY-MM-DD'), // 去程日期
+            depdate1: dayjs().format('YYYY-MM-DD'), // 去程日期
             depdate2: '', // 回程日期
             clstype: 1, // 艙等
             notrans: 'F', // 是否直飛(不轉機)
@@ -23,9 +23,9 @@ class Panel extends Component {
             multiItems: [{ // 多目的地去程日期
                 id: 1,
                 onFocus: false,
-                activeStart: today().format('YYYY-MM'),
+                activeStart: dayjs().format('YYYY-MM'),
                 selectedStartDate: '',
-                startDate: today().format('YYYY-MM-DD'),
+                startDate: dayjs().format('YYYY-MM-DD'),
                 startInputValue: '',
 
                 dptSelectedData: [],
@@ -52,41 +52,70 @@ class Panel extends Component {
     }
 
     componentDidMount () {
-        let clone = JSON.parse(JSON.stringify(this.state.multiItems));
         useLocalStorage(
             {
                 panel: 'internationalFlight',
                 methods: 'get'
             },
-            ({ depdate1, depdate2, dptSelectedData, dtnSelectedData, multiItems, multiItemsDpt, multiItemsDtn, adt, chd, inf, clstype }) => {
-                let nowday = today().format('YYYY-MM-DD');
-                let depDate = depdate1 && depdate1 >= nowday ? depdate1 : nowday;
-                let dtnDate = depdate2 ? (depdate2 >= nowday ? depdate2 : nowday) : '';
-                let multDate = multiItems ? (multiItems >= nowday ? multiItems : nowday) : '';
-                let dptPlace = dptSelectedData ? dptSelectedData : [];
-                let dtnPlace = dtnSelectedData ? dtnSelectedData : [];
-                let multDpt = multiItemsDpt ? multiItemsDpt : '';
-                let multDtn = multiItemsDtn ? multiItemsDtn : '';
-                clone[0].selectedStartDate = multDate;
-                clone[0].startInputValue = multDate;
-                clone[0].dptSelectedData = multDpt;
-                clone[0].dtnSelectedData = multDtn;
-                this.setState(
-                    {
-                        depdate1: depDate,
-                        depdate2: dtnDate,
-                        dptSelectedData: dptPlace,
-                        dtnSelectedData: dtnPlace,
-                        multiItems: clone,
-                        adt,
-                        chd,
-                        inf,
-                        clstype
-                    }
-                );
+            (data) => {
+                this.validataLocalstorageData(data);
             }
         );
     }
+    validataLocalstorageData = (data) => {
+        const localStorageRecordTime = data.PostTime + 604800000;
+        if (localStorageRecordTime < new Date().getTime()) {
+            console.log('超過7天予以刪除LocalStorage紀錄。');
+            useLocalStorage({
+                panel: 'internationalFlight',
+                methods: 'delete',
+            });
+            return;
+        }
+        const clone = JSON.parse(JSON.stringify(this.state.multiItems));
+        const {
+            depdate1,
+            depdate2,
+            dptSelectedData,
+            dtnSelectedData,
+            multiItems,
+            multiItemsDpt,
+            multiItemsDtn,
+            adt,
+            chd,
+            inf,
+            clstype,
+            haveseat
+        } = data;
+        let nowday = dayjs();
+        let depDate = depdate1 && nowday.isAfter(dayjs(depdate1)) ? nowday.format('YYYY-MM-DD') : depdate1;
+        let dtnDate = depdate2 && nowday.isAfter(dayjs(depdate2)) ? nowday.format('YYYY-MM-DD') : depdate2;
+        // 如果起日過期，迄日要清空
+        if (nowday.isAfter(dayjs(depdate1).add(1, 'day'))) dtnDate = '';
+        let multDate = multiItems ? (nowday.isAfter(dayjs(multiItems)) ? nowday.format('YYYY-MM-DD') : multiItems) : '';
+        let dptPlace = dptSelectedData ? dptSelectedData : [];
+        let dtnPlace = dtnSelectedData ? dtnSelectedData : [];
+        let multDpt = multiItemsDpt ? multiItemsDpt : '';
+        let multDtn = multiItemsDtn ? multiItemsDtn : '';
+        clone[0].selectedStartDate = multDate;
+        clone[0].startInputValue = multDate;
+        clone[0].dptSelectedData = multDpt;
+        clone[0].dtnSelectedData = multDtn;
+        this.setState(
+            {
+                depdate1: depDate,
+                depdate2: dtnDate,
+                dptSelectedData: dptPlace,
+                dtnSelectedData: dtnPlace,
+                multiItems: clone,
+                adt,
+                chd,
+                inf,
+                clstype,
+                haveseat
+            }
+        );
+    };
 
 
     // 上面的 tab 切換
@@ -193,7 +222,7 @@ class Panel extends Component {
                 if (depdate1 !== '') {
                     multiItems[i].startDate = depdate1;
                 } else {
-                    multiItems[i].startDate = today().format('YYYY-MM-DD');
+                    multiItems[i].startDate = dayjs().format('YYYY-MM-DD');
                 }
             } else {
                 if (multiItems[i - 1].startInputValue !== '') {
@@ -263,6 +292,7 @@ class Panel extends Component {
         for (let i = 0; i < arr.length; i++) {
             if (nowId === arr[i].id) {
                 newDate = this.checkDate(arr[i].startInputValue);
+                console.log('multiBlur', arr[i].startInputValue, newDate);
                 let inputDate;
                 if (newDate >= arr[i].selectedStartDate && newDate >= arr[i].startDate) {
                     inputDate = newDate;
@@ -315,6 +345,7 @@ class Panel extends Component {
 
     // 多目的地去程日期
     multipleClickDate = (date, nowId, nowIndex) => {
+        console.log('multipleClickDate', date, nowId, nowIndex);
         const { multiItems } = this.state;
         multiItems.forEach(ele => {
             if (nowId === ele.id) {
@@ -362,7 +393,7 @@ class Panel extends Component {
 
     // 雙月曆 focus 的時候
     dcInputFocus = (val, key) => {
-        const { depdate1, depdate2, clearBtn } = this.state;
+        const { depdate1, depdate2, clearBtn, startDate } = this.state;
         let isStart = (val === 'start');
         if (key === 'depdate1') {
             if (depdate1 !== '') {
@@ -381,7 +412,7 @@ class Panel extends Component {
         }
         this.setState({
             dcActiveInput: val, clearBtn,
-            startDate: isStart ? today().format('YYYY-MM-DD') : depdate1
+            startDate: isStart ? dayjs().format('YYYY-MM-DD') : startDate
         });
     }
 
@@ -404,7 +435,7 @@ class Panel extends Component {
         if (dcActiveInput !== 'end') {
             this.setState({
                 clearBtn,
-                depdate1: newDate ? newDate : (clearBtn[key] ? today().format('YYYY-MM-DD') : '')
+                depdate1: newDate ? newDate : (clearBtn[key] ? dayjs().format('YYYY-MM-DD') : '')
             });
         } else {
             this.setState({
@@ -422,9 +453,9 @@ class Panel extends Component {
         } = this.state;
 
         if (!isStart) {
-            return !depdate1.length ? today().format('YYYY-MM-DD') : depdate1;
+            return !depdate1.length ? dayjs().format('YYYY-MM-DD') : depdate1;
         }
-        return today().format('YYYY-MM-DD');
+        return dayjs().format('YYYY-MM-DD');
     }
     // 檢查日期
     checkDate = (muitDate) => {
@@ -434,10 +465,11 @@ class Panel extends Component {
             depdate1,
             depdate2,
         } = this.state;
+        const { setOtherEnd } = this.props;
         const { rtow } = this.props;
         const isStart = dcActiveInput === 'start' || focus1;
         const inputValue = isStart ? depdate1 : (muitDate ? muitDate : (rtow === 3 ? '' : depdate2));
-        let endYear = today().add(361, 'days');
+        let endYear = dayjs().add(361, 'days');
         let regex = /^(\d{4})[\-\/]?(\d{2})[\-\/]?(\d{2})$/;
 
         // 若input沒有值
@@ -448,31 +480,56 @@ class Panel extends Component {
         if (inputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
         const result = inputValue.match(regex);
         const isValidDate = (d) => d instanceof Date && !isNaN(d);
+        const setNewStartDate = () => {
+            return dayjs().format('YYYY-MM-DD');
+        };
+        const setNewEndDate = () => {
+            return dayjs(depdate1).add(1, 'days').format('YYYY-MM-DD');
+        };
+        const isAfterOtherEnd = (d) => {
+            if (isStart) return false;
+            const startDate = dayjs(depdate1).add(setOtherEnd, 'day');
+            return dayjs(d).isAfter(startDate);
+        };
 
         // 輸入的字元不合規則
         if (result === null) {
-            return alert('請輸入正確的日期格式(YYYYMMDD) EX: 2018/01/01');
+            alert('請輸入正確的日期格式(YYYYMMDD) EX: 2018/01/01');
+            return setNewStartDate();
         }
 
         // 月份小於10月，前面加'0'
         if (result[2].length === 1) result[2] = '0' + result[2];
         const [all, year, month, day] = result;
-        const d = `${year || today().year()}-${month}-${day}`;
-        const date = today(d);
+        let d = `${year || dayjs().year()}-${month}-${day}`;
+        const date = dayjs(d);
         const calcStartDate = this.calcStartDate(isStart);
 
         // 日期格式正確但是不存在的日期
         if (!isValidDate(new Date(d))) {
-            return alert('無效的日期');
+            alert('無效的日期');
+            return isStart ? setNewStartDate() : setNewEndDate();
+        }
+        // 日期格式正確但是不存在的日期
+        if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
+            alert('無效的日期');
+            d = setNewStartDate();
         }
 
         if (date.isBefore(calcStartDate)) {
-            return alert('日期小於最小可選日期');
+            alert('回程日期不得小於出發日期！');
+            d = setNewEndDate();
+        }
+
+        // 日期超過 checkIn N天範圍
+        if (isAfterOtherEnd(d)) {
+            alert('無效的日期');
+            return isStart ? setNewStartDate() : setNewEndDate();
         }
 
         // 驗證日期區間
         if (date > endYear) {
-            let start = today().format('YYYY/MM/DD');
+            let start = dayjs().format('YYYY/MM/DD');
             let end = endYear.format('YYYY/MM/DD');
             return alert(`請選擇${start}~${end}之間的日期`);
         }
@@ -480,6 +537,15 @@ class Panel extends Component {
         // 都驗證正確 就更換日期
         return d;
     }
+
+    closeInputCalendar = (val) => {
+        if (val === 'single') {
+            this.setState({ focus1: false });
+        } else if (val === 'two') {
+            this.setState({ dcActiveInput: null });
+        }
+    }
+
 
     // 出發地、目的地
     placeChange = (data, key) => {
@@ -725,7 +791,7 @@ class Panel extends Component {
 
     sourceCheck = (sourcesystem, depdate1, depdate2, rtow) => {
         // let { depdate1, depdate2, sourcesystem } = this.state;
-        let timeLimit = today().add(8, 'days').format('YYYY/MM/DD');
+        let timeLimit = dayjs().add(8, 'days').format('YYYY/MM/DD');
         let depDate = Date.parse(depdate1.replace(/-/g, '/')).valueOf();
         let arrDate = Date.parse(depdate2.replace(/-/g, '/')).valueOf();
         let limitDate = Date.parse(timeLimit).valueOf();
@@ -833,6 +899,7 @@ class Panel extends Component {
                 adt,
                 chd,
                 inf,
+                haveseat,
                 PostTime
             }
         });
@@ -896,7 +963,6 @@ class Panel extends Component {
     // 資料驗證結束
 
     singleInputChange = (e) => {
-        // console.log('panel e', e);
         this.setState({
             depdate1: e
         });
@@ -910,7 +976,7 @@ class Panel extends Component {
     }
 
     muitInputChange = (e, id) => {
-        // console.log('muit', e, id);
+        console.log('muit', e, id);
         let clone = JSON.parse(JSON.stringify(this.state.multiItems));
         clone.forEach(item => {
             if (id === item.id) {
@@ -989,6 +1055,7 @@ class Panel extends Component {
                     setTotalPeople={this.setStateVal}
                     // 直飛，找機位
                     setNoTrans={this.setStateVal}
+                    haveseat={haveseat}
                     setHaveSeat={this.setStateVal}
                     // 排除轉機國家
                     setNonprefertrans={this.setStateVal}
@@ -999,7 +1066,9 @@ class Panel extends Component {
                     // 排除過夜轉機航班
                     setnonprefertransnight={this.setStateVal}
                     // 檢查日期
-                    // checkDate={this.checkDate}
+                    checkDate={this.checkDate}
+                    // 關日曆
+                    closeInputCalendar={this.closeInputCalendar}
                     // 按下搜尋
                     submit={this.submit}
                     // 出發地，目的地

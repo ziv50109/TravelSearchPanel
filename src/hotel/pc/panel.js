@@ -369,9 +369,12 @@ class Panel extends Component {
             } else {
 
                 let CheckIn = new Date(data.CheckIn).getTime() > new Date(today().format('YYYY-MM-DD')).getTime() ?
-                    data.CheckIn : today().add(1, 'day').format('YYYY-MM-DD');
+                    data.CheckIn : '';
                 let CheckOut = new Date(data.CheckOut).getTime() > new Date(today().format('YYYY-MM-DD')).getTime() ?
-                    data.CheckOut : today().add(2, 'day').format('YYYY-MM-DD');
+                    data.CheckOut : '';
+                if (!CheckIn) {
+                    CheckOut = '';
+                }
                 let Rooms = data.Rooms;
                 return {
                     CheckIn,

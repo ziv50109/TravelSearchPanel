@@ -208,7 +208,10 @@ class Module extends PureComponent {
                 return dayjs().add(1, 'days').format('YYYY-MM-DD');
             case '':
             default:
-                return start;
+                if (activeInput === 1 && selectedStartDate !== '') {
+                    return dayjs(selectedStartDate).format('YYYY-MM-DD');
+                }
+                return dayjs().format('YYYY-MM-DD');
         }
     }
 

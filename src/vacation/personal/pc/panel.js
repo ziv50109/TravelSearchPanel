@@ -227,18 +227,20 @@ class Panel extends Component {
                         onChange={this.onDestinationChange}
                     />
                 </div>
-                <ComposeCalendar
-                    panelName="vacationPersonal"
-                    defaultStartDate={FromDate}
-                    defaultEndDate={ToDate}
-                    setOtherEnd={30}  // 月曆另外設定可選日期最大上限(單位/日),訂房最大上限14晚;
-                    onChange={(e) => { this.onDateChange(e) }}
-                />
-                <RoomListInput
-                    roomlist={roomlist}
-                    roomage={roomage}
-                    onChange={this.onRoomListChange}
-                />
+                <div className="input_group">
+                    <ComposeCalendar
+                        panelName="vacationPersonal"
+                        defaultStartDate={FromDate}
+                        defaultEndDate={ToDate}
+                        // setOtherEnd={30}  // 月曆另外設定可選日期最大上限(單位/日),訂房最大上限14晚;
+                        onChange={(e) => { this.onDateChange(e) }}
+                    />
+                    <RoomListInput
+                        roomlist={roomlist}
+                        roomage={roomage}
+                        onChange={this.onRoomListChange}
+                    />
+                </div>
                 <KeyWordInput
                     Keywords={Keywords}
                     Destination={Destination}

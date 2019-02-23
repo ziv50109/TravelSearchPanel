@@ -387,8 +387,8 @@ class Panel extends Component {
                                 startLabelTitle="最早出發日"
                                 endLabelTitle="最晚出發日"
                                 activeInput={activeInput}
-                                endMonth={dayjs().add(3, 'years').format('YYYY-MM')}
-                                // endDate={dayjs().add(3, 'years').format('YYYY-MM-DD')}
+                                endDate={dayjs().add(3, 'year').format('YYYY-MM-DD')}
+                                endMonth={dayjs().add(3, 'year').format('YYYY-MM')}
                                 ref={e => { this.calendar = e }}
                                 onClickConfirm={() => {
                                     const {

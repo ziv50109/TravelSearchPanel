@@ -4,6 +4,7 @@ import BtRcnb from '../../../magaele/bt_rcnb';
 import ForeignApp from './ForeignApp';
 import TaiwanApp from './TaiwanApp';
 import useLocalStorage from '../../../utils/useLocalStorage';
+import onSubmit from '../onSubmit';
 
 class Panel extends Component {
     constructor (props) {
@@ -11,7 +12,9 @@ class Panel extends Component {
         this.state = {
             home: false,
             taiwanSelectData: {},
-            foreignSelectData: {}
+            foreignSelectData: {},
+            searchKeyword: {},
+            Foreign: 1,
         };
     }
 
@@ -24,6 +27,8 @@ class Panel extends Component {
       const destination = { foreignSelectData, taiwanSelectData };
       const PostTime = new Date().setHours(0, 0, 0, 0);
       const hasValue = home ? taiwanSelectData : foreignSelectData;
+      //   console.log('hasValue', hasValue);
+      //   console.log('Object.keys(hasValue', Object.keys(hasValue));
       if (Object.keys(hasValue).length === 0) {
           alert('請選擇目的地或輸入關鍵字');
       } else {
@@ -36,18 +41,20 @@ class Panel extends Component {
               }
           });
       }
+
+      const state = Object.assign({}, this.state.Foreign ? foreignSelectData : taiwanSelectData, { Foreign: this.state.Foreign });
+      onSubmit(state);
   };
 
-
   render () {
-      const { home, taiwanSelectData, foreignSelectData } = this.state;
+      const { home, taiwanSelectData, foreignSelectData, } = this.state;
       return (
           <div className="activity container activePc">
               <div className="pcBtn">
                   <BtRcnb
                       className={`m-smn r mbBtn ${!home ? 'active' : ''}`}
                       whenClick={() => {
-                          this.setState({ home: false });
+                          this.setState({ home: false, Foreign: 1 });
                       }}
                   >
                     國外
@@ -55,7 +62,7 @@ class Panel extends Component {
                   <BtRcnb
                       className={`m-smn r mbBtn ${home ? 'active' : ''}`}
                       whenClick={() => {
-                          this.setState({ home: true });
+                          this.setState({ home: true, Foreign: 0 });
                       }}
                   >
                     國內
@@ -80,7 +87,7 @@ class Panel extends Component {
                       className={`search b-no`}
                       lg
                       radius
-                      whenClick={() => this.handlePost()}
+                      whenClick={this.handlePost}
                   >
                       搜尋
                   </BtRcnb>

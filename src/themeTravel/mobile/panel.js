@@ -345,7 +345,7 @@ class Panel extends Component {
                         request
                         readOnly
                         placeholder="YYYY/MM/DD"
-                        label="出發日期"
+                        label="出發區間"
                         icon={<IcRcln name="tooldate" />}
                         onClick={() => this.handleOpenPage(0)}
                         value={CyRcln1[0] && CyRcln1[0].replace(/\-/g, '/')}
@@ -454,8 +454,8 @@ class Panel extends Component {
                                 startTxt="最早"
                                 endTxt="最晚"
                                 activeInput={activeInput}
-                                endMonth={dayjs().add(3, 'years').format('YYYY-MM')}
-                                // endDate={dayjs().add(3, 'years').format('YYYY-MM-DD')}
+                                endDate={dayjs().add(3, 'year').format('YYYY-MM-DD')}
+                                endMonth={dayjs().add(3, 'year').format('YYYY-MM')}
                                 ref={e => { this.calendar = e }}
                                 onClickConfirm={() => {
                                     const {

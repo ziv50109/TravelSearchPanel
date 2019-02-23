@@ -233,7 +233,7 @@ class RoomListInput extends PureComponent {
 
         return (
             <ClickOutSide onClickOutside={this.closMenu}>
-                <div className="input_compose roomListInput">
+                <div className={`${this.props.className} input_compose roomListInput`}>
                     <IntRcln
                         placeholder="共N間，N人"
                         label="間數/人數"
@@ -242,7 +242,6 @@ class RoomListInput extends PureComponent {
                         value={inputText}
                         onClick={this.onClickInput}
                         icon={<IcRcln name="toolmember" />}
-                        className="m-b-sm"
                     />
                     <div className={dropDownClasses}>
                         <CloseButton onClick={this.closMenu} />

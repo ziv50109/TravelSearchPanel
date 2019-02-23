@@ -1,6 +1,6 @@
 $classname: 'SingleInputMenu';
 $blue: #0077b3;
-.#{$classname} {
+.high_speed_rail_pc .SingleInputMenu {
     .dtm_rcfr {
         position: relative;
         .sec_all{
@@ -19,7 +19,7 @@ $blue: #0077b3;
             padding: 16px 14px 0;
             background-color: #fff;
             z-index: 11;
-            border: 1px solid rgba(153, 153, 153, 0.7);
+            border: 1px solid #ddd;
             &.open {
                 display: block;
             }
@@ -52,7 +52,6 @@ $blue: #0077b3;
             margin: 0 4px 0 0;
             padding-left: 4px;
             font-size: 16px;
-            font-weight: bold;
             color: #0077b3;
             background-color: #eaeaea;
             cursor: pointer;
@@ -93,7 +92,6 @@ $blue: #0077b3;
         &_input {
             border: none;
             padding: 0;
-            font-weight: bold;
             color: $blue;
         }
     }
@@ -102,5 +100,17 @@ $blue: #0077b3;
         .int_rcln_input {
             flex: 0 0 auto;
         }
+    }
+}
+.high_speed_rail_m .SingleInputMenu {
+    .dtm_rcfr {
+        &-wrap {
+            top: 0;
+            width: auto;
+            border: none;
+        }
+    }
+    .int_rcln_input {
+        font-weight: normal;
     }
 }

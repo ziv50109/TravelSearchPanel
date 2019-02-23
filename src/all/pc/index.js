@@ -142,7 +142,7 @@ class SearchPanelAllPc extends PureComponent {
             <NtbRcln
                 activeTabIndex={show}
                 onClick={(i) => this.handleChangeTab(i)}
-                customClass={`search_panel_one search_panel_all_pc ${(flightRtow === 3 || String(show)[0] === '3') ? 'search_panel-inFlight' : ''}`}
+                customClass={`search_panel_one search_panel_all_pc ${(flightRtow === 3 || String(show)[0] === '3' || show === 6) ? 'search_panel-inFlight' : ''}`}
             >
                 <Tab label="團體">
                     {show === 0 && LoadComponent(import(/* webpackChunkName: "travel-pc" */ '../../travel/pc'), hrefTarget)}

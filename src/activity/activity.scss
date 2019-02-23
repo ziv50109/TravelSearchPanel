@@ -308,7 +308,7 @@ $color_brown: #444;
         border: 2px solid $color_01;
       }
       .clearBtnWrap {
-        height: 98%;
+        height: 96%;
       }
       .bt_rcnb {
         min-width: 50px;
@@ -414,13 +414,20 @@ $color_brown: #444;
         right: 10px;
         z-index: 1;
       }
-      .cross {
+      .DtmRcfrCloseBtn {
         position: absolute;
-        right: 10px;
-        top: 10px;
-        font-weight: bold;
+        top: 0;
+        right: 0;
+        padding: 10px 10px 0 10px !important;
+        margin-right: 1px;
+        background-color: white;
+        z-index: 2;
         cursor: pointer;
-      }
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
 
       .act_rajx {
         // position: initial;
@@ -447,7 +454,7 @@ $color_brown: #444;
           }
         }
         .section {
-          width: 600px;
+          width: 100%;
           .title {
             border-top: none;
           }
@@ -493,7 +500,7 @@ $color_brown: #444;
         position: absolute;
         width: 660px;
         padding: 16px 14px 0;
-        border: 1px solid rgba(153, 153, 153, 0.7);
+        border: 1px solid #ddd;
         background-color: #fff;
         z-index: 1;
         height: auto;

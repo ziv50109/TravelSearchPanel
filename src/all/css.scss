@@ -206,7 +206,7 @@
     &-pc, &_all_pc {
         display: inline-flex;
         min-height: 390px;
-        box-shadow: 0 5px 10px #666;
+        box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.25);
         > .tabs {
             flex: 0 0 80px;
             flex-direction: column;
@@ -402,4 +402,9 @@ div.nvb_rslb > .nvb_content .search_input .int_rcln {
 }
 div.nvb_rslb > .nvb_content .search_input .int_rcln_input {
     border: none;
+}
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .st_rcln .dropdown-place-holder.breakline {
+        line-height: 3 !important;
+    }
 }

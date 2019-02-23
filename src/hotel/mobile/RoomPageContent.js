@@ -195,10 +195,13 @@ class RoomPageContent extends PureComponent {
         minAdult: 1, // 每間房最少1位大人
         inputText: '共1間，2位大人、0位小孩',
     };
-    componentDidMount () {
-        this.updatePanelRooms();
+    componentDidMount() {
+        this.props.changeSum(this.state);
     }
-    componentDidUpdate (prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.Rooms !== this.props.Rooms) {
+            this.updatePanelRooms();
+        }
         if (prevState !== this.state) {
             this.props.changeSum(this.state);
         }

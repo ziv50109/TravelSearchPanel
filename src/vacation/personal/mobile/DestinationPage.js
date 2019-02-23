@@ -370,7 +370,7 @@ class Page extends PureComponent {
                                 <IntRcln
                                     ref={e => { this.destinationInput = e }}
                                     color="blue"
-                                    placeholder={selectedData.length ? null : '目的地'}
+                                    placeholder={selectedData.length ? null : '請輸入國家/城市/機場'}
                                     onClick={this.onClickInput}
                                     onChange={this.onInputChange}
                                     value={inputText}
@@ -384,7 +384,7 @@ class Page extends PureComponent {
                             確定
                         </BtRcnb>
                     </div>
-                    <p className="txt_green m-t-xs m-b-n">找不到選項？請輸入關鍵字查詢</p>
+                    <p className="txt_green m-t-xs m-b-n">找不到選項？請輸入關鍵字查詢/最多可選擇3則目的地</p>
                 </header>
                 <div className="page_content">
                     {

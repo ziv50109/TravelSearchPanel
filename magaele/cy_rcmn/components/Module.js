@@ -155,13 +155,13 @@ class Module extends PureComponent {
         const isStart = (activeInput === 0);
 
         switch (panelName) {
-            case 'vacationPersonal':
-                if (isStart) {
-                    return date;
-                } else if (!selectedStartDate) {
-                    return dayjs(date).add(-30, 'day') < dayjs() ? dayjs().format('YYYY-MM-DD') : dayjs(date).add(-30, 'day').format('YYYY-MM-DD');
-                }
-                return selectedStartDate;
+            // case 'vacationPersonal':
+            //     if (isStart) {
+            //         return date;
+            //     } else if (!selectedStartDate) {
+            //         return dayjs(date).add(-30, 'day') < dayjs() ? dayjs().format('YYYY-MM-DD') : dayjs(date).add(-30, 'day').format('YYYY-MM-DD');
+            //     }
+            //     return selectedStartDate;
             case '':
             default:
                 return isStart ? date : selectedStartDate;
@@ -232,8 +232,8 @@ class Module extends PureComponent {
                     return dayjs(selectedStartDate).add(14, 'days').format('YYYY-MM-DD');
                 }
                 return endDate;
-            case 'vacationPersonal':
-                return dayjs(selectedStartDate).add(30, 'days').format('YYYY-MM-DD');
+            // case 'vacationPersonal':
+            //     return dayjs(selectedStartDate).add(30, 'days').format('YYYY-MM-DD');
             case '':
             default:
                 return endDate;

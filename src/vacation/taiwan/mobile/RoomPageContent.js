@@ -202,17 +202,18 @@ class RoomPageContent extends PureComponent {
 
         const {
             onClickConfirm,
+            noHotel
         } = this.props;
 
         return (
             <div className="nvb_content">
                 <header>
-                    <h3 className="txt-center page_title">間數/人數</h3>
+                    <h3 className="txt-center page_title">{noHotel ? '人數' : '間數/人數'}</h3>
                     <div className="search_input">
                         <IntRcln
-                            placeholder="共N間，N人"
+                            placeholder={noHotel ? 'N人' : '共N間，N人'}
                             readOnly
-                            value={inputText}
+                            value={noHotel ? inputText.split('，')[1] : inputText}
                             color="blue"
                         />
                         <BtRcnb radius whenClick={() => {
@@ -223,18 +224,22 @@ class RoomPageContent extends PureComponent {
                     </div>
                 </header>
                 <div className="page_content wrapper-sm">
-                    <StRcln
-                        option={roomCount}
-                        placeholder="請選擇"
-                        label="間數:"
-                        defaultValue={roomList.length}
-                        onChangeCallBack={this.changeRoomCount}
-                        ClassName="m-b-sm"
-                    />
+                    {
+                        !noHotel &&
+                        <StRcln
+                            option={roomCount}
+                            placeholder="請選擇"
+                            label="間數:"
+                            defaultValue={roomList.length}
+                            onChangeCallBack={this.changeRoomCount}
+                            ClassName="m-b-sm"
+                        />
+                    }
                     {
                         roomList.map((v, i) => (
                             <RoomLitSection
                                 key={i}
+                                noHotel={noHotel}
                                 roomCount={i}
                                 adult={v.adult}
                                 childrenWithBed={v.childrenWithBed}

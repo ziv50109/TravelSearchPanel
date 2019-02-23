@@ -209,88 +209,38 @@ class ComposeCalendar extends PureComponent {
         if (inputValue.length === 3) regex = /^()(\d{1})(\d{2})/;
         const result = inputValue.match(regex);
         const isValidDate = (d) => d instanceof Date && !isNaN(d);
-
-        // 輸入的字元不合規則
-        if (result === null) {
+        const setNewDate = () => {
             if (isStart) {
-                this.setState(
-                    {
-                        startInputValue: todayDate,
-                        selectedStartDate: todayDate
-                    },
-                    this.onChange
-                );
+                this.clickDate(todayDate);
             } else {
-                this.setState(
-                    {
-                        endInputValue: dayjs()
-                            .add(1, 'days')
-                            .format('YYYY-MM-DD'),
-                        selectedEndDate: dayjs()
-                            .add(1, 'days')
-                            .format('YYYY-MM-DD')
-                    },
-                    this.onChange
-                );
+                this.clickDate(selectedStartDate ? dayjs(selectedStartDate).add(1, 'days').format('YYYY-MM-DD') : dayjs().add(1, 'days').format('YYYY-MM-DD'));
             }
+        };
+        // 輸入的字元不合規則
+        if (inputValue && result === null) {
+            setNewDate();
             return alert(DateValueErrorMessage);
         }
 
         // 月份小於10月，前面加'0'
         if (result[2].length === 1) result[2] = '0' + result[2];
         const [all, year, month, day] = result;
-        const d = `${year || dayjs().year()}-${month}-${day}`;
+        let d = `${year || dayjs().year()}-${month}-${day}`;
         const date = dayjs(d);
         const calcStartDate = this.calcStartDate();
+        const today = dayjs().format('YYYY-MM-DD');
 
         // 日期格式正確但是不存在的日期
         if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
-            if (isStart) {
-                this.setState(
-                    {
-                        startInputValue: todayDate,
-                        selectedStartDate: todayDate
-                    },
-                    this.onChange
-                );
-            } else {
-                this.setState(
-                    {
-                        endInputValue: dayjs()
-                            .add(1, 'days')
-                            .format('YYYY-MM-DD'),
-                        selectedEndDate: dayjs()
-                            .add(1, 'days')
-                            .format('YYYY-MM-DD')
-                    },
-                    this.onChange
-                );
-            }
+            setNewDate();
             return alert('無效的日期');
         }
-
+        if (date.isBefore(today)) {
+            setNewDate();
+            return alert('日期必須大於今日');
+        }
         if (date.isBefore(calcStartDate)) {
-            if (isStart) {
-                this.setState(
-                    {
-                        startInputValue: todayDate,
-                        selectedStartDate: todayDate
-                    },
-                    this.onChange
-                );
-            } else {
-                this.setState(
-                    {
-                        endInputValue: dayjs(selectedStartDate)
-                            .add(1, 'days')
-                            .format('YYYY-MM-DD'),
-                        selectedEndDate: dayjs(selectedStartDate)
-                            .add(1, 'days')
-                            .format('YYYY-MM-DD')
-                    },
-                    this.onChange
-                );
-            }
+            setNewDate();
             return alert('日期小於最小可選日期');
         }
 
@@ -328,7 +278,7 @@ class ComposeCalendar extends PureComponent {
         }));
     };
 
-    clickDate = date => {
+    clickDate = (date) => {
         const { activeInput, selectedStartDate, endInputValue } = this.state;
         let isStart = activeInput === 'start';
         let TRIP = this.props.TRIP === 1 ? true : false;
@@ -336,6 +286,7 @@ class ComposeCalendar extends PureComponent {
         let endDateValue;
         let nowInput;
         if (TRIP) {
+            // 單程
             startDateValue = date;
             if (dayjs(date).isAfter(dayjs(endInputValue))) {
                 endDateValue = date;
@@ -344,13 +295,10 @@ class ComposeCalendar extends PureComponent {
             }
             nowInput = null;
         } else {
+            // 來回
             startDateValue = isStart ? date : selectedStartDate;
             if (isStart) {
-                if (dayjs(date).isAfter(dayjs(endInputValue))) {
-                    endDateValue = date;
-                } else {
-                    endDateValue = endInputValue;
-                }
+                endDateValue = '';
             } else {
                 endDateValue = date;
             }

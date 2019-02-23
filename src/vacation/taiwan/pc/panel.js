@@ -1,3 +1,4 @@
+import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import React, { PureComponent, Component } from 'react';
 import { vacationTaiwan } from '../../../../source.config';
 
@@ -287,7 +288,7 @@ class ContentComponentKeyword extends Component {
                             containerClass="int_rcln blue request"
                             labelClass="d-no"
                             inputClass=""
-                            placeholderText="請輸入飯店名稱"
+                            placeholderText="請輸入產品名稱、飯店名稱或關鍵字"
                             keyWord={this.state.selectText}
                             parentStcity={this.props.parentStcity}
                             clearWord={(value) => this.clearWord(value)}
@@ -308,7 +309,7 @@ class ContentComponentKeyword extends Component {
                         noMatchText={this.props.parentStcity ? '很抱歉，找不到符合的項目' : '請先選擇目的地'}
                         minimumStringQuery={this.props.parentStcity ? '請至少輸入兩個字' : '請先選擇目的地'}
                         minimumStringQueryLength={2}
-                        footer={true}
+                        footer={false}
                         closeBtnOnClick={() => setTimeout(this.closeDestnMenu, 0)}
                         rules={[
                             {
@@ -369,9 +370,13 @@ class Panel extends PureComponent {
             days: '',
             dayOption: [
                 { text: '不限', value: '' },
-                { text: '1~5天', value: '1,2,3,4,5' },
-                { text: '6~10天', value: '6,7,8,9,10' },
-                { text: '10天以上', value: '10' }
+                { text: '2天', value: '2' },
+                { text: '3天', value: '3' },
+                { text: '4天', value: '4' },
+                { text: '5天', value: '5' },
+                { text: '6天', value: '6' },
+                { text: '7天', value: '7' },
+                { text: '8天以上', value: '8' }
             ],
             noHotel: false,
             roomlist: '2-0-0', // 預設一間, 兩大人
@@ -493,6 +498,22 @@ class Panel extends PureComponent {
             roomage: roomage.join(','),
         }));
     }
+    changeNoHotel = (bool) => {
+        const { roomlist, roomage } = this.state;
+        let newRoomList = '2-0-0';
+        let newRoomage = '-';
+
+        if (bool) {
+            newRoomList = roomlist.split(',')[0];
+            newRoomage = roomage.split(',')[0];
+        }
+
+        this.setState({
+            noHotel: bool,
+            roomlist: newRoomList,
+            roomage: newRoomage
+        });
+    }
     handleAllSubmit () {
         const {
             sFcity,
@@ -521,8 +542,9 @@ class Panel extends PureComponent {
                 PostTime
             }
         });
+        if (!sTcity.length && (!sDatef.length || !sDatet.length)) return alert('請輸入 / 選擇目的地、請選擇出發日期');
         if (!sTcity.length) return alert('請輸入 / 選擇目的地');
-        if (!sDatef.length || !sDatef.length) return alert('請選擇出發日期');
+        if (!sDatef.length || !sDatet.length) return alert('請選擇出發日期');
         window.open(`https://www.liontravel.com/webft/webftse01.aspx?sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${sDatef.replace(/-/g, '')}&sDatet=${sDatet.replace(/-/g, '')}&sTools=${Tools}&sHotelName=${selectText}`, this.props.hrefTarget);
     }
 
@@ -552,6 +574,7 @@ class Panel extends PureComponent {
                 </div>
                 <div className="vacation_taiwan-row">
                     <ComposeCalendar
+                        panelName="taiwanVacation"
                         defaultStartDate={this.state.sDatef ? this.state.sDatef : dayjs().add(5, 'days').format('YYYY-MM-DD')}
                         defaultEndDate={this.state.sDatet ? this.state.sDatet : dayjs().add(30, 'days').format('YYYY-MM-DD')}
                         ClassName="m-b-sm"
@@ -573,13 +596,14 @@ class Panel extends PureComponent {
                             <CrRcln
                                 textContent="只找不含住宿"
                                 checked={this.state.noHotel}
-                                whenChange={(e) => this.setState({ noHotel: e })}
+                                whenChange={this.changeNoHotel}
                             />
                         </div>
                     </div>
                 </div>
                 <div className="vacation_taiwan-row">
                     <RoomListInput
+                        noHotel={this.state.noHotel}
                         roomlist={this.state.roomlist}
                         roomage={this.state.roomage}
                         onChange={this.onRoomListChange}

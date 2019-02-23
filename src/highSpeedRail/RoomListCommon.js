@@ -1,5 +1,5 @@
 import React from 'react';
-import IntGpct from '../../../magaele/int_gpct';
+import IntGpct from '../../magaele/int_gpct';
 
 // 這支檔案放間數人數M版跟PC版共用的東西
 

@@ -1,3 +1,4 @@
+import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import React, { Component } from 'react';
 import { vacationTaiwan } from '../../../source.config';
 
@@ -16,9 +17,15 @@ import { useLocalStorage } from '../../../utils';
 // 複合組件
 import SingleInputMenuM from '../SingleInputMenu/SingleInputMenu_m';
 import SearchInput from '../SingleInput/SearchInput';
+import RoomPageContent from './RoomPageContent'; // 間數人數分頁
+import {
+    parseRoomListArray,
+    calcShowText
+} from '../RoomListCommon';
 import dayjs from 'dayjs';
-import '../../component/ComposeCalendar';
 import '../css.scss';
+import '../../component/input_group.scss';
+import '../../vacation/personal/css.scss';
 
 const inlineStyle = {
     display: 'inline-block',
@@ -132,7 +139,7 @@ class DestinationContentComponent extends Component {
                     selectedData={selectedData} // 所選擇的資料集
                     // max={this.WrapperDtmRclnMax}
                     /* int_rcln */
-                    placeholder="請選擇/可輸入目的地" // placeholder 輸入提示字
+                    placeholder="請輸入/選擇目的地" // placeholder 輸入提示字
                     getSelect={this.getSelect}
                     /* act_racp */
                     minimumStringQueryLength={2} // 最少輸入幾個字
@@ -259,7 +266,7 @@ class ContentComponentKeyword extends Component {
                 </div>
                 <div className="m_keyWord">
                     <SearchInput
-                        placeholderText="請輸入飯店名稱"
+                        placeholderText="請輸入產品名稱、飯店名稱或關鍵字"
                         keyWord={this.state.selectText}
                         clearWord={(value) => this.clearWord(value)}
                         onChange={(value) => this._inputOnChangeHandler(value)}
@@ -278,7 +285,7 @@ class ContentComponentKeyword extends Component {
                     noMatchText={this.props.parentStcity ? '很抱歉，找不到符合的項目' : '請先選擇目的地'}
                     minimumStringQuery={this.props.parentStcity ? '請至少輸入兩個字' : '請先選擇目的地'}
                     minimumStringQueryLength={2}
-                    footer={true}
+                    footer={false}
                     rules={[
                         {
                             title: '飯店',
@@ -292,7 +299,7 @@ class ContentComponentKeyword extends Component {
 
 class Destination extends Component {
     state = {
-        visible: false,
+        visible: this.props.visible,
         sTcity: '',
         // sTcitytxt: this.props.sTcitytxt ? this.props.sTcitytxt : '',
         allData: this.props.selectedData ? this.props.selectedData : [],
@@ -383,10 +390,10 @@ class Keyword extends Component {
     }
     render () {
         return (
-            <div className="keywordComponent m-b-sm">
+            <div className="keywordComponent">
                 <IntRcln
                     label="關鍵字"
-                    placeholder="請輸入飯店名稱"
+                    placeholder="請輸入產品名稱、飯店名稱或關鍵字"
                     breakline
                     value={this.state.sHotelName}
                     onClick={this.openPage}
@@ -437,11 +444,27 @@ class Panel extends Component {
             sFreekind: '',
             sFreekind1: '',
 
-            sDatef: dayjs().add(5, 'days').format('YYYY-MM-DD'),
-            sDatet: dayjs().add(30, 'days').format('YYYY-MM-DD'),
+            // sDatef: dayjs().add(5, 'days').format('YYYY-MM-DD'),
+            // sDatet: dayjs().add(30, 'days').format('YYYY-MM-DD'),
 
             sHotelName: '',
-            Tools: [1]
+            Tools: [1],
+
+            days: '',
+            dayOption: [
+                { text: '不限', value: '' },
+                { text: '2天', value: '2' },
+                { text: '3天', value: '3' },
+                { text: '4天', value: '4' },
+                { text: '5天', value: '5' },
+                { text: '6天', value: '6' },
+                { text: '7天', value: '7' },
+                { text: '8天以上', value: '8' }
+            ],
+            noHotel: false,
+            roomlist: '2-0-0', // 預設一間, 兩大人
+            roomage: '-',
+            roomListInput: '共1間，2人',
         };
         this.option = [
             { text: '不限', value: '_' },
@@ -476,7 +499,7 @@ class Panel extends Component {
     }
     validataLocalstorageData = (data) => {
         const localStorageRecordTime = data.PostTime + 604800000;
-        const { sFcity, sTcity, sDatef, sDatet, Tools, selectText, selectedData, sHotelName } = data;
+        const { sFcity, sTcity, sDatef, sDatet, selectedStartDate, selectedEndDate, Tools, selectText, selectedData, sHotelName } = data;
         if (localStorageRecordTime < new Date().getTime()) {
             console.log('超過7天予以刪除LocalStorage紀錄。');
             useLocalStorage({
@@ -485,22 +508,49 @@ class Panel extends Component {
             });
             return;
         }
-        let cStart = dayjs(sDatef).isBefore(dayjs()) ? dayjs().format('YYYY-MM-DD') : sDatef;
-        let cEnd = dayjs(sDatet).isBefore(dayjs()) ? dayjs().add(30, 'days').format('YYYY-MM-DD') : sDatet;
+        let cStart = sDatef || selectedStartDate;
+        let cEnd = sDatet || selectedEndDate;
+        if (dayjs(sDatef || selectedStartDate).isBefore(dayjs()) || dayjs(sDatet || selectedEndDate).isBefore(dayjs())) {
+            cStart = dayjs().add(5, 'days').format('YYYY-MM-DD');
+            cEnd = dayjs().add(30, 'days').format('YYYY-MM-DD');
+        }
+        if (!cStart) {
+            cEnd = '';
+        }
         this.setState(
             {
                 sFcity: sFcity,
                 sTcity: sTcity,
-                sDatef: cStart,
-                sDatet: cEnd,
+                selectedStartDate: cStart,
+                selectedEndDate: cEnd,
                 Tools: Tools,
                 selectedData: selectedData,
                 sHotelName: selectText || sHotelName
             }
         );
     };
+    // 取得間數/人數
+    updateRoomListInput = (data) => {
+        const {
+            roomlist,
+            roomage
+        } = data;
 
-    showCalendar (target) {
+        // props還原成陣列包陣列
+        const listArr = roomlist.split(',').map(e => e.split('-').filter(e => e.length).map(e => Number(e)));
+        const ageArr = roomage.split(',').map(e => e.split('-').map(e => e.split(';').filter(e => e.length).map(e => Number(e))));
+        // props還原成陣列包物件
+        const newRoomList = listArr.map((e, i) =>
+            ({
+                adult: listArr[i][0],
+                childrenWithBed: ageArr[i][0],
+                childrenNoBed: ageArr[i][1]
+            })
+        );
+        // 算人數
+        return calcShowText(newRoomList);
+    }
+    showNvbPage (target) {
         this.setState(prevState => ({
             ...prevState,
             activeInput: target,
@@ -523,12 +573,43 @@ class Panel extends Component {
             activeInput: null,
         }));
     }
+    roomPageConfirm = (pageState) => {
+        // 間數人數分頁按確定
+        const {
+            inputText: roomListInput,
+            roomList,
+        } = pageState;
+
+        const [roomlist, roomage] = parseRoomListArray(roomList);
+
+        this.setState(prevState => ({
+            roomListInput,
+            roomlist: roomlist.join(','),
+            roomage: roomage.join(','),
+            activeInput: null,
+        }));
+    }
     selectSFcity = (e) => {
         if (e) {
             this.setState({
                 sFcity: e,
             });
         }
+    }
+    getTools = (data, isChecked) => {
+        const { Tools } = this.state;
+        const arrnew = [...Tools];
+
+        if (!isChecked) {
+            const i = Tools.indexOf(data + 1);
+            arrnew.splice(i, 1);
+        } else {
+            arrnew.push(data + 1);
+        }
+
+        this.setState({
+            Tools: arrnew.sort(),
+        });
     }
     getdataKeyword (data) {
         this.setState({
@@ -542,6 +623,26 @@ class Panel extends Component {
             selectedData: allData
         });
     }
+    changeNoHotel = (bool) => {
+        const { roomlist, roomage, roomListInput } = this.state;
+        let newRoomList = '2-0-0';
+        let newRoomage = '-';
+        let newRoomListInput = '共1間，2人';
+
+        if (bool) {
+            newRoomList = roomlist.split(',')[0];
+            newRoomage = roomage.split(',')[0];
+            newRoomListInput = `${roomListInput.split('，')[1].split('、')[0]}${roomlist.split(',').length > 1 ? '人' : ''}`
+        }
+
+        this.setState({
+            noHotel: bool,
+            roomlist: newRoomList,
+            roomage: newRoomage,
+            roomListInput: newRoomListInput
+        });
+    }
+
     handleAllSubmit () {
         const {
             sFcity,
@@ -571,6 +672,7 @@ class Panel extends Component {
                 sHotelName
             }
         });
+        if (!sTcity.length) return alert('請輸入 / 選擇目的地');
         window.open(`https://www.liontravel.com/webft/webftse01.aspx?sFcountry=TW&sTcountry=TW&sFreekind1=&sFcity=${sFcity}&sTcity=${sTcity}&sDatef=${selectedStartDate.replace(/-/g, '')}&sDatet=${selectedEndDate.replace(/-/g, '')}&sTools=${Tools}&sHotelName=${sHotelName}`, this.props.hrefTarget);
     }
     render () {
@@ -578,17 +680,23 @@ class Panel extends Component {
             selectedStartDate,
             selectedEndDate,
             activeInput,
+            noHotel,
+            roomlist,
+            roomage,
+            roomListInput
         } = this.state;
-        const visible = activeInput === 0 || activeInput === 1;
+        const showCalendarPage = activeInput === 0 || activeInput === 1;
+        const showRoomPage = activeInput === 'roomlist';
+        const showDestinationPage = activeInput === 'destination';
+        const pageVisible = showCalendarPage || showDestinationPage || showRoomPage;
         return (
             <div className="high_speed_rail_m">
                 <StRcln ClassName="fwb-b m-b-sm"
                     option={this.option}
-                    placeholder="目的地"
+                    // placeholder="出發地"
                     label="出發地"
-                    // defaultValue={'_'}
                     icon={<IcRcln name="toolmap" />}
-                    defaultValue={this.state.sFcity ? this.state.sFcity : '_'}
+                    defaultValue={this.state.sFcity || '_'}
                     breakline
                     req
                     onChangeCallBack={(value) => this.setState({ sFcity: value })}>
@@ -596,7 +704,8 @@ class Panel extends Component {
                 <Destination
                     getdatavTcity={(e, data, allData) => { this.getdatavTcity(e, data, allData) }}
                     selectedData={this.state.selectedData}
-                // sTcitytxt={this.state.sTcitytxt}
+                    visible={this.activeInput === 'destination' ? true : false}
+                    // sTcitytxt={this.state.sTcitytxt}
                 />
                 <div className="calendar_compose">
                     <div className="input_group">
@@ -606,51 +715,48 @@ class Panel extends Component {
                             placeholder="YYYY/MM/DD"
                             label="出發區間"
                             icon={<IcRcln name="tooldate" />}
-                            onClick={() => { this.showCalendar(0) }}
+                            onClick={() => { this.showNvbPage(0) }}
                             value={dayjs(selectedStartDate).format('YYYY/MM/DD')}
                         />
                         <span className="cal_icon">~</span>
                         <IntRcln
                             readOnly
                             placeholder="YYYY/MM/DD"
-                            onClick={() => { this.showCalendar(1) }}
+                            onClick={() => { this.showNvbPage(1) }}
                             value={dayjs(selectedEndDate).format('YYYY/MM/DD')}
                         />
                     </div>
-                    <NvbRslb
-                        visible={visible}
-                        direction="right"
-                        className="confirmBtn_span_d-no"
-                    >
-                        <span className="nvb_rslb_goBack" onClick={this.handleClose}>
-                            <IcRcln name="toolbefore" />
-                        </span>
-                        {
-                            visible && (
-                                <CyRcmn
-                                    ClassName="mm"
-                                    doubleChoose
-                                    selectedStartDate={selectedStartDate}
-                                    selectedEndDate={selectedEndDate}
-                                    endMonth={dayjs().add(12, 'months').format('YYYY-MM')}
-                                    startDate={dayjs().format('YYYY-MM-DD')}
-                                    // startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
-                                    activeInput={activeInput}
-                                    startLabelTitle="最早出發日"
-                                    endLabelTitle="最晚出發日"
-                                    startTxt="最早"
-                                    endTxt="最晚"
-                                    ref={e => { this.calendar = e }}
-                                    onClickConfirm={this.handleConfirm}
-                                    customDiffTxt={diffDate => {
-                                        const showTxt = diffDate + 1;
-                                        return '共' + showTxt + '天';
-                                    }}
-                                />
-                            )
-                        }
-                    </NvbRslb>
+
                 </div>
+
+                <div className="high_speed_rail-row m-b-sm">
+                    <StRcln
+                        option={this.state.dayOption}
+                        placeholder="請選擇"
+                        label="旅遊天數"
+                        defaultValue={this.state.days}
+                        ClassName="strcln_day"
+                        breakline
+                        onChangeCallBack={(value) => this.setState({ days: value })}
+                    />
+                    <div className="t15">
+                        <CrRcln
+                            textContent="只找不含住宿"
+                            checked={noHotel}
+                            whenChange={this.changeNoHotel}
+                        />
+                    </div>
+                </div>
+                <IntRcln
+                    placeholder={noHotel ? 'N人' : '共N間，N人'}
+                    label={noHotel ? '人數' : '間數/人數'}
+                    breakline
+                    readOnly
+                    icon={<IcRcln name="toolmember" />}
+                    className="m-b-sm roomListInput"
+                    onClick={() => { this.showNvbPage('roomlist') }}
+                    value={roomListInput}
+                />
                 <Keyword
                     getdataKeyword={(data) => { this.getdataKeyword(data) }}
                     parentStcity={this.state.sTcity}
@@ -659,6 +765,49 @@ class Panel extends Component {
                 <div className="txt-right">
                     <BtRcnb prop="string" lg radius whenClick={() => this.handleAllSubmit()}>搜尋</BtRcnb>
                 </div>
+                <NvbRslb
+                    visible={pageVisible}
+                    direction="right"
+                    className="confirmBtn_span_d-no"
+                >
+                    <span className="nvb_rslb_goBack" onClick={this.handleClose}>
+                        <IcRcln name="toolbefore" />
+                    </span>
+                    {
+                        showCalendarPage && (
+                            <CyRcmn
+                                ClassName="mm"
+                                doubleChoose
+                                selectedStartDate={selectedStartDate}
+                                selectedEndDate={selectedEndDate}
+                                endMonth={dayjs().add(12, 'months').format('YYYY-MM')}
+                                startDate={dayjs().format('YYYY-MM-DD')}
+                                // startDate={dayjs().add(1, 'days').format('YYYY-MM-DD')}
+                                activeInput={activeInput}
+                                startLabelTitle="最早出發日"
+                                endLabelTitle="最晚出發日"
+                                startTxt="最早"
+                                endTxt="最晚"
+                                ref={e => { this.calendar = e }}
+                                onClickConfirm={this.handleConfirm}
+                                customDiffTxt={diffDate => {
+                                    const showTxt = diffDate + 1;
+                                    return '共' + showTxt + '天';
+                                }}
+                            />
+                        )
+                    }
+                    {
+                        showRoomPage && (
+                            <RoomPageContent
+                                noHotel={noHotel}
+                                roomlist={roomlist}
+                                roomage={roomage}
+                                onClickConfirm={this.roomPageConfirm}
+                            />
+                        )
+                    }
+                </NvbRslb>
             </div>
         );
     }

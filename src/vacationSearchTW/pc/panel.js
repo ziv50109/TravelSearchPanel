@@ -14,34 +14,44 @@ import RoomPeople from './components/RoomPeople';
 import Transport from './components/Transport';
 
 class Panel extends Component {
-    static defaultProps = {
-        Departure: '_',
-        Destination: '',
-        FromDate: today().format('YYYYMMDD'),
-        ToDate: today()
-            .add(1, 'days')
-            .format('YYYYMMDD'),
-        Days: 2,
-        noHotel: 0,
-        Keywords: '',
-        Traffic: 'NONE,THSR,TRA,AIR,BUS,RENT',
-        roomlist: '2-0-',
-        roomage: '-',
-    };
+    // static defaultProps = {
+    //     Departure: '_',
+    //     Destination: '',
+    //     FromDate: today().format('YYYYMMDD'),
+    //     ToDate: today()
+    //         .add(1, 'days')
+    //         .format('YYYYMMDD'),
+    //     Days: 2,
+    //     noHotel: 0,
+    //     Keywords: '',
+    //     Traffic: 'NONE,THSR,TRA,AIR,BUS,RENT',
+    //     roomlist: '2-0-',
+    //     roomage: '-',
+    // };
 
     constructor (props) {
         super(props);
         this.state = {
-            Departure: props.Departure,
-            Destination: props.Destination,
-            FromDate: props.FromDate,
-            ToDate: props.ToDate,
-            Days: props.Days,
-            noHotel: props.noHotel,
-            Keywords: props.Keywords,
-            Traffic: props.Traffic,
-            roomlist: props.roomlist,
-            roomage: props.roomage,
+            // Departure: props.Departure,
+            // Destination: props.Destination,
+            // FromDate: props.FromDate,
+            // ToDate: props.ToDate,
+            // Days: props.Days,
+            // noHotel: props.noHotel,
+            // Keywords: props.Keywords,
+            // Traffic: props.Traffic,
+            // roomlist: props.roomlist,
+            // roomage: props.roomage,
+            Departure: '',
+            Destination: '',
+            FromDate: '',
+            ToDate: '',
+            Days: '',
+            noHotel: '',
+            Keywords: '',
+            Traffic: '',
+            roomlist: '',
+            roomage: '',
 
             // 關鍵字要用的
             vTcity: '',
@@ -60,7 +70,6 @@ class Panel extends Component {
         const query = hasQuery >= 0 ? url.substring(hasQuery + 1).split('&') : null;
         const result = query.map(e => e.split('='));
         const state = {};
-        // this.setState({ vTcity: `TW_${}`  });
         result.forEach(e => {
             state[e[0]] = e[1];
             if (e[0] === 'Destination') {
@@ -181,7 +190,6 @@ class Panel extends Component {
                                 onChangeCallBack={val =>
                                     this.setState({ Days: val === '' ? '' : Number(val) })
                                 }
-                                // defaultValue={Number(this.state.Days)}
                                 defaultValue={this.state.Days === '' ? '' : Number(this.state.Days)}
                             />
 
@@ -197,6 +205,7 @@ class Panel extends Component {
                                     Number(this.state.noHotel) === 1 ? true : false
                                 }
                             />
+
                             {/* 搜尋按鈕 */}
                             <button className="pc_searchBtn" onClick={this.onSubmit}>
                                 <IcRcln name="toolsearch" />
@@ -224,8 +233,8 @@ class Panel extends Component {
                             <KeywordPlace
                                 customClass={'pc_Keyword'}
                                 Keywords={this.state.Keywords}
-                                setPanelState={this.setPanelState}
                                 Destination={this.state.vTcity}
+                                setPanelState={this.setPanelState}
                             />
                         </div>
                     </div>

@@ -1,17 +1,19 @@
 import React, { PureComponent } from 'react';
 import cx from 'classnames';
-import Label from '../../share/Label';
-import { ClickOutSide } from '../../../../utils';
-
+import IcRcln from '../../../magaele/ic_rcln';
+import IntRcln from '../../../magaele/int_rcln';
+import { ClickOutSide } from '../../../utils';
+import {
+    CloseButton,
+    roomCount
+} from '../common';
 import {
     NoticeText,
     RoomLitSection,
     calcShowText,
-    calcShowText1
-} from '../../share/RoomListCommon';
-import { CloseButton, roomCount } from '../../share/option';
+} from '../RoomListCommon';
 
-class RoomPeople extends PureComponent {
+class RoomListInput extends PureComponent {
     state = {
         roomList: [
             {
@@ -25,47 +27,27 @@ class RoomPeople extends PureComponent {
         childForSingleAdult: 2, // 一位大人最多2位小孩
         minAdult: 1, // 每間房最少1位大人
         inputText: '共1間，2人',
-        inputText1: '2人',
         showDropDown: false,
     };
 
     componentDidMount () {
-        this.updatePanelRooms();
+        this.props.onChange(this.state);
     }
 
     componentDidUpdate (prevProps, prevState) {
-        if (prevState.roomList !== this.state.roomList) {
-            this.props.setPanelState({ roomlist: this.transforRoomList(), roomage: this.transforRoomage() });
+        if (prevState !== this.state) {
+            this.props.onChange(this.state);
         }
-        if (prevProps.noHotel !== this.props.noHotel) {
-            this.resetRoomList(); // 只要一更新就重新計算
+        if (prevProps !== this.props) {
+            this.updatePanelRooms();
         }
-    }
-
-    resetRoomList () {
-        const dataTemplate = [{
-            adult: 1,
-            childrenWithBed: [],
-            childrenNoBed: []
-        }];
-
-        const inputText = calcShowText(dataTemplate);
-        const inputText1 = calcShowText1(dataTemplate);
-
-        this.setState({
-            inputText,
-            inputText1,
-            roomList: dataTemplate
-        });
     }
 
     updatePanelRooms = () => {
         const { roomlist, roomage } = this.props;
-
         // props還原成陣列包陣列
         const listArr = roomlist.split(',').map(e => e.split('-').filter(e => e.length).map(e => Number(e)));
         const ageArr = roomage.split(',').map(e => e.split('-').map(e => e.split(';').filter(e => e.length).map(e => Number(e))));
-
         // props還原成陣列包物件
         const newRoomList = listArr.map((e, i) =>
             ({
@@ -74,30 +56,13 @@ class RoomPeople extends PureComponent {
                 childrenNoBed: ageArr[i][1]
             })
         );
-
         // 算人數
         const inputText = calcShowText(newRoomList);
-        const inputText1 =  calcShowText1(newRoomList);
 
         this.setState({
             roomList: newRoomList,
-            inputText,
-            inputText1
-        }, this.props.setPanelState({ roomlist: this.transforRoomList(), roomage: this.transforRoomage() }));
-    }
-
-    transforRoomList () {
-        const roomList = this.state.roomList.map((e) => {
-            return `${e.adult}-${e.childrenWithBed.length}-${e.childrenNoBed}`;
+            inputText
         });
-        return roomList.join(',');
-    }
-
-    transforRoomage () {
-        const roomage = this.state.roomList.map((e) => {
-            return `${e.childrenWithBed.join(';')}-${e.childrenNoBed.join(';')}`;
-        });
-        return roomage.join(',');
     }
 
     calcPeopleInfo () {
@@ -119,8 +84,10 @@ class RoomPeople extends PureComponent {
         return [total, adult, childrenWithBed, childrenNoBed];
     }
 
-    changeRoomCount = e => {
-        const { roomList } = this.state;
+    changeRoomCount = (e) => {
+        const {
+            roomList,
+        } = this.state;
         const value = e.target.value;
         const count = Number(value);
 
@@ -139,37 +106,39 @@ class RoomPeople extends PureComponent {
         }
 
         const inputText = calcShowText(dataArray);
-        const inputText1 = calcShowText1(dataArray);
 
         this.setState(prevState => {
             return {
                 inputText,
-                inputText1,
-                roomList: dataArray
+                roomList: dataArray,
             };
         });
-    };
+    }
 
     closMenu = () => {
         this.setState(prevState => ({
-            showDropDown: false
+            showDropDown: false,
         }));
-    };
+    }
 
     onClickInput = () => {
         this.setState(prevState => ({
-            showDropDown: true
+            showDropDown: true,
         }));
-    };
+    }
 
     onClickAdd = (roomCount, target) => {
-        const { maxPeople, maxChild, childForSingleAdult } = this.state;
+        const {
+            maxPeople,
+            maxChild,
+            childForSingleAdult,
+        } = this.state;
 
         const [
             total,
             adultNum,
             childBedNum,
-            childNoBedNum
+            childNoBedNum,
         ] = this.calcPeopleInfo();
 
         // 超過最大人數
@@ -196,17 +165,18 @@ class RoomPeople extends PureComponent {
             }
 
             const inputText = calcShowText(roomList);
-            const inputText1 = calcShowText1(roomList);
+
             return {
                 roomList,
                 inputText,
-                inputText1
             };
         });
-    };
+    }
 
     onClickMinus = (roomCount, target) => {
-        const { minAdult } = this.state;
+        const {
+            minAdult,
+        } = this.state;
 
         let roomList = JSON.parse(JSON.stringify(this.state.roomList));
         let t = roomList[roomCount][target];
@@ -222,8 +192,9 @@ class RoomPeople extends PureComponent {
             roomList = roomList.map(v => ({
                 adult: v.adult,
                 childrenWithBed: [],
-                childrenNoBed: []
+                childrenNoBed: [],
             }));
+
         } else {
             // 如果小孩人數已經為0
             if (t.length === 0) return;
@@ -233,87 +204,79 @@ class RoomPeople extends PureComponent {
         }
 
         const inputText = calcShowText(roomList);
-        const inputText1 = calcShowText1(roomList);
 
         this.setState(prevState => ({
             roomList,
             inputText,
-            inputText1
         }));
-    };
+    }
 
     onChangeChildAge = (roomCount, target, targetIndex, value) => {
         const roomList = [...this.state.roomList];
         const val = Number(value);
         roomList[roomCount][target][targetIndex] = val;
         this.setState(prevState => ({
-            roomList
+            roomList,
         }));
-    };
+    }
 
     render () {
-        const { roomList, inputText, inputText1, showDropDown } = this.state;
+        const { noHotel } = this.props;
+        const {
+            roomList,
+            inputText,
+            showDropDown,
+        } = this.state;
 
-        const { noHotel, customClass } = this.props;
-
-        const dropDownClasses = cx('room_list_wrap_container roompeople_content_pc', {
+        const dropDownClasses = cx('room_list_wrap_container', {
             'd-no': !showDropDown
         });
 
         return (
-            <ClickOutSide
-                className={customClass}
-                onClickOutside={this.closMenu}
-            >
+            <ClickOutSide onClickOutside={this.closMenu}>
                 <div className="input_compose roomListInput">
-                    <Label
-                        isDouble={false} // 雙欄位
-                        customClass={'w-people'} // 自訂 class
-                        title1={noHotel === 0 ? '間數/人數' : '人數'} // 欄位1 title
-                        icon={'toolmember'} // 欄位標題
-                    >
-                        {[
-                            <input
-                                key="1"
-                                type="text"
-                                value={noHotel === 0 ? inputText : inputText1}
-                                placeholder={
-                                    noHotel === 0 ? '共N間，N人' : '共N間'
-                                }
-                                onChange={e => this.onChange('text1', e)}
-                                onClick={this.onClickInput}
-                            />
-                        ]}
-                    </Label>
+                    <IntRcln
+                        placeholder={noHotel ? 'N人' : '共N間，N人'}
+                        label={noHotel ? '人數' : '間數/人數'}
+                        breakline
+                        readOnly
+                        value={noHotel ? inputText.split('，')[1] : inputText}
+                        onClick={this.onClickInput}
+                        icon={<IcRcln name="toolmember" />}
+                        className="m-b-sm"
+                    />
                     <div className={dropDownClasses}>
                         <CloseButton onClick={this.closMenu} />
-                        {noHotel === 0 && (
-                            <label className="room_count_select">
-                                <select onChange={this.changeRoomCount} value={roomList.length}>
-                                    {roomCount.map(e =>
-                                        <option
-                                            key={e.value}
-                                            value={e.value}
-                                        >
-                                            {e.text}
-                                        </option>
-                                    )}
-                                </select>
-                            </label>
-                        )}
-                        {roomList.length && roomList.map((v, i) => (
-                            <RoomLitSection
-                                key={i}
-                                roomCount={i}
-                                adult={v.adult}
-                                childrenWithBed={v.childrenWithBed}
-                                childrenNoBed={v.childrenNoBed}
-                                onClickAdd={this.onClickAdd} // 點選增加人數
-                                onClickMinus={this.onClickMinus} // 點選減少人數
-                                onChangeChildAge={this.onChangeChildAge} // 小孩年齡change
-                                noHotel={noHotel}
-                            />
-                        ))}
+                        {
+                            !noHotel &&
+                                <label className="room_count_select">
+                                    <select onChange={this.changeRoomCount} value={roomList.length}>
+                                        {roomCount.map(e =>
+                                            <option
+                                                key={e.value}
+                                                value={e.value}
+                                            >
+                                                {e.text}
+                                            </option>
+                                        )}
+                                    </select>
+                                </label>
+                        }
+                        {
+                            roomList.length && roomList.map((v, i) => (
+                                <RoomLitSection
+                                    key={i}
+                                    noHotel={noHotel}
+                                    roomCount={i}
+                                    adult={v.adult}
+                                    childrenWithBed={v.childrenWithBed}
+                                    childrenNoBed={v.childrenNoBed}
+                                    onClickAdd={this.onClickAdd} // 點選增加人數
+                                    onClickMinus={this.onClickMinus} // 點選減少人數
+                                    onChangeChildAge={this.onChangeChildAge} // 小孩年齡change
+                                />
+                            ))
+                        }
                         <NoticeText />
                     </div>
                 </div>
@@ -322,4 +285,4 @@ class RoomPeople extends PureComponent {
     }
 }
 
-export default RoomPeople;
+export default RoomListInput;

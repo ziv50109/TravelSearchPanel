@@ -317,6 +317,7 @@ class Panel extends PureComponent {
                 />
 
                 <Calendar
+                    panelName="travel"
                     titleTxt="出發區間"
                     totleNights={true}
                     onChange={(d) => this.setState({ CyRcln1: [d.startInputValue, d.endInputValue] })}

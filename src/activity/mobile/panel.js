@@ -5,6 +5,8 @@ import Taiwan from './Taiwan';
 import useLocalStorage from '../../../utils/useLocalStorage';
 import today from 'dayjs';
 import '../activity.scss';
+import onSubmit from '../onSubmit';
+import { Object } from 'es6-shim';
 
 class Panel extends Component {
     constructor (props) {
@@ -15,12 +17,12 @@ class Panel extends Component {
             taiwanSelectData: {},
             foreignSelectData: {},
             activityData: [
-                { title: '精選日本一日遊', href: '#'},
-                { title: '搭巴士遊歐洲', href: '#'},
-                { title: '全台樂園', href: '#'},
-                { title: '超值住宿', href: '#'},
-                { title: '水舞間特惠價', href: '#'},
-                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#'},
+                { title: '精選日本一日遊', href: '#' },
+                { title: '搭巴士遊歐洲', href: '#' },
+                { title: '全台樂園', href: '#' },
+                { title: '超值住宿', href: '#' },
+                { title: '水舞間特惠價', href: '#' },
+                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#' },
             ],
         };
     }
@@ -83,6 +85,14 @@ class Panel extends Component {
                 PostTime
             }
         });
+
+        const state = Object.assign({}, home ? taiwanSelectData : foreignSelectData, { Foreign: this.state.home ? 0 : 1 });
+        // const state = {
+        //     foreignSelectData: this.state.foreignSelectData,
+        //     taiwanSelectData: this.state.taiwanSelectData,
+        //     Foreign: this.state.home ? 0 : 1
+        // };
+        onSubmit(state);
     };
 
     render () {

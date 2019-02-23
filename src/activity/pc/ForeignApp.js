@@ -26,12 +26,12 @@ class ForeignApp extends Component {
             ticketAbroadData: {},
             ticketTaiwanData: {},
             activityData: [
-                { title: '精選日本一日遊', href: '#'},
-                { title: '搭巴士遊歐洲', href: '#'},
-                { title: '全台樂園', href: '#'},
-                { title: '超值住宿', href: '#'},
-                { title: '水舞間特惠價', href: '#'},
-                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#'},
+                { title: '精選日本一日遊', href: '#' },
+                { title: '搭巴士遊歐洲', href: '#' },
+                { title: '全台樂園', href: '#' },
+                { title: '超值住宿', href: '#' },
+                { title: '水舞間特惠價', href: '#' },
+                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#' },
             ],
         };
         this.AbortController = null;
@@ -86,11 +86,27 @@ class ForeignApp extends Component {
             this.validataLocalstorageData(data);
         });
     }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.foreignSelectData !== this.props.foreignSelectData) {
+            this.updateData();
+        }
+    }
     componentWillUnmount () {
         window.removeEventListener('resize', this.updateDimensions);
     }
+    updateData = () => {
+        const { foreignSelectData } = this.props;
+        // 判斷是否來自補字  or 快速
+
+        if (foreignSelectData.txt) {
+            this.setState({
+                innerValue: foreignSelectData.txt
+            });
+        }
+        const url = activity.keyword + '?KeyWord=' + encodeURI(foreignSelectData.txt);
+        this.fetchDestnActData(url);
+    }
     _onClickItem = data => {
-        console.log('_onClickItem', data);
         const { home } = this.props;
         this.setState({
             selectedData: [data],
@@ -106,14 +122,20 @@ class ForeignApp extends Component {
 
         let keyName = home ? 'taiwanSelectData' : 'foreignSelectData';
         this.props.onClickItem && this.props.onClickItem({
-            [keyName]: data
+            [keyName]: data //  = foreignSelectData: data
         });
     };
 
   _onFocusHandle = e => {
-      this.setState({ showSearchResult: true });
+      this.setState({
+          showSearchResult: true
+      });
   };
+
   _onClickOutSide = () => {
+      if (this.state.innerValue && this.state.showSearchResult) {
+          this.selectActFirstItem(this.state.actData);
+      }
       this.setState({
           showSearchResult: false
       });
@@ -123,27 +145,31 @@ class ForeignApp extends Component {
       // const thisItem = this.state.actData.sort((a, b) => a.txt.length - b.txt.length)[v.dataIndex];
       this.setState({
           inputValue: v.txt,
-          showSearchResult: this.state.width < 980 ? true : e || false,
+          showSearchResult: false,
           selectedVal: v
+      }, () => {
+          this.props.onClickItem({
+              foreignSelectData: v
+          });
       });
   };
     updateDimensions = () => {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
     };
   selectActFirstItem = () => {
-      const firstItemName = this.state.actData.sort(
-          (a, b) => a.txt.length - b.txt.length
-      )[0].txt;
-      const firstItem = this.state.actData.sort(
-          (a, b) => a.txt.length - b.txt.length
-      )[0];
+      const firstItemName = this.state.actData[0].txt;
+      const firstItem = this.state.actData[0];
       firstItem.dataIndex = 0;
       // console.log('沒有使用快速選單');
       // console.log(`將${firstItemName}塞回input`);
       this.setState({
-          showSearchResult: this.state.width < 980 ? true : false,
+          showSearchResult: false,
           inputValue: firstItemName,
           selectedVal: firstItem
+      }, () => {
+          this.props.onClickItem({
+              foreignSelectData: this.state.selectedVal
+          });
       });
       // 關閉選單                  把文字塞回input
   };
@@ -153,7 +179,7 @@ class ForeignApp extends Component {
 
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-          const url = activity.keyword + '?KeyWord=' + encodeURI(searchKeyword);
+          const url = activity.keyword + '?Foreign=1&Keyword=' + encodeURI(searchKeyword);
           this.fetchDestnActData(url);
       }, 500);
   };
@@ -171,6 +197,7 @@ class ForeignApp extends Component {
       // Destinations 是 fetch的第一個key name
       let p = new Promise(function (resolve, reject) {
           data.Destinations.map(item => {
+              item.Foreign = item.Foreign;
               item.level1 = item.Kind;
               item.level2 = item.KindName;
               item.level3 = item.Code;
@@ -182,8 +209,19 @@ class ForeignApp extends Component {
           });
           resolve(data);
       });
+      console.log(data.Destinations);
+      const actData = data.Destinations.filter(e => e.Foreign === '1');
+
+      let searchWord = this.state.innerValue.toUpperCase(); // 關鍵字尋轉成大寫
+      actData.sort((a, b) => {  // ActRajax 值傳入入模組 rajx 前,依照搜尋的關鍵先後,字預先排序好
+          let a_lightingWord = a.txt.indexOf(searchWord);
+          let b_lightingWord = b.txt.indexOf(searchWord);
+          return ((a_lightingWord < b_lightingWord) ? -1 : ((a_lightingWord > b_lightingWord) ? 1 : -1));
+      }).sort((a, b) => a.level1 - b.level1);
+
+      // 後端目前未給Foreign值,
       this.setState({
-          actData: data.Destinations,
+          actData,
           searchKeyWord: searchKeyWord,
           showText: '',
           fetchFinish: true
@@ -192,7 +230,6 @@ class ForeignApp extends Component {
   }
 
   onTypingFinish = value => {
-      console.log("ontypingfinish's value", value);
       this.setState({
           foreignSelectData: {},
           inputValue: value,
@@ -233,7 +270,7 @@ class ForeignApp extends Component {
               }));
           } else {
               this.setState({
-                  inputValue: data.destination.foreignSelectData.text
+                  inputValue: data.destination.foreignSelectData.text || data.destination.foreignSelectData.txt
               });
           }
           this.props.onClickItem && this.props.onClickItem({
@@ -242,11 +279,10 @@ class ForeignApp extends Component {
       }
   };
 
-
   render () {
       const { showSearchResult } = this.state;
       const { home, foreignSelectData } = this.props;
-      let foreignSelected = Object.keys(foreignSelectData).length ? [foreignSelectData.value] : [];
+      let foreignSelected = Object.keys(foreignSelectData).length && foreignSelectData.value ? [foreignSelectData.value] : [];
 
       const handleChange = e => {
           this.setState({
@@ -258,14 +294,14 @@ class ForeignApp extends Component {
               this.props.onClickItem && this.props.onClickItem({
                   foreignSelectData: {}
               });
-              this.setState({
-                  showSearchResult: false
-              });
           }
       };
       const svgClassName = () => {
           if (!showSearchResult) {
               return 'd-no';
+          }
+          if (this.state.inputValue) {
+              return '';
           }
           if (!home && Object.keys(foreignSelectData).length) {
               return '';
@@ -315,20 +351,12 @@ class ForeignApp extends Component {
                       }
                   </span>
               </div>
-              <div
-                  className={
-                      ((this.state.innerValue.length <= 0 ||
-              !this.state.showSearchResult) &&
-              'd-no actrajaxWraper') ||
-            'actrajaxWraper'
-                  }
+              <div className={
+                  ((this.state.innerValue.length <= 0 || !this.state.showSearchResult) && 'd-no actrajaxWraper') || 'actrajaxWraper'
+              }
               >
-                  <div
-                      className={`cross ${this.state.actData.length === 0 && 'd-no'}
-          `}
-                      onClick={this.closeSearch}
-                  >
-            x
+                  <div className="DtmRcfrCloseBtn" onClick={this.closeSearch}>
+                      <svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg>
                   </div>
                   <ActRajax
                       containerClass={
@@ -351,14 +379,11 @@ class ForeignApp extends Component {
                       rules={[
                           { title: '城市' },
                           { title: '區域' },
-                          { title: '行政區' },
-                          { title: '商圈' },
-                          { title: '地標' },
-                          { title: '飯店' }
+                          { title: '產品' },
                       ]}
                   />
               </div>
-              {this.state.innerValue < 2 && (
+              {this.state.innerValue.length < 1 && (
                   <div
                       className={
                           !home && this.state.showSearchResult
@@ -379,14 +404,14 @@ class ForeignApp extends Component {
                           dataResouce={this.state.ticketAbroadData}
                           replaceRegular={/[a-zA-Z\(\)\s]/g}
                           onClickItem={this._onClickItem}
-                          selectedData={this.handleChange && this.handleChange || foreignSelected}
+                          selectedData={foreignSelected}
                       />
                       }
                   </div>
               )}
               <ActivityLinks
-                links={this.state.activityData}
-                targetBlank={true}
+                  links={this.state.activityData}
+                  targetBlank={true}
               />
           </ClickOutSide>
       );

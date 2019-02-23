@@ -84,8 +84,8 @@ class Depdtn extends PureComponent {
         fetch(this.fetchDtnS)
             .then(r => r.json())
             .then(data => {
-                // const jsonData = JSON.parse(data);
-                this.setState({ destinationData: data }, this.updateDtn(data));
+                const jsonData = JSON.parse(data);
+                this.setState({ destinationData: jsonData }, this.updateDtn(jsonData));
                 sessionStorage.setItem(
                     this.fetchDtnS,
                     JSON.stringify(data)
@@ -95,13 +95,12 @@ class Depdtn extends PureComponent {
 
     // props 傳過來的 Destination 修改成 dtm 可以讀格式
     updateDtn (sourceData) {
-        const dtnData = JSON.parse(sourceData);
         if (!this.props.Destination) {
             this.setState({ selectedData: [] });
             return;
         }
         const propsDtn = `${this.props.Destination.split('_')[1]}`;
-        dtnData['City'].forEach(everyZone => {
+        sourceData['City'].forEach(everyZone => {
             everyZone['CityList'].forEach((v) => {
                 if (v['City'] === propsDtn) {
                     // example { value: '_9-01-TPE', text: '台北' }
@@ -151,6 +150,7 @@ class Depdtn extends PureComponent {
 
     // 目的地
     onDtnChange (v) {
+        console.log(v);
         const dtnString = v.length ? `${v[0].vArea}_${v[0].vTcity}_` : '';
         this.setPanelState({ Destination: dtnString, vTcity: v.length ? `TW_${v[0].vTcity}` : '' });
     }

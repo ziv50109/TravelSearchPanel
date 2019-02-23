@@ -360,6 +360,7 @@ class Panel extends Component {
                 />
 
                 <ComposeCalendar
+                    panelName="travel"
                     titleTxt="出發日期"
                     totleNights={true}
                     onChange={(d) => this.setState({ GoDateStart: d.startInputValue, GoDateEnd: d.endInputValue })}

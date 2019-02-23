@@ -1,6 +1,6 @@
 $classname: 'SingleInputMenu';
 $blue: #0077b3;
-.#{$classname} {
+.#{$classname}.flights {
     &.flights-m {
         padding-top: 125px;
         height: 100%;
@@ -32,13 +32,13 @@ $blue: #0077b3;
         &-wrap {
             display: none;
             position: absolute;
-            top: 100%;
-            left: -1px;
-            width: 690px;
+            // top: 100%;
+            // left: -1px;
+            // width: 690px;
             padding: 16px 14px 0;
             background-color: #fff;
             z-index: 11;
-            border: 1px solid rgba(153, 153, 153, 0.7);
+            border: 1px solid #ddd;
             &.open {
                 display: block;
             }
@@ -112,7 +112,7 @@ $blue: #0077b3;
         &_input {
             border: none;
             padding: 0;
-            font-weight: bold;
+            // font-weight: bold;
             color: $blue;
         }
     }

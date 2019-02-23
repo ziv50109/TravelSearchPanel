@@ -42,6 +42,34 @@ class RoomPeopleM extends PureComponent {
         this.setState({ zIndex: this.getHighestZIndex() });
     }
 
+    componentDidUpdate (prevProps, prevState) {
+        if (prevState.roomList !== this.state.roomList) {
+            this.props.setPanelState({ roomlist: this.transforRoomList(), roomage: this.transforRoomage() });
+        }
+        if (prevProps.noHotel !== this.props.noHotel) {
+            this.resetRoomList(); // 只要一更新就重新計算
+        }
+    }
+
+    resetRoomList () {
+        const dataTemplate = [{
+            adult: 1,
+            childrenWithBed: [],
+            childrenNoBed: []
+        }];
+
+        const inputText = calcShowText(dataTemplate);
+        const inputText1 = calcShowText1(dataTemplate);
+
+        this.setState({
+            inputText,
+            inputText1,
+            pageText: inputText,
+            pageText1: inputText1,
+            roomList: dataTemplate
+        });
+    }
+
     updatePanelRooms = () => {
         const { roomlist, roomage } = this.props;
         // props還原成陣列包陣列
@@ -58,11 +86,14 @@ class RoomPeopleM extends PureComponent {
 
         // 算人數
         const inputText = calcShowText(newRoomList);
+        const inputText1 = calcShowText1(newRoomList);
 
         this.setState({
             roomList: newRoomList,
             inputText,
+            inputText1,
             pageText: inputText,
+            pageText1: inputText1
         });
     }
 
@@ -245,7 +276,7 @@ class RoomPeopleM extends PureComponent {
     showCalendar = () => {
         this.setState({
             visible: !this.state.visible,
-        });
+        }, this.updatePanelRooms);
     }
 
     onClickConfirm = () => {

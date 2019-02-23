@@ -402,7 +402,7 @@ class Panel extends Component {
                                     {DestinationSelected.length < 3 && (
                                         <IntRcln
                                             readOnly
-                                            placeholder={DestinationSelected.length ? null : '目的地'}
+                                            placeholder={DestinationSelected.length ? null : '請輸入國家/城市/機場'}
                                         />
                                     )}
                                 </div>

@@ -123,6 +123,14 @@ class Panel extends Component {
             };
             dataArray.push(hotelDataObj);
         }
+
+        let searchKeyWord = this.state.Txt.toUpperCase(); // 關鍵字尋轉成大寫
+        dataArray.sort((a, b) => {  // dataArray 值傳入入模組 rajx 前,依照搜尋的關鍵先後,字預先排序好
+            let a_lightingWord = a.txt.indexOf(searchKeyWord);
+            let b_lightingWord = b.txt.indexOf(searchKeyWord);
+            return ((a_lightingWord < b_lightingWord) ? -1 : ((a_lightingWord > b_lightingWord) ? 1 : -1));
+        }).sort((a, b) => a.Kind - b.Kind);
+
         return dataArray;
     }
     transformDtmData = (data) => {

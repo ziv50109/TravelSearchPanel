@@ -55,6 +55,7 @@ class SingleInputMenu extends Component {
         this.searchInput = React.createRef();
         this.state = {
             keyword: '',
+            Txt: '',
             showDtm: false,
             showAct: false,
 
@@ -109,7 +110,8 @@ class SingleInputMenu extends Component {
             ? nextProps.selectedData[0].text
             : '';
         this.setState({
-            keyword: text
+            keyword: text,
+            Txt: text
         });
     }
 
@@ -143,6 +145,7 @@ class SingleInputMenu extends Component {
                 newObj['level3'] = `${cityV['City']}_${cityV['CityEName']}`;
                 newObj['txt'] = cityV.CityName;
                 newObj['city'] = cityV['City'];
+                newObj['area'] = v['Zone'];
                 destinationAct.push(newObj);
                 actArea.push(cityV);
             });
@@ -186,7 +189,7 @@ class SingleInputMenu extends Component {
             }
         });
 
-        this.setState({ destinationAct });
+        this.setState({ destinationAct, showAct: true, showDtm: false });
     }
 
     // 快速選單 json 資料格式
@@ -217,36 +220,62 @@ class SingleInputMenu extends Component {
         return newObj;
     }
 
-    // 通知 parent component data 更新
-    emitPushData = data => {
-        const { selectedData } = this.props;
-        let propsText =
-            selectedData.length > 0
-                ? selectedData[0].text + '-' + selectedData[0].vLinetravelText
-                : '';
-        let dataText = data ? data.text + '-' + data.vLinetravelText : '';
-        let text = propsText === dataText ? '' : dataText;
-        if (data) {
-            this.props.onChange && this.props.onChange(data);
-            this.setState({ keyword: text, showDtm: false });
-        } else {
-            this.setState({ keyword: '', showDtm: true });
-            this.props.onChange && this.props.onChange('');
-        }
-    };
-
+    // 修改父層 state
     onClickItem = (v) => {
         this.props.onChange && this.props.onChange(v);
+        this.setState({ showAct: false, showDtm: false });
     }
 
-    // 補字點擊時
-    onClickAct =(v) => {
-        const newObj = {
-            vTcity: v['city'],
-            value: `_9_${v['city']}`
-        };
+    // 通知 parent component data 更新
+    // emitPushData = data => {
+    //     const { selectedData } = this.props;
+    //     let propsText =
+    //         selectedData.length > 0
+    //             ? selectedData[0].text + '-' + selectedData[0].vLinetravelText
+    //             : '';
+    //     let dataText = data ? data.text + '-' + data.vLinetravelText : '';
+    //     let text = propsText === dataText ? '' : dataText;
+    //     if (data) {
+    //         this.props.onChange && this.props.onChange(data);
+    //         this.setState({ keyword: text, showDtm: false });
+    //     } else {
+    //         this.setState({ keyword: '', showDtm: true });
+    //         this.props.onChange && this.props.onChange('');
+    //     }
+    // };
 
-        this.onClickItem(newObj);
+    // 補字點擊時
+    onClickDestnAct = (data, str) => {
+        const {
+            txt: Txt
+        } = data;
+        if (str === 'choosed') {
+            // this.setState({
+            //     Code,
+            //     Kind,
+            //     Txt,
+            //     dtmSelected: [],
+            //     selectedData: [data],
+            //     showAct: false,
+            // }, () => {
+            //     const newObj = {
+            //         vTcity: data['city'],
+            //         vArea: data['area'],
+            //         value: `_9_${data['city']}`
+            //     };
+            //     this.onClickItem(newObj);
+            // });
+            const newObj = {
+                vTcity: data['city'],
+                vArea: data['area'],
+                value: `_9_${data['city']}`
+            };
+            this.onClickItem(newObj);
+        } else {
+            this.setState({
+                Txt,
+            });
+        }
     }
 
     handleOpenMenuFocus = () => {
@@ -254,31 +283,43 @@ class SingleInputMenu extends Component {
     };
 
     handleOpenMenuDown = () => {
-        this.state.keyword
-            ? this.setState({ showDtm: false, showAct: true })
-            : this.setState({ showDtm: true, showAct: false });
+        // this.state.keyword
+        //     ? this.setState({ showDtm: false, showAct: true })
+        //     : this.setState({ showDtm: true, showAct: false });
     };
+
+    // 關閉　dtm act 時
     handleCloseMenu = () => {
-        const { selectedData } = this.props;
-        const { keyword } = this.state;
-        if (selectedData.length > 0) {
-            let text = selectedData ? selectedData[0].text : '';
-            if (keyword.length !== text.length) {
-                this.setState({
-                    keyword: text,
-                    showDtm: false,
-                    showAct: false
-                });
-            }
+        const { destinationAct } = this.state;
+        if (destinationAct.length) {
+            const newObj = {
+                vTcity: destinationAct[0]['city'],
+                vArea: destinationAct[0]['area'],
+                value: `_9_${destinationAct[0]['city']}`
+            };
+            this.onClickItem(newObj);
         }
+        // const { selectedData } = this.props;
+        // const { keyword } = this.state;
+        // if (selectedData.length > 0) {
+        //     let text = selectedData ? selectedData[0].text : '';
+        //     if (keyword.length !== text.length) {
+        //         this.setState({
+        //             keyword: text,
+        //             showDtm: false,
+        //             showAct: false
+        //         });
+        //     }
+        // }
         this.setState({
             showDtm: false,
             showAct: false
         });
     };
     // 通知 parent component 移除 data
-    handleEmitRemoveData = (e, data) => {
-        this.emitPushData('');
+    handleEmitRemoveData = () => {
+        this.props.onChange && this.props.onChange('');
+        // this.emitPushData('');
     };
     // 點擊 label wrap 就 focus search input
     handleLabelWrapClick = () => {
@@ -288,19 +329,20 @@ class SingleInputMenu extends Component {
         if (!e.target.value) {
             this.setState({
                 keyword: '',
-                showAct: false,
-                showDtm: true
+                Txt: '',
+                // showAct: false,
+                // showDtm: true
             });
             this.props.onChange && this.props.onChange('');
         } else {
             this.setState({
                 keyword: e.target.value,
-                showAct: true,
-                showDtm: false
+                Txt: e.target.value,
+                // showAct: true,
+                // showDtm: false
             });
         }
-
-        this.findAboutKeyword(e.target.value); // 補字
+        this.findAboutKeyword(e.target.value);  // 補字
     };
     handleFocus = () => {
         this.searchInput.current.inputDOM.focus();
@@ -323,7 +365,8 @@ class SingleInputMenu extends Component {
             showDtm,
             destinationDtm,
             destinationAct,
-            actRules
+            actRules,
+            Txt
         } = this.state;
 
         // DtmRcfr highlight
@@ -361,14 +404,15 @@ class SingleInputMenu extends Component {
                                     placeholder={placeholder}
                                     onKeyDown={this.handleOpenMenuDown}
                                     onFocus={this.handleOpenMenuFocus}
-                                    value={keyword}
+                                    value={Txt}
                                     onChange={e => this.handleChange(e)}
-                                    onClearValue={e =>
-                                        this.handleEmitRemoveData(
-                                            e,
-                                            selectedData
-                                        )
-                                    }
+                                    // onClearValue={e =>
+                                    //     this.handleEmitRemoveData(
+                                    //         e,
+                                    //         selectedData
+                                    //     )
+                                    // }
+                                    onClearValue={this.handleEmitRemoveData}
                                 />
                             </div>
 
@@ -380,7 +424,7 @@ class SingleInputMenu extends Component {
                                     isFocus={showAct}
                                     data={destinationAct}
                                     matchWord={keyword}
-                                    getItemClickValue={this.onClickAct}
+                                    getItemClickValue={this.onClickDestnAct}
                                     minimumStringQuery={'請至少輸入兩個字'}
                                     noMatchText="很抱歉，找不到符合的項目"
                                     minimumStringQueryLength={1}
@@ -402,7 +446,19 @@ class SingleInputMenu extends Component {
                                         <use xlinkHref="#dtm_rcfr-x" />
                                     </svg>
                                 </span>
-                                {Object.keys(destinationDtm).length && (
+                                {/* {Object.keys(destinationDtm).length && (
+                                    <DtmRcfr
+                                        levelKey={[
+                                            'vLine',
+                                            'vArea',
+                                            'vTcity'
+                                        ]}
+                                        onClickItem={this.onClickItem}
+                                        dataResouce={this.state.destinationDtm}
+                                        selectedData={selected}
+                                    />
+                                )} */}
+                                {showDtm && (
                                     <DtmRcfr
                                         levelKey={[
                                             'vLine',

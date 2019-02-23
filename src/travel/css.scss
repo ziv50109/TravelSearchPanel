@@ -96,7 +96,6 @@ $blue: #0077b3;
 
     // [只找保證出團、只找可報名團體] checkbox 樣式調整
     .chkbox-group {
-        padding-top: 10px;
         margin: 0;
     }
     .cr_rcln {
@@ -218,6 +217,9 @@ $blue: #0077b3;
             margin: 8px 0 10px 16px;
             font-size: 14px;
             color: #24a07d;
+            @media screen and (max-width: 350px) {
+                font-size: 12px;
+            }
         }
         &-close_btn {
             display: none;
@@ -389,7 +391,7 @@ $blue: #0077b3;
                 height: auto;
                 overflow: visible;
                 padding: 16px 14px 0;
-                border: 1px solid rgba(153, 153, 153, 0.7);
+                border: 1px solid #ddd;
                 z-index: 11;
             }
             &-label {

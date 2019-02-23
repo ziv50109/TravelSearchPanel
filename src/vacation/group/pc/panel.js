@@ -316,7 +316,8 @@ class Panel extends Component {
                 </div>
 
                 <ComposeCalendar
-                    titleTxt="出發日期"
+                    panelName="travel"
+                    titleTxt="出發區間"
                     totleNights={true}
                     onChange={(e) => this.setState({ GoDateStart: e.startInputValue, GoDateEnd: e.endInputValue })}
                     setEndDate={36}  // 月曆可選日期最大上限(單位/月),不設定則預設是12個月;

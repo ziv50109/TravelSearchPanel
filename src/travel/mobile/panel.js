@@ -419,8 +419,8 @@ class Panel extends PureComponent {
                                 endLabelTitle="最晚出發日"
                                 startTxt="最早"
                                 endTxt="最晚"
-                                // endDate={`${this.year}-${this.month + 3}-${this.day}`}
-                                endMonth={`${this.year + 3}-${this.month}`}
+                                endDate={dayjs().add(3, 'year').format('YYYY-MM-DD')}
+                                endMonth={dayjs().add(3, 'year').format('YYYY-MM')}
                                 ref={e => { this.calendar = e }}
                                 onClickConfirm={() => {
                                     const {

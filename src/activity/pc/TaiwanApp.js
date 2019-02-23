@@ -26,12 +26,12 @@ class TaiwanApp extends Component {
             ticketAbroadData: {},
             ticketTaiwanData: {},
             activityData: [
-                { title: '精選日本一日遊', href: '#'},
-                { title: '搭巴士遊歐洲', href: '#'},
-                { title: '全台樂園', href: '#'},
-                { title: '超值住宿', href: '#'},
-                { title: '水舞間特惠價', href: '#'},
-                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#'},
+                { title: '精選日本一日遊', href: '#' },
+                { title: '搭巴士遊歐洲', href: '#' },
+                { title: '全台樂園', href: '#' },
+                { title: '超值住宿', href: '#' },
+                { title: '水舞間特惠價', href: '#' },
+                { title: '冰雪冰雪加拿大極光旅人達人推薦', href: '#' },
             ],
         };
         this.AbortController = null;
@@ -87,8 +87,27 @@ class TaiwanApp extends Component {
             this.validataLocalstorageData(data);
         });
     }
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.taiwanSelectData !== this.props.taiwanSelectData) {
+            this.updateData();
+        }
+    }
     componentWillUnmount () {
         window.removeEventListener('resize', this.updateDimensions);
+    }
+    updateData = () => {
+        const { taiwanSelectData } = this.props;
+        console.log(taiwanSelectData);
+        // 判斷是否來自補字  or 快速
+
+        if (taiwanSelectData.txt) {
+            this.setState({
+                innerValue: taiwanSelectData.txt,
+            });
+        }
+        const url = activity.keyword + '?KeyWord=' + encodeURI(taiwanSelectData.txt);
+        this.fetchDestnActData(url);
+
     }
     _onClickItem = data => {
         const { home } = this.props;
@@ -113,7 +132,11 @@ class TaiwanApp extends Component {
   _onFocusHandle = e => {
       this.setState({ showSearchResult: true });
   };
+
   _onClickOutSide = () => {
+      if (this.state.innerValue && this.state.showSearchResult) {
+          this.selectActFirstItem(this.state.actData);
+      }
       this.setState({
           showSearchResult: false
       });
@@ -123,27 +146,31 @@ class TaiwanApp extends Component {
       // const thisItem = this.state.actData.sort((a, b) => a.txt.length - b.txt.length)[v.dataIndex];
       this.setState({
           inputValue: v.txt,
-          showSearchResult: this.state.width < 980 ? true : e || false,
+          showSearchResult: false,
           selectedVal: v
+      }, () => {
+          this.props.onClickItem({
+              taiwanSelectData: v
+          });
       });
   };
     updateDimensions = () => {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
     };
   selectActFirstItem = () => {
-      const firstItemName = this.state.actData.sort(
-          (a, b) => a.txt.length - b.txt.length
-      )[0].txt;
-      const firstItem = this.state.actData.sort(
-          (a, b) => a.txt.length - b.txt.length
-      )[0];
+      const firstItemName = this.state.actData[0].txt;
+      const firstItem = this.state.actData[0];
       firstItem.dataIndex = 0;
       // console.log('沒有使用快速選單');
       // console.log(`將${firstItemName}塞回input`);
       this.setState({
-          showSearchResult: this.state.width < 980 ? true : false,
+          showSearchResult: false,
           inputValue: firstItemName,
-          selectedVal: firstItem
+          selectedVal: firstItem,
+      }, () => {
+          this.props.onClickItem({
+              taiwanSelectData: this.state.selectedVal
+          });
       });
       // 關閉選單                  把文字塞回input
   };
@@ -153,7 +180,8 @@ class TaiwanApp extends Component {
 
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-          const url = activity.keyword + '?KeyWord=' + encodeURI(searchKeyword);
+
+          const url = activity.keyword + '?Foreign=0&KeyWord=' + encodeURI(searchKeyword);
           this.fetchDestnActData(url);
       }, 500);
   };
@@ -171,6 +199,7 @@ class TaiwanApp extends Component {
       // Destinations 是 fetch的第一個key name
       let p = new Promise(function (resolve, reject) {
           data.Destinations.map(item => {
+              //   item.Foreign = item.Foreign;
               item.level1 = item.Kind;
               item.level2 = item.KindName;
               item.level3 = item.Code;
@@ -182,8 +211,19 @@ class TaiwanApp extends Component {
           });
           resolve(data);
       });
+      console.log(data.Destinations);
+      const actData = data.Destinations.filter(e => e.Foreign === '0');
+
+      let searchWord = this.state.innerValue.toUpperCase(); // 關鍵字尋轉成大寫
+      actData.sort((a, b) => {  // ActRajax 值傳入入模組 rajx 前,依照搜尋的關鍵先後,字預先排序好
+          let a_lightingWord = a.txt.indexOf(searchWord);
+          let b_lightingWord = b.txt.indexOf(searchWord);
+          return ((a_lightingWord < b_lightingWord) ? -1 : ((a_lightingWord > b_lightingWord) ? 1 : -1));
+      }).sort((a, b) => a.level1 - b.level1);
+
+      // 後端目前未給Foreign值,
       this.setState({
-          actData: data.Destinations,
+          actData,
           searchKeyWord: searchKeyWord,
           showText: '',
           fetchFinish: true
@@ -228,7 +268,7 @@ class TaiwanApp extends Component {
               }));
           } else {
               this.setState({
-                  inputValue: data.destination.taiwanSelectData.text
+                  inputValue: data.destination.taiwanSelectData.text || data.destination.taiwanSelectData.txt
               });
           }
           this.props.onClickItem && this.props.onClickItem({
@@ -241,8 +281,7 @@ class TaiwanApp extends Component {
   render () {
       const { showSearchResult } = this.state;
       const { home, taiwanSelectData } = this.props;
-      let taiwanSelected = Object.keys(taiwanSelectData).length ? [taiwanSelectData.value] : [];
-
+      let taiwanSelected = Object.keys(taiwanSelectData).length && taiwanSelectData.value ? [taiwanSelectData.value] : [];
 
       const handleChange = e => {
           this.setState({
@@ -254,14 +293,14 @@ class TaiwanApp extends Component {
               this.props.onClickItem && this.props.onClickItem({
                   taiwanSelectData: {}
               });
-              this.setState({
-                  showSearchResult: false
-              });
           }
       };
       const svgClassName = () => {
           if (!showSearchResult) {
               return 'd-no';
+          }
+          if (this.state.inputValue) {
+              return '';
           }
           if (home && Object.keys(taiwanSelectData).length) {
               return '';
@@ -314,18 +353,11 @@ class TaiwanApp extends Component {
               </div>
               <div
                   className={
-                      ((this.state.innerValue.length <= 0 ||
-              !this.state.showSearchResult) &&
-              'd-no actrajaxWraper') ||
-            'actrajaxWraper'
+                      ((this.state.innerValue.length <= 0 || !this.state.showSearchResult) && 'd-no actrajaxWraper') || 'actrajaxWraper'
                   }
               >
-                  <div
-                      className={`cross ${this.state.actData.length === 0 && 'd-no'}
-          `}
-                      onClick={this.closeSearch}
-                  >
-            x
+                  <div className="DtmRcfrCloseBtn" onClick={this.closeSearch}>
+                      <svg viewBox="0 0 10 10"><use xlinkHref="#dtm_rcfr-x" /></svg>
                   </div>
                   <ActRajax
                       containerClass={
@@ -348,14 +380,11 @@ class TaiwanApp extends Component {
                       rules={[
                           { title: '城市' },
                           { title: '區域' },
-                          { title: '行政區' },
-                          { title: '商圈' },
-                          { title: '地標' },
-                          { title: '飯店' }
+                          { title: '產品' }
                       ]}
                   />
               </div>
-              {this.state.innerValue < 2 && (
+              {this.state.innerValue.length < 1 && (
                   <div
                       className={
                           home && this.state.showSearchResult
@@ -381,9 +410,9 @@ class TaiwanApp extends Component {
                   </div>
               )}
               <ActivityLinks
-                links={this.state.activityData}
-                targetBlank={true}
-            />
+                  links={this.state.activityData}
+                  targetBlank={true}
+              />
           </ClickOutSide>
       );
   }

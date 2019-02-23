@@ -92,7 +92,10 @@ class Panel extends Component {
         let dtnDate = depdate2 && nowday.isAfter(dayjs(depdate2)) ? nowday.format('YYYY-MM-DD') : depdate2;
         // 如果起日過期，迄日要清空
         if (nowday.isAfter(dayjs(depdate1).add(1, 'day'))) dtnDate = '';
+
         let multDate = multiItems ? (nowday.isAfter(dayjs(multiItems)) ? nowday.format('YYYY-MM-DD') : multiItems) : '';
+        if (nowday.isAfter(dayjs(depdate1).add(1, 'day'))) multDate = '';
+
         let dptPlace = dptSelectedData ? dptSelectedData : [];
         let dtnPlace = dtnSelectedData ? dtnSelectedData : [];
         let multDpt = multiItemsDpt ? multiItemsDpt : '';
@@ -435,13 +438,15 @@ class Panel extends Component {
         if (dcActiveInput !== 'end') {
             this.setState({
                 clearBtn,
-                depdate1: newDate ? newDate : (clearBtn[key] ? dayjs().format('YYYY-MM-DD') : '')
+                depdate1: newDate ? newDate : (clearBtn[key] ? dayjs().format('YYYY-MM-DD') : ''),
+                // depdate2: ''
+                startDate: depdate1
             });
         } else {
             this.setState({
                 clearBtn,
                 depdate2: newDate && newDate >= depdate1 ? newDate : '',
-                startDate: depdate1
+                startDate: ''
             });
         }
     }
@@ -458,6 +463,7 @@ class Panel extends Component {
         return dayjs().format('YYYY-MM-DD');
     }
     // 檢查日期
+    // eslint-disable-next-line complexity
     checkDate = (muitDate) => {
         const {
             dcActiveInput,
@@ -484,7 +490,8 @@ class Panel extends Component {
             return dayjs().format('YYYY-MM-DD');
         };
         const setNewEndDate = () => {
-            return dayjs(depdate1).add(1, 'days').format('YYYY-MM-DD');
+            const newEndDate = depdate1 ? dayjs(depdate1) : dayjs();
+            return newEndDate.add(1, 'days').format('YYYY-MM-DD');
         };
         const isAfterOtherEnd = (d) => {
             if (isStart) return false;
@@ -495,7 +502,7 @@ class Panel extends Component {
         // 輸入的字元不合規則
         if (result === null) {
             alert('請輸入正確的日期格式(YYYYMMDD) EX: 2018/01/01');
-            return setNewStartDate();
+            return isStart ? setNewStartDate() : setNewEndDate();
         }
 
         // 月份小於10月，前面加'0'
@@ -504,6 +511,7 @@ class Panel extends Component {
         let d = `${year || dayjs().year()}-${month}-${day}`;
         const date = dayjs(d);
         const calcStartDate = this.calcStartDate(isStart);
+        const today = dayjs().format('YYYY-MM-DD');
 
         // 日期格式正確但是不存在的日期
         if (!isValidDate(new Date(d))) {
@@ -513,12 +521,19 @@ class Panel extends Component {
         // 日期格式正確但是不存在的日期
         if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
             alert('無效的日期');
-            d = setNewStartDate();
+            return isStart ? setNewStartDate() : setNewEndDate();
         }
-
+        if (date.isBefore(today)) {
+            alert('日期必須大於今日');
+            return isStart ? setNewStartDate() : setNewEndDate();
+        }
         if (date.isBefore(calcStartDate)) {
-            alert('回程日期不得小於出發日期！');
-            d = setNewEndDate();
+            let text = '日期必須大於今日';
+            if (!isStart && depdate1 && this.props.rtow !== 3) {
+                text = '回程日期不得小於去程日期！';
+            }
+            alert(text);
+            return isStart ? setNewStartDate() : setNewEndDate();
         }
 
         // 日期超過 checkIn N天範圍

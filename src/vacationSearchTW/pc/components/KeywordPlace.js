@@ -15,7 +15,7 @@ class KeyWordInput extends PureComponent {
         this.state = {
             inputText: props.Keywords,
             actRules: [{
-                title: 'only',
+                title: '',
             }],
             searchTimeGap: 500, // 在0.5秒內的輸入都不會發fetch
             fetchData: [],
@@ -35,9 +35,19 @@ class KeyWordInput extends PureComponent {
                 value: this.props.Keywords
             }
         };
-        this.onInputChange(obj);
-        this.setState({ showAct: false });
+        // this.onInputChange(obj);
+        // this.setState({ showAct: false });
     }
+
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.Destination !== this.props.Destination) {
+            this.onClearPanelVal();
+        }
+    }
+
+    handleOpenMenuFocus = () => {
+        this.setState({ showAct: true });
+    };
 
     callKeyWordAPI () {
         const {
@@ -64,7 +74,7 @@ class KeyWordInput extends PureComponent {
             .then(r => r.json())
             .then(data => {
                 const fetchData = data.map(v => {
-                    v.level2 = 'only';
+                    v.level2 = '';
                     v.txt = v.label;
                     v.level3 = v.value;
                     delete v.label;
@@ -79,6 +89,15 @@ class KeyWordInput extends PureComponent {
             .catch(err => {
                 console.log('err', err);
             });
+    }
+
+    onClearPanelVal = () => {
+        this.setState({
+            selectedData: {
+                fthotel: '',
+            },
+            fetchData: [],
+        }, this.props.setPanelState && this.props.setPanelState({ fthotel: '' }));
     }
 
     onClearInputValue = () => {
@@ -112,34 +131,55 @@ class KeyWordInput extends PureComponent {
                 fthotel: '',
             },
         }), throttled);
+        if (!inputText) {
+            this.onClearInputValue();
+        }
     }
 
     setPanelState = (txt, fthotel) => {
-        console.log(fthotel);
         if (fthotel === '') {
             this.props.setPanelState && this.props.setPanelState({ Keywords: '', fthotel });
         } else {
             this.props.setPanelState && this.props.setPanelState({ Keywords: txt, fthotel });
         }
+
     }
 
-    onClickAct = (data) => {
-        console.log(data);
-        const {
-            txt: inputText,
-        } = data;
-
+    choosedData = (data) => {
         this.setState(prevState => ({
-            inputText,
+            inputText: data.txt,
             selectedData: data,
             showAct: false,
         }), this.setPanelState(data.txt, data.fthotel));
     }
 
+    onClickAct = (data, str) => {
+        const {
+            txt: inputText,
+        } = data;
+
+        if (str === 'choosed') {
+            this.choosedData(data);
+            // this.setState(prevState => ({
+            //     inputText,
+            //     selectedData: data,
+            //     showAct: false,
+            // }), this.setPanelState(data.txt, data.fthotel));
+        } else {
+            this.setState({
+                inputText,
+            });
+        }
+    }
+
     closMenu = () => {
-        this.setState(prevState => ({
-            showAct: false,
-        }));
+        const { fetchData, selectedData } = this.state;
+        if (fetchData.length && selectedData.fthotel === '') {
+            this.choosedData(fetchData[0]);
+        }
+        this.setState({
+            showAct: false
+        });
     }
 
     render () {
@@ -165,7 +205,8 @@ class KeyWordInput extends PureComponent {
                         className="m-b-sm"
                         value={inputText}
                         onChange={this.onInputChange}
-                        onClick={this.onClickInput}
+                        onFocus={this.handleOpenMenuFocus}
+                        // onClick={this.onClickInput}
                         onClearValue={this.onClearInputValue}
                     />
                     <div className={act_wrap_classes}>
@@ -183,7 +224,8 @@ class KeyWordInput extends PureComponent {
                                     :
                                     (
                                         <ActRajx
-                                            titleClass="d-no"
+                                            titleClass={showAct ? '' : 'd-no'}
+                                            isFocus={showAct}
                                             data={fetchData}
                                             matchWord={inputText}
                                             getItemClickValue={this.onClickAct}

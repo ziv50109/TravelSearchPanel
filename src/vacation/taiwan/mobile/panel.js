@@ -1,3 +1,4 @@
+import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import React, { Component } from 'react';
 import { vacationTaiwan } from '../../../../source.config';
 
@@ -22,8 +23,8 @@ import {
     calcShowText
 } from '../RoomListCommon';
 import dayjs from 'dayjs';
-import '../../../component/ComposeCalendar';
 import '../css.scss';
+import '../../../component/input_group.scss';
 
 const inlineStyle = {
     display: 'inline-block',
@@ -264,7 +265,7 @@ class ContentComponentKeyword extends Component {
                 </div>
                 <div className="m_keyWord">
                     <SearchInput
-                        placeholderText="請輸入飯店名稱"
+                        placeholderText="請輸入產品名稱、飯店名稱或關鍵字"
                         keyWord={this.state.selectText}
                         clearWord={(value) => this.clearWord(value)}
                         onChange={(value) => this._inputOnChangeHandler(value)}
@@ -283,7 +284,7 @@ class ContentComponentKeyword extends Component {
                     noMatchText={this.props.parentStcity ? '很抱歉，找不到符合的項目' : '請先選擇目的地'}
                     minimumStringQuery={this.props.parentStcity ? '請至少輸入兩個字' : '請先選擇目的地'}
                     minimumStringQueryLength={2}
-                    footer={true}
+                    footer={false}
                     rules={[
                         {
                             title: '飯店',
@@ -335,7 +336,7 @@ class Destination extends Component {
                 <IntRcln
                     request
                     label="目的地"
-                    placeholder="請輸入/選擇目的地"
+                    placeholder="請選擇/可輸入目的地"
                     breakline
                     icon={<IcRcln name="toolmap" />}
                     value={this.state.allData.length > 0 ? this.state.allData[0].text : ''}
@@ -391,7 +392,7 @@ class Keyword extends Component {
             <div className="keywordComponent m-t">
                 <IntRcln
                     label="關鍵字"
-                    placeholder="請輸入飯店名稱"
+                    placeholder="請輸入產品名稱、飯店名稱或關鍵字"
                     breakline
                     value={this.state.sHotelName}
                     onClick={this.openPage}
@@ -474,12 +475,16 @@ class Panel extends Component {
             sHotelName: '',
             Tools: [1, 2, 3, 4, 5],
 
-            days:'',
+            days: '',
             dayOption: [
                 { text: '不限', value: '' },
-                { text: '1~5天', value: '1,2,3,4,5' },
-                { text: '6~10天', value: '6,7,8,9,10' },
-                { text: '10天以上', value: '10' }
+                { text: '2天', value: '2' },
+                { text: '3天', value: '3' },
+                { text: '4天', value: '4' },
+                { text: '5天', value: '5' },
+                { text: '6天', value: '6' },
+                { text: '7天', value: '7' },
+                { text: '8天以上', value: '8' }
             ],
             noHotel: false,
             roomlist: '2-0-0', // 預設一間, 兩大人
@@ -643,6 +648,25 @@ class Panel extends Component {
             selectedData: allData
         });
     }
+    changeNoHotel = (bool) => {
+        const { roomlist, roomage, roomListInput } = this.state;
+        let newRoomList = '2-0-0';
+        let newRoomage = '-';
+        let newRoomListInput = '共1間，2人';
+
+        if (bool) {
+            newRoomList = roomlist.split(',')[0];
+            newRoomage = roomage.split(',')[0];
+            newRoomListInput = `${roomListInput.split('，')[1].split('、')[0]}${roomlist.split(',').length > 1 ? '人' : ''}`
+        }
+
+        this.setState({
+            noHotel: bool,
+            roomlist: newRoomList,
+            roomage: newRoomage,
+            roomListInput: newRoomListInput
+        });
+    }
 
     handleAllSubmit () {
         const {
@@ -681,6 +705,7 @@ class Panel extends Component {
             selectedStartDate,
             selectedEndDate,
             activeInput,
+            noHotel,
             roomlist,
             roomage,
             roomListInput
@@ -693,11 +718,10 @@ class Panel extends Component {
             <div className="vacation_taiwan_m m-t-sm">
                 <StRcln ClassName="fwb-b m-b-sm"
                     option={this.option}
-                    placeholder="目的地"
+                    // placeholder="出發地"
                     label="出發地"
-                    // defaultValue={'_'}
                     icon={<IcRcln name="toolmap" />}
-                    defaultValue={!!this.state.sFcity ? this.state.sFcity : '_'}
+                    defaultValue={this.state.sFcity || '_'}
                     breakline
                     req
                     onChangeCallBack={(value) => this.setState({ sFcity: value })}>
@@ -705,7 +729,7 @@ class Panel extends Component {
                 <Destination
                     getdatavTcity={(e, data, allData) => { this.getdatavTcity(e, data, allData) }}
                     selectedData={this.state.selectedData}
-                    visible={ this.activeInput==='destination' ? true : false}
+                    visible={this.activeInput === 'destination' ? true : false}
                     // sTcitytxt={this.state.sTcitytxt}
                 />
                 <div className="calendar_compose">
@@ -743,14 +767,14 @@ class Panel extends Component {
                     <div className="t15">
                         <CrRcln
                             textContent="只找不含住宿"
-                            checked={this.state.noHotel}
-                            whenChange={(e) => this.setState({ noHotel: e })}
+                            checked={noHotel}
+                            whenChange={this.changeNoHotel}
                         />
                     </div>
                 </div>
                 <IntRcln
-                    placeholder="共N間，N人"
-                    label="間數/人數"
+                    placeholder={noHotel ? 'N人' : '共N間，N人'}
+                    label={noHotel ? '人數' : '間數/人數'}
                     breakline
                     readOnly
                     icon={<IcRcln name="toolmember" />}
@@ -805,6 +829,7 @@ class Panel extends Component {
                     {
                         showRoomPage && (
                             <RoomPageContent
+                                noHotel={noHotel}
                                 roomlist={roomlist}
                                 roomage={roomage}
                                 onClickConfirm={this.roomPageConfirm}

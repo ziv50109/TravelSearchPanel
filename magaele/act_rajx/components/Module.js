@@ -24,8 +24,7 @@ export default class Module extends Component {
         window.removeEventListener('keydown', (e) => this.whenKeyPress(e), true);
     }
     cloneDataArray () { // 複製一個DATA出來操作 不要動到props
-        let dataHasDataInedx = JSON.parse(JSON.stringify([...this.props.data]))
-            .sort((a, b) => a.txt.length - b.txt.length);
+        let dataHasDataInedx = JSON.parse(JSON.stringify([...this.props.data]));
         let newArry = [];
         for (let i = 0; i <= this.props.rules.length - 1; i++) {
             for (let n = 0; n <= dataHasDataInedx.length - 1; n++) {
@@ -64,30 +63,34 @@ export default class Module extends Component {
         return [...levelGroup];
     }
     _itemOnClickHandler (item, str) {
-        this.setState({ select: item.dataIndex });
-        this.props.getItemClickValue(item, str);
+        this.setState({ select: item.dataIndex }, this.props.getItemClickValue(item, str));
     }
 
     whenKeyPress (e) {
-        if (this.props.isFocus) {
+        const { isFocus, data } = this.props;
+        if (isFocus && data.length) {
             if (e.keyCode === 40) {
                 let index = this.state.select === null ? 0 : this.state.select + 1;
-                if (index >= this.props.data.length) {
+                if (index >= data.length) {
                     index = 0;
                 }
                 this.idx = index;
                 this._itemOnClickHandler(this.newData[index]);
             }
             if (e.keyCode === 38) {
-                let prevIndex = this.state.select === null ? this.props.data.length - 1 : this.state.select - 1;
+                let prevIndex = this.state.select === null ? data.length - 1 : this.state.select - 1;
                 if (prevIndex < 0) {
-                    prevIndex = this.props.data.length - 1;
+                    prevIndex = data.length - 1;
                 }
                 this.idx = prevIndex;
                 this._itemOnClickHandler(this.newData[prevIndex]);
             }
             if (e.keyCode === 13) {
+                if (this.idx === null) {
+                    this.idx = 0;
+                }
                 this._itemOnClickHandler(this.newData[this.idx], 'choosed');
+                this.idx = null;
                 e.target.blur();
             }
         }

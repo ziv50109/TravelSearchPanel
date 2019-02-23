@@ -19,10 +19,7 @@ class App extends PureComponent {
         this.actRules = [
             { title: '城市' },
             { title: '區域' },
-            { title: '行政區' },
-            { title: '商圈' },
-            { title: '地標' },
-            { title: '飯店' }
+            { title: '產品' },
         ];
     }
 
@@ -91,7 +88,7 @@ class App extends PureComponent {
 
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-            const url = activity.keyword + '?KeyWord=' + encodeURI(searchKeyword);
+            const url = activity.keyword + `?Foreign=${this.props.home ? 0 : 1}&KeyWord=` + encodeURI(searchKeyword);
             this.fetchDestnActData(url);
         }, 500);
     };
@@ -108,6 +105,7 @@ class App extends PureComponent {
         // Destinations 是 fetch的第一個key name
         const dataArray = Destinations.map(item => (
             {
+                Foreign: item.Foreign,
                 txt: item.Name,
                 level2: item.KindName,
                 level3: item.Code,
@@ -115,9 +113,15 @@ class App extends PureComponent {
             }
         ));
 
-        console.log('actData: ', dataArray);
+        let actData;
+        if (this.props.home) {
+            actData = dataArray.filter(e => e.Foreign === '0');
+        } else {
+            actData = dataArray.filter(e => e.Foreign === '1');
+        }
+
         this.setState({
-            actData: dataArray,
+            actData: actData,
         });
     }
 

@@ -10,7 +10,7 @@ import IcRcln from '../../../../magaele/ic_rcln';
 class KeywordPlaceM extends PureComponent {
     state = {
         inputText: '',
-        inputText1: '',
+        inputText1: '', // 實際在頁面上的字
         actRules: [
             {
                 title: 'only'
@@ -28,6 +28,13 @@ class KeywordPlaceM extends PureComponent {
     componentDidMount () {
         this.getHighestZIndex();
         this.handlePropsKeyword();
+    }
+
+    componentDidUpdate (prevProps, prevState) {
+        if (prevProps.Destination !== this.props.Destination) {
+            this.onClearInputValue();
+            this.props.setPanelState({ fthotel: '' });
+        }
     }
 
     handlePropsKeyword () {
@@ -96,13 +103,13 @@ class KeywordPlaceM extends PureComponent {
     }
 
     onClearInputValue = () => {
-        this.setState(prevState => ({
+        this.setState({
             inputText: '',
             selectedData: {
                 fthotel: ''
             },
             fetchData: []
-        }));
+        });
     };
 
     onInputChange = e => {
@@ -135,12 +142,12 @@ class KeywordPlaceM extends PureComponent {
     };
 
     showCalendar = () => {
+        this.onClearInputValue();
         this.setState({ visible: !this.state.visible });
     };
 
     onClickConfirm = () => {
         this.setState({ inputText1: this.state.inputText });
-        console.log(this.state);
         this.props.onClickConfirm && this.props.onClickConfirm(this.state);
         this.showCalendar();
     }

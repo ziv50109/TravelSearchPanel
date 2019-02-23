@@ -270,7 +270,7 @@ class DestinationInput extends PureComponent {
 
             });
     }
-    closMenu = () => {
+    closMenu = (e) => {
         const {
             showAct,
             showDtm,
@@ -278,7 +278,7 @@ class DestinationInput extends PureComponent {
         } = this.state;
 
         if (!showAct && !showDtm) return;
-
+        e.stopPropagation();
         // 如果沒點選就關選單
         if (!selectedData.length) {
             return this.setState(prevState => ({
@@ -484,7 +484,7 @@ class DestinationInput extends PureComponent {
                                 {selectedData.length < this.maxLabel && (
                                     <IntRcln
                                         ref={e => { this.destinationInput = e }}
-                                        placeholder={selectedData.length ? null : '目的地'}
+                                        placeholder={selectedData.length ? null : '請輸入國家/城市/機場'}
                                         onClick={this.onClickInput}
                                         onChange={this.onInputChange}
                                         value={inputText}
@@ -495,7 +495,7 @@ class DestinationInput extends PureComponent {
                     </div>
                     <div className={dtm_wrap_classes}>
                         <CloseButton onClick={this.closMenu} />
-                        <p className="txt_green">找不到選項？請輸入關鍵字查詢</p>
+                        <p className="txt_green">找不到選項？請輸入關鍵字查詢/最多可選擇3則目的地</p>
                         {Object.keys(dtmData).length &&
                             <DtmRcfr
                                 levelKey={dtmLevelKey}

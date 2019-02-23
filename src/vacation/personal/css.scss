@@ -10,7 +10,7 @@
 %act_rajx_inside {
     position: static;
     border:none;
-    padding: 0;
+    padding: 0 10px 5px 16px;
     font-size: 14px;
     background: transparent;
     box-shadow:none;
@@ -164,7 +164,7 @@ select::-ms-expand {
         }
     }
     .vacation_select_group{
-        flex: 1.15;
+        flex: 1.14;
         border:solid 1px #bbb;
         height: 50px;
         margin-right: 10px;
@@ -202,12 +202,12 @@ select::-ms-expand {
                 flex-direction: column;
                 justify-content: center;
                 width: 100%;
-                padding-top: 4px;
             }
             .int_rcln {
                 height: auto;
             }
             .int_rcln .int_rcln_input {
+                line-height: 1;
                 padding: 0;
                 border: none;
             }
@@ -220,7 +220,7 @@ select::-ms-expand {
             .title {
                 height: 14px;
                 line-height: 14px;
-                margin-bottom: 2px;
+                margin-bottom: 3px;
                 font-size: 14px;
                 color: #222;
                 span {
@@ -233,6 +233,7 @@ select::-ms-expand {
             }
             .input_wrap {
                 display: flex;
+                min-height: 21px;
             }
         }
         & + .radio_wrap {
@@ -300,7 +301,7 @@ select::-ms-expand {
     }
     //日曆的clearBtn調整
     .calendar_compose{
-
+        margin-right: 5px;
         .cal_icon{
             border-top:solid 1px #bbb;
             border-bottom:solid 1px #bbb;
@@ -308,6 +309,9 @@ select::-ms-expand {
         .clearBtn{
             right: 5px;
             bottom: 8px;
+        }
+        .input_group {
+            margin-bottom: 0;
         }
         .int_rcln_input{
             font-weight:normal;
@@ -326,7 +330,16 @@ select::-ms-expand {
         }
 
     }
-
+    //間數人數
+    .roomListInput {
+        margin-left: 5px;
+        .int_gpct > .amount {
+            height: 28px;
+            .int_rcln_input {
+                border: none;
+            }
+        }
+    }
 
     .act_wrap_container{
         .m-place, .noMatchText, .searching{
@@ -492,6 +505,12 @@ select::-ms-expand {
             padding: 6px;
             border: 2px solid #ff8b88;
         }
+        header p {
+            white-space: nowrap;
+            @media screen and (max-width: 350px) {
+                font-size: 12px;
+            }
+        }
         .int_rcln {
             height: auto;
             border: none !important;
@@ -540,6 +559,17 @@ select::-ms-expand {
             height: 6px;
             fill: #999;
         }
+    }
+
+    .act_rajx {
+        .m-place, .noMatchText, .searching {
+            padding: 7px 20px 0 10px;
+            color: #24a07d;
+        }
+    }
+    .searching {
+        padding: 7px 20px 0 10px;
+        color: #24a07d;
     }
 }
 
@@ -616,6 +646,7 @@ select::-ms-expand {
     touch-action: manipulation;
     .act_rajx{
         @extend %act_rajx_inside;
+        padding: 0 10px 0;
         .item {
             @extend %act_new_item;
         }

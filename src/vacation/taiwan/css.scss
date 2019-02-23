@@ -131,8 +131,8 @@ input::placeholder {
             color: #999;
             margin: 15px 8px;
             font-size: 18px;
-            padding: unset;
-            line-height: unset;
+            padding: inherit;
+            line-height: inherit;
         }
         .dropdown-place-holder {
            span{
@@ -194,13 +194,17 @@ input::placeholder {
     //間數人數
     .roomListInput {
         // color: #0077b3;
+        cursor: pointer;
         background-color: transparent;
         .int_rcln {
             > .int_rcln_input {
                 border-color: #bbb;
                 color: #0077b3;
+                background-color: transparent;
+                z-index: 1;
             }
             > .int_rcln_label {
+                cursor: pointer;
                 color: #222;
             }
             &.amount {
@@ -211,17 +215,23 @@ input::placeholder {
         }
     }
     .pc_keyWord {
-        .int-label{
-            color:#222;
-            top: 6px;
-        }
+        height: 100%;
         position: relative;
         * {
             cursor: pointer;
         }
+        .int-label{
+            position: absolute;
+            top: 6px;
+            left: 5px;
+            color:#222;
+        }
         .int_rcln > .int_rcln_input {
+            border-color: #bbb;
+            color: #0077b3;
+            background-color: transparent;
+            z-index: 1;
             border: none;
-            font-weight: bold;
         }
         .int_rcln .int_rcln_input:not(input):empty::before {
             color: #999;
@@ -237,7 +247,7 @@ input::placeholder {
                 }
             }
             .int_rcln_input{
-                padding: 16px 5px 0;
+                padding: 16px 0 0;
             }
             input {
                 width: 100%;
@@ -381,9 +391,10 @@ input::placeholder {
         }
     }
     .dtm_rcfr-wrap {
-        padding: 0px;
+        width: auto;
         border: none;
-        top: 40px;
+        top: 0;
+        padding: 0;
         .dtm_rcfr-label {
             margin: 11px 0px 11px 10px;
         }
@@ -436,6 +447,9 @@ input::placeholder {
     }
     .int_rctg {
         margin-bottom: 10px;
+    }
+    .int_rcln_input {
+        color: #0077b3;
     }
     &.SingleInputMenu {
         width: 100%;
@@ -621,6 +635,26 @@ input::placeholder {
         font-size: 14px;
         background: transparent;
         box-shadow: none;
+        .section{
+            .title{
+                margin-left: 10px;
+                padding-bottom: 0;
+                border-top:none;
+                font-size: 16px;
+                font-weight: bold;
+                color: #222;
+                i{
+                    display: none;
+                }
+            }
+        }
+        .item{
+            line-height: 30px;
+            margin: 0 0 0 10px;
+            padding: 4px 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #E3E3E3;
+        }
         .m-place, .noMatchText {
             color: #24a07d;
             button {
@@ -641,32 +675,3 @@ input::placeholder {
     }
 }
 
-.pc_keyWord {
-    height: 100%;
-    .int-label {
-        position: absolute;
-        top: 2px;
-        left: 5px;
-    }
-    .int_rcln {
-        position: absolute;
-        top: 8px;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        height: unset;
-        input {
-            width: 100%;
-            padding: 20px 0 0 5px;
-            border: 0px solid #ddd;
-            background-color: transparent;
-        }
-    }
-    .act_rajx {
-        left: 15px;
-    }
-    .clearBtn {
-        left: 0;
-    }
-}

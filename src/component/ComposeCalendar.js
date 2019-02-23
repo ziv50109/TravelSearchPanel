@@ -81,16 +81,37 @@ class ComposeCalendar extends PureComponent {
                 alert('單次訂購一次最多14晚');
                 this.clickDate(dayjs(selectedStartDate).add(14, 'day').format('YYYY-MM-DD'));
                 return;
-            case 'vacationPersonal':
-                alert('無效的日期');
-                this.clickDate(dayjs(selectedStartDate).add(30, 'day').format('YYYY-MM-DD'));
-                return;
+            // case 'vacationPersonal':
+            //     alert('無效的日期');
+            //     this.clickDate(dayjs(selectedStartDate).add(30, 'day').format('YYYY-MM-DD'));
+            //     return;
             case '':
             default:
                 alert('無效的日期');
                 this.clickDate('');
                 return;
         }
+    }
+    customIsBefore = () => {
+        const { panelName } = this.props;
+        let text = '日期必須大於今日';
+        switch (panelName) {
+            case 'travel':
+            case 'taiwanVacation':
+                text = '最晚日期不得小於最早日期！';
+                break;
+            case 'hotel':
+                text = '退房日期不得小於入住日期！';
+                break;
+            case 'vacationPersonal':
+                text = '回程日期不得小於去程日期！';
+                break;
+            case '':
+            default:
+                text = '日期必須大於今日';
+                break;
+        }
+        alert(text);
     }
     checkDate = (inputType) => {
         const isStart = inputType === 'start';
@@ -130,7 +151,7 @@ class ComposeCalendar extends PureComponent {
         };
 
         // 輸入的字元不合規則
-        if (result === null) {
+        if (inputValue && result === null) {
             alert(DateValueErrorMessage);
             setNewStartDate();
             return;
@@ -143,6 +164,7 @@ class ComposeCalendar extends PureComponent {
         const d = `${year || dayjs().year()}-${month}-${day}`;
         const date = dayjs(d);
         const calcStartDate = this.calcStartDate();
+        const today = dayjs().format('YYYY-MM-DD');
 
         // 日期格式正確但是不存在的日期
         if (!isValidDate(new Date(d)) || !isLeapYear(d)) {
@@ -150,9 +172,17 @@ class ComposeCalendar extends PureComponent {
             setNewStartDate();
             return;
         }
-
-        if (date.isBefore(calcStartDate)) {
+        if (date.isBefore(today)) {
             alert('日期必須大於今日');
+            setNewStartDate();
+            return;
+        }
+        if (date.isBefore(calcStartDate)) {
+            if (!isStart) {
+                this.customIsBefore();
+            } else {
+                alert('日期必須大於今日');
+            }
             setNewStartDate();
             return;
         }
@@ -216,13 +246,13 @@ class ComposeCalendar extends PureComponent {
         const isStart = (activeInput === 'start');
 
         switch (panelName) {
-            case 'vacationPersonal':
-                if (isStart) {
-                    return date;
-                } else if (!selectedStartDate) {
-                    return dayjs(date).add(-30, 'day') < dayjs() ? dayjs().format('YYYY-MM-DD') : dayjs(date).add(-30, 'day').format('YYYY-MM-DD');
-                }
-                return selectedStartDate;
+            // case 'vacationPersonal':
+            //     if (isStart) {
+            //         return date;
+            //     } else if (!selectedStartDate) {
+            //         return dayjs(date).add(-30, 'day') < dayjs() ? dayjs().format('YYYY-MM-DD') : dayjs(date).add(-30, 'day').format('YYYY-MM-DD');
+            //     }
+            //     return selectedStartDate;
             case '':
             default:
                 return isStart ? date : selectedStartDate;

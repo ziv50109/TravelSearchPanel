@@ -24,7 +24,7 @@ import '../css.scss';
 // [ popup ]
 const ContentComponent = (props) => {
     return (
-        <div className={`themeTravel-pp_rcln-popup ${props.className}`}>
+        <div className={`cruise-pp_rcln-popup ${props.className}`}>
             <p>本公司「成團」之旅遊團體，係指報名參團人數已達出團標準，但團體出發前若遇有以下情事，將依國外（內）團體旅遊定型化契約書取消出團：</p>
             <ul>
                 <li><span>一、</span><p>不可抗力、不可歸責於雙方當事人之事由，如颱 風、海嘯、地震、洪災等不可抗力之天然災害；或罷工、戰亂抗爭、官方封閉旅遊地區、重大疫情等不可歸責之人為因素。</p></li>
@@ -333,7 +333,7 @@ class Panel extends Component {
                         request
                         readOnly
                         placeholder="YYYY/MM/DD"
-                        label="出發日期"
+                        label="出發區間"
                         icon={<IcRcln name="tooldate" />}
                         onClick={() => this.handleOpenPage(0)}
                         value={CyRcln1[0] && CyRcln1[0].replace(/\-/g, '/')}
@@ -401,7 +401,7 @@ class Panel extends Component {
                 <BtRcnb prop="string" className="h-sm fluid m-t-30" whenClick={this.handleSubmit} md radius>搜尋</BtRcnb>
 
                 <NvbRslb
-                    className="themeTravel-nvb"
+                    className="cruise-nvb"
                     visible={pageVisible}
                     direction="right"
                 >
@@ -432,7 +432,7 @@ class Panel extends Component {
                     }
                     {
                         showCalendarPage &&
-                        <div className="themeTravel-cyRcmnWrap">
+                        <div className="cruise-cyRcmnWrap">
                             <CyRcmn
                                 doubleChoose
                                 selectedStartDate={CyRcln1[0]}
@@ -442,8 +442,8 @@ class Panel extends Component {
                                 startTxt="最早"
                                 endTxt="最晚"
                                 activeInput={activeInput}
-                                endMonth={dayjs().add(3, 'years').format('YYYY-MM')}
-                                // endDate={dayjs().add(3, 'years').format('YYYY-MM-DD')}
+                                endDate={dayjs().add(3, 'year').format('YYYY-MM-DD')}
+                                endMonth={dayjs().add(3, 'year').format('YYYY-MM')}
                                 ref={e => { this.calendar = e }}
                                 onClickConfirm={() => {
                                     const {

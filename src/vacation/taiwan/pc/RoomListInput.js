@@ -221,6 +221,7 @@ class RoomListInput extends PureComponent {
     }
 
     render () {
+        const { noHotel } = this.props;
         const {
             roomList,
             inputText,
@@ -235,33 +236,37 @@ class RoomListInput extends PureComponent {
             <ClickOutSide onClickOutside={this.closMenu}>
                 <div className="input_compose roomListInput">
                     <IntRcln
-                        placeholder="共N間，N人"
-                        label="間數/人數"
+                        placeholder={noHotel ? 'N人' : '共N間，N人'}
+                        label={noHotel ? '人數' : '間數/人數'}
                         breakline
                         readOnly
-                        value={inputText}
+                        value={noHotel ? inputText.split('，')[1] : inputText}
                         onClick={this.onClickInput}
                         icon={<IcRcln name="toolmember" />}
                         className="m-b-sm"
                     />
                     <div className={dropDownClasses}>
                         <CloseButton onClick={this.closMenu} />
-                        <label className="room_count_select">
-                            <select onChange={this.changeRoomCount} value={roomList.length}>
-                                {roomCount.map(e =>
-                                    <option
-                                        key={e.value}
-                                        value={e.value}
-                                    >
-                                        {e.text}
-                                    </option>
-                                )}
-                            </select>
-                        </label>
+                        {
+                            !noHotel &&
+                                <label className="room_count_select">
+                                    <select onChange={this.changeRoomCount} value={roomList.length}>
+                                        {roomCount.map(e =>
+                                            <option
+                                                key={e.value}
+                                                value={e.value}
+                                            >
+                                                {e.text}
+                                            </option>
+                                        )}
+                                    </select>
+                                </label>
+                        }
                         {
                             roomList.length && roomList.map((v, i) => (
                                 <RoomLitSection
                                     key={i}
+                                    noHotel={noHotel}
                                     roomCount={i}
                                     adult={v.adult}
                                     childrenWithBed={v.childrenWithBed}

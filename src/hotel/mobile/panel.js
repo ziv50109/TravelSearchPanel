@@ -34,7 +34,13 @@ class Panel extends Component {
             Code: '',
             Kind: '',
             Txt: '',
-            Rooms: [],
+            Rooms: [
+                {
+                    AdultQty: 2,
+                    ChildAges: [],
+                    ChildQty: 0
+                }
+            ],
             CheckIn: '',
             CheckOut: '',
             endMonth: dayjs().add(12, 'months').format('YYYY-MM'),
@@ -43,7 +49,7 @@ class Panel extends Component {
             },
             activeInput: null,
             selectedData: [],
-            roomListInput: '',
+            roomListInput: '共1間，2位大人、0位小孩',
             totleNights: 0,
             inputText: '',
             showDtm: true,
@@ -407,8 +413,14 @@ class Panel extends Component {
                     data.CheckIn : '';
                 let CheckOut = new Date(data.CheckOut).getTime() > new Date(dayjs().format('YYYY-MM-DD')).getTime() ?
                     data.CheckOut : '';
+
+                const d1 = new Date(data.CheckIn).getTime();
+                const d2 = new Date(data.CheckOut).getTime();
+                let totleNights = (d2 - d1) / (1000 * 3600 * 24);
+
                 if (!CheckIn) {
                     CheckOut = '';
+                    totleNights = 0;
                 }
                 const Rooms = data.Rooms;
                 const AdultQty = Rooms.map(e => e.AdultQty || 0).reduce((a, b) => a + b);
@@ -418,6 +430,7 @@ class Panel extends Component {
                 return {
                     CheckIn,
                     CheckOut,
+                    totleNights,
                     Rooms,
                     roomListInput
                 };

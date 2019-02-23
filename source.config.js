@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 
 const env = process.env.ENV || 'dev';
+
 let sourcePath;
 
 const soucreConfig = {
@@ -60,7 +61,7 @@ const soucreConfig = {
         activity: {
             ticketAbroad: './json/abroad.json',
             ticketTaiwan: './json/home.json',
-            keyword: 'https://hotel.liontravel.com/search/keyword' // keyWord
+            keyword: 'https://uactivity.liontravel.com/search/keyword'// keyWord
         }
     },
     // demo機測試環境

@@ -90,6 +90,10 @@ $fz: 16px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        overflow-x: hidden;
+        &::-webkit-scrollbar {
+            width: 0px;
+        }
         > * {
             &:first-child {
                 height: 21px;
